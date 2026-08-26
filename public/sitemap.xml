@@ -1,40 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Static sitemap of public routes. In production this should be GENERATED from
-  the live catalog (categories + products) at build time or served dynamically
-  by the backend, so new products appear automatically. Update the domain if
-  the site is not served from aurexindia.com.
--->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://aurexindia.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://aurexindia.com/shop</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-
-  <!-- Categories -->
-  <url><loc>https://aurexindia.com/shop/triply-cookware</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://aurexindia.com/shop/cast-iron</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://aurexindia.com/shop/kadais</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://aurexindia.com/shop/tawas</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://aurexindia.com/shop/fry-pans</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://aurexindia.com/shop/combos-and-sets</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-
-  <!-- Products -->
-  <url><loc>https://aurexindia.com/product/triply-kadai-with-lid-24cm</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/triply-fry-pan-24cm</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/cast-iron-dosa-tawa-27cm</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/cast-iron-kadai-with-handles</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/triply-flat-tawa-28cm</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/triply-saucepan-2l</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/triply-nonstick-fry-pan-26cm</loc><priority>0.7</priority></url>
-  <url><loc>https://aurexindia.com/product/triply-starter-combo-3pc</loc><priority>0.7</priority></url>
-
-  <!-- Content -->
-  <url><loc>https://aurexindia.com/about</loc><priority>0.5</priority></url>
-  <url><loc>https://aurexindia.com/blog</loc><priority>0.5</priority></url>
-  <url><loc>https://aurexindia.com/contact</loc><priority>0.4</priority></url>
-  <url><loc>https://aurexindia.com/faq</loc><priority>0.4</priority></url>
-  <url><loc>https://aurexindia.com/shipping</loc><priority>0.3</priority></url>
-  <url><loc>https://aurexindia.com/returns</loc><priority>0.3</priority></url>
-  <url><loc>https://aurexindia.com/refund</loc><priority>0.3</priority></url>
-  <url><loc>https://aurexindia.com/privacy</loc><priority>0.3</priority></url>
-  <url><loc>https://aurexindia.com/terms</loc><priority>0.3</priority></url>
+  <url>
+    <loc>https://aurexindia.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://aurexindia.com/shop</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://aurexindia.com/shop/triply-stainless-steel</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://aurexindia.com/shop/cast-iron</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://aurexindia.com/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aurexindia.com/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aurexindia.com/blog</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
