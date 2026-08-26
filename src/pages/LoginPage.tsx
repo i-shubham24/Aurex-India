@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import OtpForm from "@/components/OtpForm";
 import Seo from "@/components/Seo";
+import { emailError, phoneError } from "@/lib/validation";
 
 export default function LoginPage() {
   const { signIn } = useAuth();
@@ -19,6 +20,20 @@ export default function LoginPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    // Identifier must be a valid email OR a valid mobile number.
+    const id = email.trim();
+    if (!id) {
+      setError("Please enter your email or mobile number.");
+      return;
+    }
+    if (emailError(id) && phoneError(id)) {
+      setError("Enter a valid email address or 10-digit mobile number.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
     setBusy(true);
     try {
       await signIn(email, password);

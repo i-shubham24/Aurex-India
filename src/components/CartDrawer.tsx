@@ -7,10 +7,17 @@ export default function CartDrawer() {
   const { isOpen, setOpen, lines, subtotal, itemCount, setQty, remove } = useCart();
 
   return (
-    <>
+    // Viewport-sized clipping layer: keeps the off-canvas panel from creating
+    // horizontal page scroll on mobile (a fixed panel translated off-screen
+    // isn't clipped by html{overflow-x:hidden}, but an absolute child of this
+    // overflow-hidden layer IS).
+    <div
+      className={`fixed inset-0 z-50 overflow-hidden ${isOpen ? "" : "pointer-events-none"}`}
+      aria-hidden={!isOpen}
+    >
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-ink/40 transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-ink/40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={() => setOpen(false)}
@@ -19,7 +26,7 @@ export default function CartDrawer() {
 
       {/* Panel */}
       <aside
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-cream shadow-lift transition-transform duration-300 ${
+        className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-cream shadow-lift transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
@@ -117,6 +124,6 @@ export default function CartDrawer() {
           </>
         )}
       </aside>
-    </>
+    </div>
   );
 }

@@ -8,11 +8,11 @@ const COLUMNS = [
   {
     title: "Shop",
     links: [
-      { label: "Triply Cookware", to: "/shop/triply-cookware" },
+      { label: "Triply", to: "/shop/triply" },
       { label: "Cast Iron", to: "/shop/cast-iron" },
-      { label: "Kadais", to: "/shop/kadais" },
-      { label: "Tawas", to: "/shop/tawas" },
-      { label: "Combos & Sets", to: "/shop/combos-and-sets" },
+      { label: "Kadhai", to: "/shop/kadhai" },
+      { label: "Honeycomb", to: "/shop/honeycomb" },
+      { label: "Shop All", to: "/shop" },
     ],
   },
   {
@@ -40,7 +40,7 @@ const COLUMNS = [
 export default function Footer() {
   return (
     <footer className="mt-20 border-t border-ink/[0.08] bg-charcoal text-cream/80">
-      <div className="container-x grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-5">
+      <div className="container-x grid gap-10 py-14 lg:grid-cols-5">
         <div className="lg:col-span-2">
           <div className="[&_span]:text-cream">
             <Logo className="[&_.text-ink]:text-cream" />
@@ -62,7 +62,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={label}
-                className="grid h-9 w-9 place-items-center rounded-full bg-cream/10 text-cream transition-colors hover:bg-copper"
+                className="grid h-9 w-9 place-items-center rounded-full bg-cream/10 text-cream transition-colors hover:bg-gold hover:text-ink"
               >
                 <Icon size={17} />
               </a>
@@ -70,22 +70,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {COLUMNS.map((col) => (
-          <div key={col.title}>
-            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-cream">
-              {col.title}
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm">
-              {col.links.map((l) => (
-                <li key={l.label}>
-                  <Link to={l.to} className="text-cream/60 transition-colors hover:text-copper">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3">
+          {COLUMNS.map((col) => (
+            <div key={col.title}>
+              <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-cream">
+                {col.title}
+              </h4>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {col.links.map((l) => (
+                  <li key={l.label}>
+                    <Link to={l.to} className="text-cream/60 transition-colors hover:text-gold">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="border-t border-cream/10">
@@ -97,7 +99,7 @@ export default function Footer() {
               href="https://humblesolutions.in"
               target="_blank"
               rel="noreferrer"
-              className="font-semibold text-cream/80 underline decoration-copper/60 underline-offset-2 transition-colors hover:text-copper"
+              className="font-semibold text-cream/80 underline decoration-gold/60 underline-offset-2 transition-colors hover:text-gold"
             >
               HumbleSolutions
             </a>

@@ -4,6 +4,7 @@ import type { Product } from "@/services/types";
 import { formatINR, discountPct } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import ProductImage from "./ProductImage";
 import Rating from "./Rating";
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -16,10 +17,9 @@ export default function ProductCard({ product }: { product: Product }) {
     <div className="group card relative flex flex-col overflow-hidden hover-lift cursor-fork">
       <Link to={`/product/${product.slug}`} className="block">
         <div className="relative aspect-square overflow-hidden bg-sand">
-          <img
+          <ProductImage
             src={product.images[0]}
             alt={product.name}
-            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
@@ -48,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {product.material ?? "Cookware"}
         </p>
         <Link to={`/product/${product.slug}`}>
-          <h3 className="mt-1 line-clamp-2 text-[0.82rem] font-medium leading-snug text-ink transition-colors group-hover:text-copper sm:text-[0.95rem]">
+          <h3 className="mt-1 line-clamp-2 min-h-[2.4rem] text-[0.82rem] font-medium leading-snug text-ink transition-colors group-hover:text-copper sm:min-h-[2.75rem] sm:text-[0.95rem]">
             {product.name}
           </h3>
         </Link>
@@ -70,7 +70,7 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
           <button
             onClick={() => add(product)}
-            className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-ink text-cream transition-all hover:bg-copper active:scale-90 cursor-fork"
+            className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-ink text-cream transition-all hover:bg-gold hover:text-ink active:scale-90 cursor-fork"
             aria-label={`Add ${product.name} to cart`}
           >
             <ShoppingBag size={16} />

@@ -158,7 +158,7 @@ export default function ChatWidget() {
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="rounded-full bg-white px-3 py-1.5 text-xs text-ink/70 ring-1 ring-ink/10 transition-colors hover:bg-copper hover:text-white"
+                  className="rounded-full bg-white px-3 py-1.5 text-xs text-ink/70 ring-1 ring-ink/10 transition-colors hover:bg-gold hover:text-ink"
                 >
                   {s}
                 </button>

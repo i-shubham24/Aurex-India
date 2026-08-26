@@ -1,19 +1,35 @@
 import { useState } from "react";
 import { Mail, Phone, MessageCircle, MapPin, Send, Check } from "lucide-react";
 import Seo from "@/components/Seo";
+import { nameError, emailError, phoneError, requiredError } from "@/lib/validation";
 
 const whatsapp = import.meta.env.VITE_WHATSAPP_NUMBER ?? "917814477667";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "General enquiry", message: "" });
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [sent, setSent] = useState(false);
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
+    if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+  }
+
+  function validate() {
+    const next: Record<string, string | undefined> = {
+      name: nameError(form.name) ?? undefined,
+      email: emailError(form.email) ?? undefined,
+      // Phone optional here — only validate when something was entered.
+      phone: form.phone.trim() ? phoneError(form.phone) ?? undefined : undefined,
+      message: requiredError(form.message, "Message") ?? undefined,
+    };
+    setErrors(next);
+    return !Object.values(next).some(Boolean);
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     // No backend yet: compose a WhatsApp message the customer sends themselves.
     // Swap for a real endpoint (Supabase/MERN) later without changing the form.
     const text =
@@ -22,6 +38,8 @@ export default function ContactPage() {
     window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`, "_blank");
     setSent(true);
   }
+
+  const errCls = (f: string) => (errors[f] ? "border-red-400 focus:border-red-400 focus:ring-red-200" : "");
 
   return (
     <div className="container-x py-12">
@@ -85,16 +103,19 @@ export default function ContactPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="label" htmlFor="c-name">Name</label>
-                  <input id="c-name" required className="input" value={form.name} onChange={(e) => set("name", e.target.value)} />
+                  <input id="c-name" className={`input ${errCls("name")}`} value={form.name} onChange={(e) => set("name", e.target.value)} />
+                  {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="label" htmlFor="c-phone">Phone</label>
-                  <input id="c-phone" type="tel" className="input" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                  <label className="label" htmlFor="c-phone">Phone <span className="text-ink/40">(optional)</span></label>
+                  <input id="c-phone" type="tel" inputMode="numeric" className={`input ${errCls("phone")}`} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                  {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
                 </div>
               </div>
               <div>
                 <label className="label" htmlFor="c-email">Email</label>
-                <input id="c-email" type="email" required className="input" value={form.email} onChange={(e) => set("email", e.target.value)} />
+                <input id="c-email" type="email" className={`input ${errCls("email")}`} value={form.email} onChange={(e) => set("email", e.target.value)} />
+                {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
               </div>
               <div>
                 <label className="label" htmlFor="c-subject">Subject</label>
@@ -108,7 +129,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <label className="label" htmlFor="c-message">Message</label>
-                <textarea id="c-message" required rows={4} className="input" value={form.message} onChange={(e) => set("message", e.target.value)} placeholder="How can we help?" />
+                <textarea id="c-message" rows={4} className={`input ${errCls("message")}`} value={form.message} onChange={(e) => set("message", e.target.value)} placeholder="How can we help?" />
+                {errors.message && <p className="mt-1 text-xs text-red-600">{errors.message}</p>}
               </div>
               <button type="submit" className="btn-primary w-full py-3">
                 <Send size={16} /> Send message

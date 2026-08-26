@@ -142,8 +142,8 @@ export default function ShopPage() {
           </div>
         </aside>
 
-        {/* Grid */}
-        <div>
+        {/* Grid — min-w-0 lets this grid column shrink instead of overflowing */}
+        <div className="min-w-0">
           <div className="mb-5 flex items-center justify-between">
             <p className="text-sm text-ink/55">
               {products ? `${products.length} product${products.length === 1 ? "" : "s"}` : " "}

@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Truck, Flame, Recycle } from "lucide-react";
 import { data } from "@/services";
 import { useAsync } from "@/lib/useAsync";
-import { stockImg } from "@/lib/images";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
 import Reveal from "@/components/Reveal";
@@ -97,8 +96,11 @@ export default function HomePage() {
           </div>
           <div className="relative animate-fade-in" style={{ animationDelay: "200ms" }}>
             <img
-              src={stockImg("stainless-steel-cookware-set", 3001, 1000, 750)}
-              alt="Aurex triply cookware"
+              src="https://images.unsplash.com/photo-1584990347193-6bebebfeaeee?w=1400&q=80&auto=format&fit=crop"
+              alt="Premium stainless steel cookware"
+              onError={(e) => {
+                e.currentTarget.src = "/products/649-0.jpg";
+              }}
               className="aspect-[4/3] w-full rounded-xl2 object-cover shadow-lift"
             />
             <div className="absolute -bottom-5 -left-5 hidden rounded-xl2 bg-white p-4 shadow-card animate-float sm:block">
@@ -172,7 +174,7 @@ export default function HomePage() {
             <p className="mt-2 max-w-xs text-cream/70">
               Three bonded layers for fast, even, professional heat.
             </p>
-            <Link to="/shop/triply-cookware" className="btn-copper mt-5">
+            <Link to="/shop/triply" className="btn-copper mt-5">
               Shop triply <ArrowRight size={15} />
             </Link>
           </div>
@@ -209,8 +211,8 @@ export default function HomePage() {
       <section className="bg-white">
         <div className="container-x grid items-center gap-10 py-16 lg:grid-cols-2">
           <img
-            src={stockImg("cookware-manufacturing", 3002, 900, 675)}
-            alt="The art of manufacturing"
+            src="/products/661-0.png"
+            alt="Aurex cast iron cookware"
             className="aspect-[4/3] w-full rounded-xl2 object-cover shadow-card"
           />
           <div>

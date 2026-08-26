@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { phoneError } from "@/lib/validation";
 
 /**
  * Two-step phone OTP: enter number → receive code → verify.
@@ -23,6 +24,11 @@ export default function OtpForm({ redirectTo = "/account" }: { redirectTo?: stri
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    const pErr = phoneError(phone);
+    if (pErr) {
+      setError(pErr);
+      return;
+    }
     setBusy(true);
     try {
       const res = await requestOtp(phone);

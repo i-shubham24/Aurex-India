@@ -148,7 +148,7 @@ function ProductsAdmin({ products, onChange }: { products: Product[]; onChange: 
         <button
           onClick={() =>
             setEditing({
-              id: `p-${Date.now()}`, slug: "", name: "", categorySlug: "triply-cookware",
+              id: `p-${Date.now()}`, slug: "", name: "", categorySlug: "triply",
               price: 0, currency: "INR", images: [""], shortDescription: "", description: "",
               features: [], variants: [], rating: 0, reviewCount: 0, stock: 0,
             } as Product)

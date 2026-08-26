@@ -16,13 +16,10 @@ const MARQUEE = [
 
 const NAV = [
   { label: "Shop All", to: "/shop" },
-  { label: "Triply", to: "/shop/triply-cookware" },
+  { label: "Triply", to: "/shop/triply" },
   { label: "Cast Iron", to: "/shop/cast-iron" },
-  { label: "Kadais", to: "/shop/kadais" },
-  { label: "Tawas", to: "/shop/tawas" },
-  { label: "Fry Pans", to: "/shop/fry-pans" },
-  { label: "Combos & Sets", to: "/shop/combos-and-sets" },
-  { label: "New Arrivals", to: "/shop?new=1" },
+  { label: "Kadhai", to: "/shop/kadhai" },
+  { label: "Honeycomb", to: "/shop/honeycomb" },
 ];
 
 export default function Header() {
@@ -42,7 +39,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/[0.06] bg-cream/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-ink/[0.06] bg-cream/95 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80">
       {/* Announcement marquee */}
       <div className="marquee overflow-hidden bg-ink py-2 text-cream">
         <div className="marquee-track text-xs font-medium">
@@ -50,7 +47,7 @@ export default function Header() {
             <span key={dup} className="flex shrink-0 items-center" aria-hidden={dup === 1}>
               {MARQUEE.map((m, i) => (
                 <span key={i} className="mx-6 inline-flex items-center gap-1.5">
-                  <Truck size={13} className="text-copper" /> {m}
+                  <Truck size={13} className="text-gold" /> {m}
                 </span>
               ))}
             </span>
