@@ -11,6 +11,19 @@ export const SITE = {
   url: (import.meta.env.VITE_SITE_URL ?? "https://aurexindia.com").replace(/\/$/, ""),
   description:
     "Premium triply stainless steel and toxin-free cast iron cookware, built to last. Free shipping across India.",
+  keywords: [
+    "Aurex India",
+    "premium cookware",
+    "triply stainless steel",
+    "cast iron cookware",
+    "toxin-free pans",
+    "healthy cooking",
+    "Indian cookware brand",
+    "non-stick alternatives",
+    "kadhai",
+    "tawa",
+    "stainless steel set"
+  ],
   defaultImage: stockImg("stainless-steel-cookware-set", 3001, 1200, 630),
   locale: "en_IN",
   twitter: "@aurexindia",

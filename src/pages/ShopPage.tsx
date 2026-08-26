@@ -26,10 +26,11 @@ const CAT_BANNER: Record<string, string> = {
 };
 
 const PRICE_RANGES: { label: string; min?: number; max?: number }[] = [
-  { label: "Under ₹1,500", max: 1499 },
-  { label: "₹1,500 – ₹2,500", min: 1500, max: 2500 },
-  { label: "₹2,500 – ₹4,000", min: 2500, max: 4000 },
-  { label: "Over ₹4,000", min: 4000 },
+  { label: "Under ₹200", max: 199 },
+  { label: "₹200 – ₹500", min: 200, max: 500 },
+  { label: "₹500 – ₹800", min: 500, max: 800 },
+  { label: "₹800 – ₹1,200", min: 800, max: 1200 },
+  { label: "Over ₹1,200", min: 1200 },
 ];
 
 export default function ShopPage() {

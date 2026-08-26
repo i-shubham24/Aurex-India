@@ -14,6 +14,7 @@ import { SITE, absoluteUrl } from "@/lib/seo";
 export interface SeoProps {
   title: string;
   description?: string;
+  keywords?: string[];
   image?: string;
   type?: "website" | "article" | "product";
   noindex?: boolean;
@@ -47,6 +48,7 @@ const JSONLD_ID = "seo-jsonld";
 export default function Seo({
   title,
   description = SITE.description,
+  keywords,
   image = SITE.defaultImage,
   type = "website",
   noindex = false,
@@ -62,6 +64,9 @@ export default function Seo({
 
     document.title = fullTitle;
     upsertMeta("name", "description", description);
+    
+    const kw = keywords?.join(", ") || SITE.keywords.join(", ");
+    upsertMeta("name", "keywords", kw);
     upsertMeta("name", "robots", noindex ? "noindex, nofollow" : "index, follow");
     upsertLink("canonical", canonical);
 
@@ -93,7 +98,7 @@ export default function Seo({
       script.text = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
       document.head.appendChild(script);
     }
-  }, [title, description, image, type, noindex, jsonLd, canonicalPath, location.pathname]);
+  }, [title, description, keywords, image, type, noindex, jsonLd, canonicalPath, location.pathname]);
 
   return null;
 }
