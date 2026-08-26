@@ -160,7 +160,7 @@ export default function HomePage() {
         <div className="orb -left-24 -top-16 h-72 w-72 bg-copper/15" />
         <div className="orb right-[-6rem] top-40 h-80 w-80 bg-gold/15" />
         <div className="orb bottom-[-4rem] left-1/3 h-64 w-64 bg-sky/10" />
-        <div className="container-x">
+        <div className="container-x overflow-hidden">
         <Carousel slideClassName="basis-full" gapClassName="gap-4" autoPlayMs={6500} showDots leftArrow={false} ariaLabel="Featured collections">
           {HERO_SLIDES.map((s, i) => (
             <div
@@ -386,28 +386,30 @@ export default function HomePage() {
             <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Aurex vs ordinary cookware</h2>
             <p className="mt-3 text-ink/65">Built to a higher standard — here's how we compare.</p>
           </div>
-          <div className="mx-auto mt-10 max-w-3xl overflow-hidden rounded-xl2 ring-1 ring-ink/[0.08]">
-            <div className="grid grid-cols-[1fr_5rem_5rem] bg-ink text-sm font-semibold text-cream sm:grid-cols-[1fr_7rem_7rem]">
-              <div className="px-4 py-3 sm:px-6">Feature</div>
-              <div className="py-3 text-center">Aurex</div>
-              <div className="py-3 text-center text-cream/55">Ordinary</div>
-            </div>
-            {COMPARISON.map((row, i) => (
-              <div
-                key={row.feature}
-                className={`grid grid-cols-[1fr_5rem_5rem] items-center text-sm sm:grid-cols-[1fr_7rem_7rem] ${
-                  i % 2 ? "bg-sand/40" : "bg-white"
-                }`}
-              >
-                <div className="px-4 py-3.5 text-ink/80 sm:px-6">{row.feature}</div>
-                <div className="grid place-items-center py-3.5">
-                  {row.aurex ? <Check size={18} className="text-forest" /> : <X size={18} className="text-ink/25" />}
-                </div>
-                <div className="grid place-items-center py-3.5">
-                  {row.ordinary ? <Check size={18} className="text-forest" /> : <X size={18} className="text-ink/25" />}
-                </div>
+          <div className="mx-auto mt-10 max-w-3xl overflow-x-auto rounded-xl2 ring-1 ring-ink/[0.08]">
+            <div className="min-w-[400px]">
+              <div className="grid grid-cols-[1fr_5rem_5rem] bg-ink text-sm font-semibold text-cream sm:grid-cols-[1fr_7rem_7rem]">
+                <div className="px-4 py-3 sm:px-6">Feature</div>
+                <div className="py-3 text-center">Aurex</div>
+                <div className="py-3 text-center text-cream/55">Ordinary</div>
               </div>
-            ))}
+              {COMPARISON.map((row, i) => (
+                <div
+                  key={row.feature}
+                  className={`grid grid-cols-[1fr_5rem_5rem] items-center text-sm sm:grid-cols-[1fr_7rem_7rem] ${
+                    i % 2 ? "bg-sand/40" : "bg-white"
+                  }`}
+                >
+                  <div className="px-4 py-3.5 text-ink/80 sm:px-6">{row.feature}</div>
+                  <div className="grid place-items-center py-3.5">
+                    {row.aurex ? <Check size={18} className="text-forest" /> : <X size={18} className="text-ink/25" />}
+                  </div>
+                  <div className="grid place-items-center py-3.5">
+                    {row.ordinary ? <Check size={18} className="text-forest" /> : <X size={18} className="text-ink/25" />}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </Reveal>

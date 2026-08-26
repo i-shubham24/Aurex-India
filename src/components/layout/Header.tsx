@@ -169,6 +169,19 @@ export default function Header() {
                 {item.label}
               </NavLink>
             ))}
+            <div className="my-2 border-t border-ink/[0.06]" />
+            <NavLink to="/about" onClick={() => setMobileOpen(false)} className="block rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-ink/[0.05]">Our Story</NavLink>
+            <NavLink to="/contact" onClick={() => setMobileOpen(false)} className="block rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-ink/[0.05]">Contact</NavLink>
+            <NavLink to="/blog" onClick={() => setMobileOpen(false)} className="block rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-ink/[0.05]">Blog</NavLink>
+            <div className="my-2 border-t border-ink/[0.06]" />
+            <NavLink
+              to={user ? "/account" : "/login"}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-copper hover:bg-copper/10"
+            >
+              <UserIcon size={16} />
+              {user ? user.fullName?.split(" ")[0] ?? "Account" : "Login / Sign up"}
+            </NavLink>
           </div>
         </div>
       )}

@@ -25,8 +25,12 @@ export default function AccountPage() {
   );
 
   async function logout() {
-    await signOut();
-    navigate("/");
+    try {
+      await signOut();
+      navigate("/");
+    } catch (err) {
+      console.error("Sign out failed", err);
+    }
   }
 
   if (!user) return null;

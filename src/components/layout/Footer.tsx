@@ -70,7 +70,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:col-span-3">
           {COLUMNS.map((col) => (
             <div key={col.title}>
               <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-cream">

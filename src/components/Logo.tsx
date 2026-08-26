@@ -8,14 +8,10 @@ export default function Logo({ className = "" }: { className?: string }) {
   return (
     <Link
       to="/"
-      className={`inline-flex items-baseline gap-1 font-serif ${className}`}
+      className={`inline-flex items-center ${className}`}
       aria-label="Aurex India — home"
     >
-      <span className="text-2xl font-semibold tracking-tight text-ink">Aurex</span>
-      <span className="text-2xl font-semibold tracking-tight text-copper">.</span>
-      <span className="ml-0.5 text-[0.65rem] font-sans font-semibold uppercase tracking-[0.2em] text-ink/50">
-        India
-      </span>
+      <img src="/brand/logo.png" alt="Aurex India" className="h-6 w-auto object-contain sm:h-7" />
     </Link>
   );
 }

@@ -9,8 +9,11 @@
 
   html {
     scroll-behavior: smooth;
-    /* Off-canvas panels (cart drawer, mobile menu) sit beyond the right edge;
-       clip horizontal overflow so they never create a mobile side-scroll. */
+  }
+
+  /* Clip horizontal overflow on the app wrapper instead of html/body so
+     position:sticky isn't broken on iOS Safari. */
+  #root {
     overflow-x: hidden;
   }
 

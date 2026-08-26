@@ -61,10 +61,9 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Launcher */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-copper text-white shadow-lift transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-20 lg:bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-copper text-white shadow-lift transition-transform hover:scale-105 active:scale-95"
         aria-label={open ? "Close chat" : "Open chat assistant"}
       >
         {open ? <X size={22} /> : <MessageCircle size={24} />}
@@ -72,7 +71,7 @@ export default function ChatWidget() {
 
       {/* Panel */}
       <div
-        className={`fixed bottom-24 right-5 z-40 flex w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-lift ring-1 ring-ink/10 transition-all duration-300 ${
+        className={`fixed bottom-36 lg:bottom-24 right-5 z-40 flex w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-lift ring-1 ring-ink/10 transition-all duration-300 ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
         }`}
         style={{ height: "min(70vh, 560px)" }}

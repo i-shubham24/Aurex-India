@@ -21,15 +21,20 @@ export default function AdminPage() {
 
   async function refresh() {
     setLoading(true);
-    const [p, o, u] = await Promise.all([
-      data.getProducts(),
-      data.getOrders(),
-      data.getUsers(),
-    ]);
-    setProducts(p);
-    setOrders(o);
-    setUsers(u);
-    setLoading(false);
+    try {
+      const [p, o, u] = await Promise.all([
+        data.getProducts(),
+        data.getOrders(),
+        data.getUsers(),
+      ]);
+      setProducts(p);
+      setOrders(o);
+      setUsers(u);
+    } catch (err) {
+      console.error("Admin refresh failed:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -225,9 +230,14 @@ function ProductEditor({
   async function save() {
     setSaving(true);
     const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    await data.upsertProduct({ ...form, slug, images: form.images.filter(Boolean) });
-    setSaving(false);
-    onSaved();
+    try {
+      await data.upsertProduct({ ...form, slug, images: form.images.filter(Boolean) });
+      onSaved();
+    } catch (err) {
+      alert("Failed to save product");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -308,6 +318,7 @@ function OrdersAdmin({ orders, onChange }: { orders: Order[]; onChange: () => vo
               <td className="p-4 font-semibold">{formatINR(o.total)}</td>
               <td className="p-4">
                 <select
+                  aria-label={`Change status for order ${o.id}`}
                   value={o.status}
                   onChange={(e) => setStatus(o.id, e.target.value as OrderStatus)}
                   className="rounded-lg border border-ink/15 bg-white px-2 py-1 text-sm capitalize focus:border-copper focus:outline-none"

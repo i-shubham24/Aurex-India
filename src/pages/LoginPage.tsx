@@ -104,10 +104,12 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {import.meta.env.DEV && (
         <div className="mt-4 rounded-xl bg-sand/60 p-4 text-center text-xs text-ink/60">
-          <b>Demo admin:</b> admin@aurexindia.com · admin123 &nbsp;→&nbsp; opens the{" "}
+          <b>Dev only:</b> admin@aurexindia.com · admin123 &nbsp;→&nbsp; opens the{" "}
           <Link to="/admin" className="text-copper underline">admin panel</Link>
         </div>
+        )}
       </div>
     </div>
   );

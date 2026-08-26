@@ -50,6 +50,9 @@ export default function ProductPage() {
   const [variant, setVariant] = useState<ProductVariant | undefined>(undefined);
   const [qty, setQty] = useState(1);
   const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
+  // Disable hover-zoom on touch devices — no mouseleave fires so the
+  // magnified layer gets permanently stuck over the product image.
+  const canHover = typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
 
   const specs = useMemo(() => (product ? parseSpecs(product) : []), [product]);
 
@@ -97,31 +100,33 @@ export default function ProductPage() {
           ]),
         ]}
       />
-      <nav className="mb-6 text-sm text-ink/50">
-        <Link to="/" className="hover:text-copper">Home</Link>
-        <span className="mx-2">/</span>
-        <Link to={`/shop/${product.categorySlug}`} className="capitalize hover:text-copper">
+      <nav className="mb-6 flex items-center text-sm text-ink/50">
+        <Link to="/" className="flex-shrink-0 hover:text-copper">Home</Link>
+        <span className="mx-2 flex-shrink-0">/</span>
+        <Link to={`/shop/${product.categorySlug}`} className="flex-shrink-0 capitalize hover:text-copper">
           {product.categorySlug.replace(/-/g, " ")}
         </Link>
-        <span className="mx-2">/</span>
-        <span className="text-ink/70">{product.name}</span>
+        <span className="mx-2 flex-shrink-0">/</span>
+        <span className="truncate text-ink/70">{product.name}</span>
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery with corner hover-zoom (desktop) */}
         <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
           <div
-            className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-xl2 bg-white ring-1 ring-ink/[0.06]"
-            onMouseEnter={() => setZoom((z) => ({ ...z, active: true }))}
-            onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
-            onMouseMove={(e) => {
-              const r = e.currentTarget.getBoundingClientRect();
-              setZoom({
-                active: true,
-                x: ((e.clientX - r.left) / r.width) * 100,
-                y: ((e.clientY - r.top) / r.height) * 100,
-              });
-            }}
+            className={`group relative aspect-square overflow-hidden rounded-xl2 bg-white ring-1 ring-ink/[0.06] ${canHover ? "cursor-zoom-in" : ""}`}
+            {...(canHover ? {
+              onMouseEnter: () => setZoom((z) => ({ ...z, active: true })),
+              onMouseLeave: () => setZoom((z) => ({ ...z, active: false })),
+              onMouseMove: (e: React.MouseEvent) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                setZoom({
+                  active: true,
+                  x: ((e.clientX - r.left) / r.width) * 100,
+                  y: ((e.clientY - r.top) / r.height) * 100,
+                });
+              },
+            } : {})}
           >
             <ProductImage
               src={gallery[activeImg]}

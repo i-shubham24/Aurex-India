@@ -202,7 +202,7 @@ export const mockService: DataService = {
     writeLS(LS_OTP, pending);
     return delay({
       sent: true,
-      devCode: code,
+      devCode: import.meta.env.DEV ? code : undefined,
       message: `OTP sent to +91 ${norm}.`,
     });
   },

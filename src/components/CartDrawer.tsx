@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -5,6 +6,17 @@ import { formatINR } from "@/lib/format";
 
 export default function CartDrawer() {
   const { isOpen, setOpen, lines, subtotal, itemCount, setQty, remove } = useCart();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   return (
     // Viewport-sized clipping layer: keeps the off-canvas panel from creating
@@ -78,7 +90,8 @@ export default function CartDrawer() {
                         <div className="flex items-center rounded-full border border-ink/15">
                           <button
                             onClick={() => setQty(l.productId, l.quantity - 1, l.variantId)}
-                            className="grid h-7 w-7 place-items-center text-ink/70 hover:text-copper"
+                            disabled={l.quantity <= 1}
+                            className="grid h-7 w-7 place-items-center text-ink/70 disabled:opacity-30 disabled:hover:text-ink/70 hover:text-copper"
                             aria-label="Decrease quantity"
                           >
                             <Minus size={13} />

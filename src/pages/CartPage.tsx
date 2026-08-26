@@ -160,7 +160,7 @@ export default function CartPage() {
                 {l.variantName && <span className="mt-0.5 text-xs text-ink/50">{l.variantName}</span>}
                 <div className="mt-auto flex items-center justify-between pt-3">
                   <div className="flex items-center rounded-full border border-ink/15">
-                    <button onClick={() => setQty(l.productId, l.quantity - 1, l.variantId)} className="grid h-8 w-8 place-items-center text-ink/70 hover:text-copper" aria-label="Decrease"><Minus size={14} /></button>
+                    <button onClick={() => setQty(l.productId, l.quantity - 1, l.variantId)} disabled={l.quantity <= 1} className="grid h-8 w-8 place-items-center text-ink/70 disabled:opacity-30 disabled:hover:text-ink/70 hover:text-copper" aria-label="Decrease"><Minus size={14} /></button>
                     <span className="w-8 text-center text-sm">{l.quantity}</span>
                     <button onClick={() => setQty(l.productId, l.quantity + 1, l.variantId)} className="grid h-8 w-8 place-items-center text-ink/70 hover:text-copper" aria-label="Increase"><Plus size={14} /></button>
                   </div>
