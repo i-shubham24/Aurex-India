@@ -13,7 +13,7 @@ export const categories: Category[] = [
       "slug": "triply",
       "name": "Triply",
       "description": "Three-layer stainless steel with an aluminium core for fast, even, induction-ready heat.",
-      "image": "/products/653-0.jpg"
+      "image": "/products/wc-653-0.webp"
     },
     {
       "id": "cat-cast-iron",
@@ -27,14 +27,14 @@ export const categories: Category[] = [
       "slug": "kadhai",
       "name": "Kadhai",
       "description": "Deep, sturdy kadhais for everything from sabzi to festive frying.",
-      "image": "/products/981-0.jpg"
+      "image": "/products/wc-981-0.webp"
     },
     {
       "id": "cat-honeycomb",
       "slug": "honeycomb",
       "name": "Honeycomb",
       "description": "Honeycomb-textured triply for a durable, low-stick everyday surface.",
-      "image": "/products/655-0.png"
+      "image": "/products/wc-655-0.webp"
     }
   ];
 
@@ -48,13 +48,14 @@ export const products: Product[] = [
       "compareAtPrice": 599,
       "currency": "INR",
       "images": [
-        "/products/981-0.jpg",
-        "/products/981-1.jpg",
-        "/products/981-2.jpg",
-        "/products/981-3.jpg"
+        "/products/wc-981-0.webp",
+        "/products/wc-981-1.webp",
+        "/products/wc-981-2.webp",
+        "/products/wc-981-3.webp",
+        "/products/wc-981-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel Deep Kadai/ Kadai with Steel Lid/ 22cm/ 2.9ltr Deep/ 1.6Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean,…",
-      "description": "Aurex Triply Stainless Steel Deep Kadai/ Kadai with Steel Lid/ 22cm/ 2.9ltr Deep/ 1.6Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 29.5 Width (cm) – 32.5 Height (cm) – 12 Product Length (cm) – 35.5 Width (cm) – 28 Height (cm) – 10 Weight (kg) – 1.680 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel Deep Kadai/ Kadai with Steel Lid/ 22cm/ 2.9ltr Deep/ 1.6Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 29.5 Width (cm) – 32.5 Height (cm) – 12 Product Length (cm) – 35.5 Width (cm) – 28 Height (cm) – 10 Weight (kg) – 1.680 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -68,7 +69,8 @@ export const products: Product[] = [
       "reviewCount": 70,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     },
     {
       "id": "wc-663",
@@ -82,7 +84,7 @@ export const products: Product[] = [
         "/products/663-0.png"
       ],
       "shortDescription": "Aurex Cast Iron Deep Kadai with toughened Glass Lid/ 26cm/ 4.6ltr/ Pre-Seasoned/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish,…",
-      "description": "Aurex Cast Iron Deep Kadai with toughened Glass Lid/ 26cm/ 4.6ltr/ Pre-Seasoned/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – Lifetime warranty",
+      "description": "Aurex Cast Iron Deep Kadai with toughened Glass Lid/ 26cm/ 4.6ltr/ Pre-Seasoned/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with cast iron",
         "Cast Iron Construction: Cast Iron is mostly made from Iron and few",
@@ -96,7 +98,8 @@ export const products: Product[] = [
       "reviewCount": 114,
       "stock": 40,
       "badges": [],
-      "isFeatured": true
+      "isFeatured": true,
+      "isNew": false
     },
     {
       "id": "wc-662",
@@ -110,7 +113,7 @@ export const products: Product[] = [
         "/products/662-0.png"
       ],
       "shortDescription": "Aurex Cast Iron Grill Pan/ 27cm/ Pre -Seasoned/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less…",
-      "description": "Aurex Cast Iron Grill Pan/ 27cm/ Pre -Seasoned/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – Lifetime warranty",
+      "description": "Aurex Cast Iron Grill Pan/ 27cm/ Pre -Seasoned/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with cast iron",
         "Cast Iron Construction: Cast Iron is mostly made from Iron and few",
@@ -124,7 +127,8 @@ export const products: Product[] = [
       "reviewCount": 95,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     },
     {
       "id": "wc-661",
@@ -135,13 +139,14 @@ export const products: Product[] = [
       "compareAtPrice": 1199,
       "currency": "INR",
       "images": [
-        "/products/661-0.png",
-        "/products/661-1.jpg",
-        "/products/661-2.png",
-        "/products/661-3.png"
+        "/products/wc-661-0.webp",
+        "/products/wc-661-1.webp",
+        "/products/wc-661-2.webp",
+        "/products/wc-661-3.webp",
+        "/products/wc-661-4.webp"
       ],
       "shortDescription": "Aurex Cast Iron Fry Pan/ Skillet/ 24cm/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil,…",
-      "description": "Aurex Cast Iron Fry Pan/ Skillet/ 24cm/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – Lifetime warranty",
+      "description": "Aurex Cast Iron Fry Pan/ Skillet/ 24cm/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with cast iron",
         "Cast Iron Construction: Cast Iron is mostly made from Iron and few",
@@ -155,7 +160,8 @@ export const products: Product[] = [
       "reviewCount": 77,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     },
     {
       "id": "wc-660",
@@ -166,13 +172,14 @@ export const products: Product[] = [
       "compareAtPrice": 999,
       "currency": "INR",
       "images": [
-        "/products/660-0.png",
-        "/products/660-1.png",
-        "/products/660-2.png",
-        "/products/660-3.png"
+        "/products/wc-660-0.webp",
+        "/products/wc-660-1.webp",
+        "/products/wc-660-2.webp",
+        "/products/wc-660-3.webp",
+        "/products/wc-660-4.webp"
       ],
       "shortDescription": "Aurex Cast Iron Fry Pan/ Skillet/ 24cm/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil,…",
-      "description": "Aurex Cast Iron Fry Pan/ Skillet/ 24cm/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as crispy dosas, pancakes, Uttapams, and cheelas etc. Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – Lifetime warranty",
+      "description": "Aurex Cast Iron Fry Pan/ Skillet/ 24cm/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as crispy dosas, pancakes, Uttapams, and cheelas etc. Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with cast iron",
         "Cast Iron Construction: Cast Iron is mostly made from Iron and few",
@@ -186,7 +193,8 @@ export const products: Product[] = [
       "reviewCount": 59,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": true
     },
     {
       "id": "wc-659",
@@ -197,10 +205,14 @@ export const products: Product[] = [
       "compareAtPrice": 699,
       "currency": "INR",
       "images": [
-        "/products/659-0.png"
+        "/products/wc-659-0.webp",
+        "/products/wc-659-1.webp",
+        "/products/wc-659-2.webp",
+        "/products/wc-659-3.webp",
+        "/products/wc-659-4.webp"
       ],
       "shortDescription": "Aurex Cast Iron Dosa Tawa 30cm/ 1kg/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy…",
-      "description": "Aurex Cast Iron Dosa Tawa 30cm/ 1kg/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – Lifetime warranty",
+      "description": "Aurex Cast Iron Dosa Tawa 30cm/ 1kg/ 100% Toxin Free, No Chemical Coating, Durable, Natural Stone Finish, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with cast iron",
         "Cast Iron Construction: Cast Iron is mostly made from Iron and few",
@@ -214,7 +226,8 @@ export const products: Product[] = [
       "reviewCount": 99,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     },
     {
       "id": "wc-658",
@@ -225,13 +238,14 @@ export const products: Product[] = [
       "compareAtPrice": 599,
       "currency": "INR",
       "images": [
-        "/products/658-0.jpg",
-        "/products/658-1.jpg",
-        "/products/658-2.jpg",
-        "/products/658-3.jpg"
+        "/products/wc-658-0.webp",
+        "/products/wc-658-1.webp",
+        "/products/wc-658-2.webp",
+        "/products/wc-658-3.webp",
+        "/products/wc-658-4.webp"
       ],
       "shortDescription": "Aurex Cast Iron Concave Tawa with Silicon Sleeve/ 26cm/ 1kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking…",
-      "description": "Aurex Cast Iron Concave Tawa with Silicon Sleeve/ 26cm/ 1kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – Lifetime warranty",
+      "description": "Aurex Cast Iron Concave Tawa with Silicon Sleeve/ 26cm/ 1kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material -Made with cast iron Cast Iron Construction – Cast Iron is mostly made from Iron and few percentage of carbon, silicon and other chemical elements. Built for exceptional heat retention and lifelong durability. Colour – Black Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for versatile and everyday cooking, such as all kinds of Indian flat breads ( roti, paratha, naan etc). Cleaning Process – Cast Iron can be easily cleaned with just warm water and a soft scrubber. Make sure not use the dishwasher for cleaning cast iron. Durability – Cast Iron is known to last for decades and even generations if properly maintained. Consumes Less Oil – Cast Iron products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with cast iron",
         "Cast Iron Construction: Cast Iron is mostly made from Iron and few",
@@ -245,7 +259,8 @@ export const products: Product[] = [
       "reviewCount": 117,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": true
     },
     {
       "id": "wc-655",
@@ -256,7 +271,11 @@ export const products: Product[] = [
       "compareAtPrice": 499,
       "currency": "INR",
       "images": [
-        "/products/655-0.png"
+        "/products/wc-655-0.webp",
+        "/products/wc-655-1.webp",
+        "/products/wc-655-2.webp",
+        "/products/wc-655-3.webp",
+        "/products/wc-655-4.webp"
       ],
       "shortDescription": "Designed for larger meals, this honeycomb kadhai offers stability and surface protection. Textured surface for controlled cooking Consistent heating…",
       "description": "Designed for larger meals, this honeycomb kadhai offers stability and surface protection. Textured surface for controlled cooking Consistent heating throughout Suitable for frying and gravies Strong triply construction Induction compatible",
@@ -271,7 +290,8 @@ export const products: Product[] = [
       "reviewCount": 319,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": true
     },
     {
       "id": "wc-653",
@@ -282,13 +302,14 @@ export const products: Product[] = [
       "compareAtPrice": 699,
       "currency": "INR",
       "images": [
-        "/products/653-0.jpg",
-        "/products/653-1.jpg",
-        "/products/653-2.jpg",
-        "/products/653-3.jpg"
+        "/products/wc-653-0.webp",
+        "/products/wc-653-1.webp",
+        "/products/wc-653-2.webp",
+        "/products/wc-653-3.webp",
+        "/products/wc-653-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel Tawa/ 26cm/ 1kg/ 4mm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material –…",
-      "description": "Aurex Triply Stainless Steel Tawa/ 26cm/ 1kg/ 4mm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) -26.5 Width (cm) -44.5 Height (cm) – 9 Product Length (cm) -38 Height (cm) -8.5 Weight (kg) -2.32 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel Tawa/ 26cm/ 1kg/ 4mm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) -26.5 Width (cm) -44.5 Height (cm) – 9 Product Length (cm) -38 Height (cm) -8.5 Weight (kg) -2.32 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -302,7 +323,8 @@ export const products: Product[] = [
       "reviewCount": 282,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": true
     },
     {
       "id": "wc-650",
@@ -313,13 +335,14 @@ export const products: Product[] = [
       "compareAtPrice": 699,
       "currency": "INR",
       "images": [
-        "/products/650-0.jpg",
-        "/products/650-1.png",
-        "/products/650-2.jpg",
-        "/products/650-3.jpg"
+        "/products/wc-650-s0-0.webp",
+        "/products/wc-650-s0-1.webp",
+        "/products/wc-650-s0-2.webp",
+        "/products/wc-650-s0-3.webp",
+        "/products/wc-650-s0-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy…",
-      "description": "Aurex Triply Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Product Length (cm) -42 Height (cm) -7.6 Weight (kg) -1.2 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects. Aurex Triply Stainless Steel Fry Pan with Lid/ 24cm/ 1.4kg/2.5mm 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) -29 Width (cm) – 44.5 Height (cm) -7.5 Product Length (cm) -46.5 Height (cm) -8.5 Weight (kg) -1.0 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Product Length (cm) -42 Height (cm) -7.6 Weight (kg) -1.2 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -331,22 +354,37 @@ export const products: Product[] = [
       "variants": [
         {
           "id": "v-0",
-          "name": "22cm",
+          "name": "22 cm",
           "priceDelta": 0,
-          "stock": 25
+          "stock": 25,
+          "images": [
+            "/products/wc-650-s0-0.webp",
+            "/products/wc-650-s0-1.webp",
+            "/products/wc-650-s0-2.webp",
+            "/products/wc-650-s0-3.webp",
+            "/products/wc-650-s0-4.webp"
+          ]
         },
         {
           "id": "v-1",
-          "name": "24cm",
+          "name": "24 cm",
           "priceDelta": 0,
-          "stock": 25
+          "stock": 25,
+          "images": [
+            "/products/wc-650-s1-0.webp",
+            "/products/wc-650-s1-1.webp",
+            "/products/wc-650-s1-2.webp",
+            "/products/wc-650-s1-3.webp",
+            "/products/wc-650-s1-4.webp"
+          ]
         }
       ],
       "rating": 4.7,
       "reviewCount": 264,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     },
     {
       "id": "wc-649",
@@ -357,13 +395,14 @@ export const products: Product[] = [
       "compareAtPrice": 799,
       "currency": "INR",
       "images": [
-        "/products/649-0.jpg",
-        "/products/649-1.jpg",
-        "/products/649-2.jpg",
-        "/products/649-3.jpg"
+        "/products/wc-649-0.webp",
+        "/products/wc-649-1.webp",
+        "/products/wc-649-2.webp",
+        "/products/wc-649-3.webp",
+        "/products/wc-649-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel 4 Pc Cookware Set, Stainless Steel Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ Stainless Steel Fry Pan…",
-      "description": "Aurex Triply Stainless Steel 4 Pc Cookware Set, Stainless Steel Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm/ Stainless Steel Tea Pan/ 16cm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 33 Width (cm) – 44 Height (cm) – 14.5 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel 4 Pc Cookware Set, Stainless Steel Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm/ Stainless Steel Tea Pan/ 16cm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 33 Width (cm) – 44 Height (cm) – 14.5 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -377,7 +416,8 @@ export const products: Product[] = [
       "reviewCount": 281,
       "stock": 40,
       "badges": [],
-      "isFeatured": true
+      "isFeatured": true,
+      "isNew": false
     },
     {
       "id": "wc-648",
@@ -388,13 +428,14 @@ export const products: Product[] = [
       "compareAtPrice": 799,
       "currency": "INR",
       "images": [
-        "/products/648-0.png",
-        "/products/648-1.png",
-        "/products/648-2.jpg",
-        "/products/648-3.jpg"
+        "/products/wc-648-0.webp",
+        "/products/wc-648-1.webp",
+        "/products/wc-648-2.webp",
+        "/products/wc-648-3.webp",
+        "/products/wc-648-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel 3 Pc Cookware Set, Stainless Steel Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ Stainless Steel Fry Pan…",
-      "description": "Aurex Triply Stainless Steel 3 Pc Cookware Set, Stainless Steel Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 32 Width (cm) – 45 Height (cm) – 12 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel 3 Pc Cookware Set, Stainless Steel Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ Stainless Steel Fry Pan with Lid/ 22cm/ 1.23kg/2.5mm/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 32 Width (cm) – 45 Height (cm) – 12 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -408,7 +449,8 @@ export const products: Product[] = [
       "reviewCount": 263,
       "stock": 40,
       "badges": [],
-      "isFeatured": true
+      "isFeatured": true,
+      "isNew": false
     },
     {
       "id": "wc-646",
@@ -419,13 +461,14 @@ export const products: Product[] = [
       "compareAtPrice": 699,
       "currency": "INR",
       "images": [
-        "/products/646-0.jpg",
-        "/products/646-1.jpg",
-        "/products/646-2.jpg",
-        "/products/646-3.jpg"
+        "/products/wc-646-s0-0.webp",
+        "/products/wc-646-s0-1.webp",
+        "/products/wc-646-s0-2.webp",
+        "/products/wc-646-s0-3.webp",
+        "/products/wc-646-s0-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel Deep Kadai/ Kadai with Steel Lid/ 24cm/ 3.3ltr Deep/ 1.78Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean,…",
-      "description": "Aurex Triply Stainless Steel Deep Kadai/ Kadai with Steel Lid/ 24cm/ 3.3ltr Deep/ 1.78Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 29.5 Width (cm) – 35 Height (cm) – 11.5 Product Length (cm) – 37 Height (cm) – 11.5 Weight (kg) – 1.780 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel Deep Kadai/ Kadai with Steel Lid/ 24cm/ 3.3ltr Deep/ 1.78Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 22cm, 24cm Colour – Silver Dimensions Package Length (cm) – 29.5 Width (cm) – 35 Height (cm) – 11.5 Product Length (cm) – 37 Height (cm) – 11.5 Weight (kg) – 1.780 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Perfect for deep-frying, curries, slow cookings and stir-fries. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking, yet deep walls allow efficient, even deep frying.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -437,22 +480,37 @@ export const products: Product[] = [
       "variants": [
         {
           "id": "v-0",
-          "name": "22cm",
+          "name": "22 cm",
           "priceDelta": 0,
-          "stock": 25
+          "stock": 25,
+          "images": [
+            "/products/wc-646-s0-0.webp",
+            "/products/wc-646-s0-1.webp",
+            "/products/wc-646-s0-2.webp",
+            "/products/wc-646-s0-3.webp",
+            "/products/wc-646-s0-4.webp"
+          ]
         },
         {
           "id": "v-1",
-          "name": "24cm",
+          "name": "24 cm",
           "priceDelta": 0,
-          "stock": 25
+          "stock": 25,
+          "images": [
+            "/products/wc-646-s1-0.webp",
+            "/products/wc-646-s1-1.webp",
+            "/products/wc-646-s1-2.webp",
+            "/products/wc-646-s1-3.webp",
+            "/products/wc-646-s1-4.webp"
+          ]
         }
       ],
       "rating": 4.5,
       "reviewCount": 306,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     },
     {
       "id": "wc-645",
@@ -463,10 +521,11 @@ export const products: Product[] = [
       "compareAtPrice": 699,
       "currency": "INR",
       "images": [
-        "/products/645-0.jpg",
-        "/products/645-1.png",
-        "/products/645-2.png",
-        "/products/645-3.jpg"
+        "/products/wc-645-0.webp",
+        "/products/wc-645-1.webp",
+        "/products/wc-645-2.webp",
+        "/products/wc-645-3.webp",
+        "/products/wc-645-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel Kadai/ Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean,…",
       "description": "Aurex Triply Stainless Steel Kadai/ Kadai with Steel Lid/ 24cm/ 9.4 Iches/2.5ltr Deep/ 1.7Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with Triply stainless Steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 24cm, 26cm Colour – Silver Dimensions Package Length (cm) – 29 Width (cm) – 33 Height (cm) – 10.5 Product Length (cm) – 38 Width (cm) – 8.5 Height (cm) – 2.32 Compatibly – Compatible for induction, gas Stove, ceramic and electric cooktops. Usage – Ideal for shallow frying, sauteing and everyday cooking. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
@@ -483,7 +542,8 @@ export const products: Product[] = [
       "reviewCount": 61,
       "stock": 40,
       "badges": [],
-      "isFeatured": true
+      "isFeatured": true,
+      "isNew": false
     },
     {
       "id": "wc-644",
@@ -494,13 +554,14 @@ export const products: Product[] = [
       "compareAtPrice": 699,
       "currency": "INR",
       "images": [
-        "/products/644-0.jpg",
-        "/products/644-1.png",
-        "/products/644-2.png",
-        "/products/644-3.jpg"
+        "/products/wc-644-0.webp",
+        "/products/wc-644-1.webp",
+        "/products/wc-644-2.webp",
+        "/products/wc-644-3.webp",
+        "/products/wc-644-4.webp"
       ],
       "shortDescription": "Aurex Triply Stainless Steel Kadai/ Kadai with Steel Lid/ 26cm/ 3.6ltr/ 1.96Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less…",
-      "description": "Aurex Triply Stainless Steel Kadai/ Kadai with Steel Lid/ 26cm/ 3.6ltr/ 1.96Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 24cm, 26cm Colour – Silver Dimensions Package Length (cm) – 30 Width (cm) – 38.5 Height (cm) – 11 Product Length (cm) – 39.6 Width (cm) – 26.5 Height (cm) – 9.2 Weight (kg) – 1.960 Compatibly – Compatible for induction, gas stove, ceramic and electric cooktops. Usage – Ideal for shallow frying, sauteing and everyday cooking. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking without compromising on the taste. Warranty – 5 year warranty on manufacturing defects.",
+      "description": "Aurex Triply Stainless Steel Kadai/ Kadai with Steel Lid/ 26cm/ 3.6ltr/ 1.96Kg/ 100% Toxin Free, No Chemical Coating, Easy to Clean, Consumes Less Oil, Healthy Cooking Material – Made with triply stainless steel Triply Construction – Three layer construction with stainless steel on the inside and the outside. Its durable, rust-free, hygienic, and non reactive. Size Options – 24cm, 26cm Colour – Silver Dimensions Package Length (cm) – 30 Width (cm) – 38.5 Height (cm) – 11 Product Length (cm) – 39.6 Width (cm) – 26.5 Height (cm) – 9.2 Weight (kg) – 1.960 Compatibly – Compatible for induction, gas stove, ceramic and electric cooktops. Usage – Ideal for shallow frying, sauteing and everyday cooking. Cleaning Process – Its smooth surface makes it easy to clean and dishwasher safe. Durability – Triply’s rust-free and damage resistant features makes it highly durable. Consumes Less Oil – Triply products are designed to consume less oil, promoting healthy cooking without compromising on the taste.",
       "features": [
         "Material: Made with triply stainless steel",
         "Triply Construction: Three layer construction with",
@@ -514,7 +575,8 @@ export const products: Product[] = [
       "reviewCount": 43,
       "stock": 40,
       "badges": [],
-      "isFeatured": false
+      "isFeatured": false,
+      "isNew": false
     }
   ];
 

@@ -21,6 +21,7 @@ export interface ProductVariant {
   name: string; // e.g. "24 cm", "2 L"
   priceDelta?: number; // added to base price
   stock: number;
+  images?: string[]; // per-size photos; when set, selecting the size swaps the gallery
 }
 
 export interface Review {

@@ -14,6 +14,7 @@ import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import AccountPage from "@/pages/AccountPage";
 import AboutPage from "@/pages/AboutPage";
+import StoryPage from "@/pages/StoryPage";
 import ContactPage from "@/pages/ContactPage";
 import BlogPage from "@/pages/BlogPage";
 import ContentPage from "@/pages/ContentPage";
@@ -61,6 +62,7 @@ export default function App() {
             }
           />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/story" element={<StoryPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/blog" element={<BlogPage />} />
           {/* Policy pages share one content component */}

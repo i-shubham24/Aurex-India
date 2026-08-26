@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, Trash2, Tag, X, ShoppingBag, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { data } from "@/services";
+import { useAsync } from "@/lib/useAsync";
 import { payments, isPaymentConfigured } from "@/services/payments";
 import { openRazorpay } from "@/lib/razorpay";
 import { formatINR } from "@/lib/format";
+import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 
 const whatsapp = import.meta.env.VITE_WHATSAPP_NUMBER ?? "917814477667";
@@ -24,6 +26,20 @@ export default function CartPage() {
   const [applying, setApplying] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [placedId, setPlacedId] = useState<string | null>(null);
+
+  // "You may also like" — products not in the cart, same categories first.
+  const { data: allProducts } = useAsync(() => data.getProducts(), []);
+  const recommendations = useMemo(() => {
+    if (!allProducts) return [];
+    const cartIds = new Set(lines.map((l) => l.productId));
+    const cartCats = new Set(
+      allProducts.filter((p) => cartIds.has(p.id)).map((p) => p.categorySlug)
+    );
+    const candidates = allProducts.filter((p) => !cartIds.has(p.id));
+    const sameCat = candidates.filter((p) => cartCats.has(p.categorySlug));
+    const rest = candidates.filter((p) => !cartCats.has(p.categorySlug));
+    return [...sameCat, ...rest].slice(0, 4);
+  }, [allProducts, lines]);
 
   async function onApply(e: React.FormEvent) {
     e.preventDefault();
@@ -222,6 +238,18 @@ export default function CartPage() {
           </div>
         </aside>
       </div>
+
+      {/* You may also like */}
+      {recommendations.length > 0 && (
+        <div className="mt-16">
+          <h2 className="mb-6 text-2xl font-semibold">You may also like</h2>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {recommendations.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

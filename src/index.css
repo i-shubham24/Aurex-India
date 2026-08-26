@@ -80,6 +80,10 @@
 .scroll-slim::-webkit-scrollbar { width: 6px; }
 .scroll-slim::-webkit-scrollbar-thumb { @apply rounded-full bg-ink/15; }
 
+/* Fully hidden scrollbar (carousels, chip rows) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ─── Fork cursor (thematic, for important interactive sections) ─── */
 .cursor-fork,
 .btn-primary,
@@ -161,6 +165,26 @@
   .animate-fade-up, .animate-fade-in, .animate-float { animation: none !important; }
   .tw-caret { animation: none !important; }
 }
+
+/* Slow cinematic zoom for full-bleed image bands */
+@keyframes kenburns {
+  from { transform: scale(1.05) translate(0, 0); }
+  to { transform: scale(1.16) translate(-2%, -2%); }
+}
+
+/* Slowly panning gradient (subtle "aurora" section background) */
+@keyframes auroraPan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.aurora { background-size: 220% 220%; }
+@media (prefers-reduced-motion: no-preference) {
+  .aurora { animation: auroraPan 14s ease infinite; }
+}
+
+/* Soft blurred decorative orb (layering behind content) */
+.orb { position: absolute; z-index: -10; border-radius: 9999px; filter: blur(64px); pointer-events: none; }
 
 /* Top announcement marquee */
 @keyframes marquee {

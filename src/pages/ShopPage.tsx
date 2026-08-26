@@ -12,10 +12,18 @@ const SORTS: { value: NonNullable<ProductQuery["sort"]>; label: string }[] = [
   { value: "relevant", label: "Relevance" },
   { value: "popular", label: "Popular" },
   { value: "newest", label: "Newest" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
+  { value: "price-asc", label: "Price: Low–High" },
+  { value: "price-desc", label: "Price: High–Low" },
   { value: "rating", label: "Top rated" },
 ];
+
+// Real AUREX "range" banners per category for the page heading.
+const CAT_BANNER: Record<string, string> = {
+  triply: "/brand/tri-ply-range.webp",
+  "cast-iron": "/brand/cast-iron-range.webp",
+  kadhai: "/brand/tri-ply-range.webp",
+  honeycomb: "/brand/full-range.webp",
+};
 
 const PRICE_RANGES: { label: string; min?: number; max?: number }[] = [
   { label: "Under ₹1,500", max: 1499 },
@@ -96,9 +104,25 @@ export default function ShopPage() {
           </>
         )}
       </nav>
-      <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
-      {activeCat?.description && (
-        <p className="mt-2 max-w-2xl text-ink/60">{activeCat.description}</p>
+      {activeCat && category && CAT_BANNER[category] ? (
+        <div className="relative mt-3 overflow-hidden rounded-xl2">
+          <img
+            src={CAT_BANNER[category]}
+            alt={`${activeCat.name} range`}
+            className="h-44 w-full object-cover sm:h-60"
+          />
+          <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/80 via-ink/25 to-transparent p-6 sm:p-8">
+            <h1 className="text-3xl font-semibold text-cream sm:text-4xl">{activeCat.name}</h1>
+            <p className="mt-1 max-w-lg text-sm text-cream/85">{activeCat.description}</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h1 className="mt-2 text-3xl font-semibold">{title}</h1>
+          {activeCat?.description && (
+            <p className="mt-2 max-w-2xl text-ink/60">{activeCat.description}</p>
+          )}
+        </>
       )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr]">
@@ -144,16 +168,16 @@ export default function ShopPage() {
 
         {/* Grid — min-w-0 lets this grid column shrink instead of overflowing */}
         <div className="min-w-0">
-          <div className="mb-5 flex items-center justify-between">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <p className="text-sm text-ink/55">
               {products ? `${products.length} product${products.length === 1 ? "" : "s"}` : " "}
             </p>
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-ink/55">Sort</span>
+            <label className="flex min-w-0 items-center gap-2 text-sm">
+              <span className="flex-shrink-0 text-ink/55">Sort</span>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="rounded-lg border border-ink/15 bg-white px-3 py-1.5 text-sm focus:border-copper focus:outline-none"
+                className="min-w-0 rounded-lg border border-ink/15 bg-white px-3 py-1.5 text-sm focus:border-copper focus:outline-none"
               >
                 {SORTS.map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>

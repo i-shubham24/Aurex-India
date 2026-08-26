@@ -1,15 +1,37 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ShieldCheck, Truck, Recycle, Check, Minus, Plus } from "lucide-react";
+import { Zap, Truck, Recycle, Check, Minus, Plus, ShoppingBag } from "lucide-react";
 import { data } from "@/services";
 import { useAsync } from "@/lib/useAsync";
 import { formatINR, discountPct } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import Rating from "@/components/Rating";
+import ProductImage from "@/components/ProductImage";
 import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
-import type { ProductVariant } from "@/services/types";
+import type { Product, ProductVariant } from "@/services/types";
+
+/** Pull a few reliable spec rows out of the (messy) source description. */
+function parseSpecs(product: Product): [string, string][] {
+  const d = product.description ?? "";
+  const rows: [string, string][] = [["Material", product.material ?? "—"]];
+  if (product.variants.length) rows.push(["Sizes", product.variants.map((v) => v.name).join(", ")]);
+  const grab = (label: string, re: RegExp, cap = 120) => {
+    const m = d.match(re);
+    if (m && m[1]) {
+      let v = m[1].trim().replace(/\s+/g, " ");
+      if (v.length > cap) v = v.slice(0, cap).replace(/\s\S*$/, "") + "…";
+      rows.push([label, v]);
+    }
+  };
+  grab("Colour", /Colou?r\s*[–-]\s*([A-Za-z ]{3,20})/i, 24);
+  grab("Weight", /Weight\s*\(kg\)\s*[–-]\s*([\d.]+)/i);
+  const wr = rows.find((r) => r[0] === "Weight");
+  if (wr) wr[1] += " kg";
+  grab("Compatibility", /Compatibl[ey]\s*[–-]\s*([^–]+?)(?=\s+(?:Usage|Cleaning|Durability|Consumes|Warranty)\b|$)/i);
+  return rows;
+}
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -20,16 +42,16 @@ export default function ProductPage() {
     [product?.id]
   );
   const { data: related } = useAsync(
-    () =>
-      product
-        ? data.getProducts({ categorySlug: product.categorySlug })
-        : Promise.resolve([]),
+    () => (product ? data.getProducts({ categorySlug: product.categorySlug }) : Promise.resolve([])),
     [product?.categorySlug]
   );
 
   const [activeImg, setActiveImg] = useState(0);
   const [variant, setVariant] = useState<ProductVariant | undefined>(undefined);
   const [qty, setQty] = useState(1);
+  const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
+
+  const specs = useMemo(() => (product ? parseSpecs(product) : []), [product]);
 
   if (loading) {
     return (
@@ -38,7 +60,6 @@ export default function ProductPage() {
       </div>
     );
   }
-
   if (!product) {
     return (
       <div className="container-x py-24 text-center">
@@ -48,16 +69,19 @@ export default function ProductPage() {
     );
   }
 
-  // Default to the base variant (priceDelta 0/undefined) so the detail page
-  // opens at the same price the product card shows — not whichever variant
-  // happens to be first in the array.
   const chosen = variant ?? product.variants.find((v) => !v.priceDelta) ?? product.variants[0];
+  const gallery = chosen?.images?.length ? chosen.images : product.images;
   const unitPrice = product.price + (chosen?.priceDelta ?? 0);
   const off = discountPct(product.price, product.compareAtPrice);
   const inStock = (chosen?.stock ?? product.stock) > 0;
 
+  function selectVariant(v: ProductVariant) {
+    setVariant(v);
+    setActiveImg(0);
+  }
+
   return (
-    <div className="container-x py-10">
+    <div className="container-x py-10 pb-24 lg:pb-10">
       <Seo
         title={product.name}
         description={product.shortDescription}
@@ -76,7 +100,7 @@ export default function ProductPage() {
       <nav className="mb-6 text-sm text-ink/50">
         <Link to="/" className="hover:text-copper">Home</Link>
         <span className="mx-2">/</span>
-        <Link to={`/shop/${product.categorySlug}`} className="hover:text-copper capitalize">
+        <Link to={`/shop/${product.categorySlug}`} className="capitalize hover:text-copper">
           {product.categorySlug.replace(/-/g, " ")}
         </Link>
         <span className="mx-2">/</span>
@@ -84,26 +108,52 @@ export default function ProductPage() {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        {/* Gallery */}
-        <div>
-          <div className="overflow-hidden rounded-xl2 bg-sand">
-            <img
-              src={product.images[activeImg]}
+        {/* Gallery with corner hover-zoom (desktop) */}
+        <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
+          <div
+            className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-xl2 bg-white ring-1 ring-ink/[0.06]"
+            onMouseEnter={() => setZoom((z) => ({ ...z, active: true }))}
+            onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
+            onMouseMove={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              setZoom({
+                active: true,
+                x: ((e.clientX - r.left) / r.width) * 100,
+                y: ((e.clientY - r.top) / r.height) * 100,
+              });
+            }}
+          >
+            <ProductImage
+              src={gallery[activeImg]}
               alt={product.name}
-              className="aspect-square w-full object-cover"
+              className="h-full w-full object-contain p-4 transition-transform duration-200 ease-out"
             />
+            {/* zoom layer follows the cursor */}
+            <img
+              src={gallery[activeImg]}
+              alt=""
+              aria-hidden
+              className={`pointer-events-none absolute inset-0 h-full w-full object-contain p-2 transition-opacity duration-150 ${
+                zoom.active ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ transform: "scale(2.1)", transformOrigin: `${zoom.x}% ${zoom.y}%` }}
+            />
+            <span className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-ink/70 px-2.5 py-1 text-[0.65rem] font-medium text-cream opacity-0 transition-opacity group-hover:opacity-100">
+              Hover to zoom
+            </span>
           </div>
-          {product.images.length > 1 && (
-            <div className="mt-3 flex gap-3">
-              {product.images.map((img, i) => (
+          {gallery.length > 1 && (
+            <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1">
+              {gallery.map((img, i) => (
                 <button
-                  key={i}
+                  key={img + i}
                   onClick={() => setActiveImg(i)}
-                  className={`h-20 w-20 overflow-hidden rounded-lg ring-2 ${
-                    activeImg === i ? "ring-copper" : "ring-transparent"
+                  className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-white ring-2 sm:h-20 sm:w-20 ${
+                    activeImg === i ? "ring-copper" : "ring-ink/10 hover:ring-ink/30"
                   }`}
+                  aria-label={`View image ${i + 1}`}
                 >
-                  <img src={img} alt="" className="h-full w-full object-cover" />
+                  <img src={img} alt="" className="h-full w-full object-contain p-1" />
                 </button>
               ))}
             </div>
@@ -111,16 +161,14 @@ export default function ProductPage() {
         </div>
 
         {/* Details */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-copper">
-            {product.material}
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold leading-tight">{product.name}</h1>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wider text-copper">{product.material}</p>
+          <h1 className="mt-1 text-2xl font-semibold leading-tight sm:text-3xl">{product.name}</h1>
           <div className="mt-3">
             <Rating value={product.rating} count={product.reviewCount} />
           </div>
 
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <span className="text-3xl font-semibold">{formatINR(unitPrice)}</span>
             {product.compareAtPrice && (
               <>
@@ -130,11 +178,12 @@ export default function ProductPage() {
                 {off && <span className="chip bg-copper text-white">{off}% off</span>}
               </>
             )}
+            <span className="text-xs text-ink/50">(incl. of all taxes)</span>
           </div>
 
-          <p className="mt-4 text-ink/70">{product.shortDescription}</p>
+          <p className="mt-4 break-words text-ink/70">{product.shortDescription}</p>
 
-          {/* Variants */}
+          {/* Size selector — swaps gallery + price */}
           {product.variants.length > 1 && (
             <div className="mt-6">
               <p className="label">Size</p>
@@ -142,12 +191,12 @@ export default function ProductPage() {
                 {product.variants.map((v) => (
                   <button
                     key={v.id}
-                    onClick={() => setVariant(v)}
+                    onClick={() => selectVariant(v)}
                     disabled={v.stock === 0}
                     className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 ${
                       chosen?.id === v.id
                         ? "border-copper bg-copper text-white"
-                        : "border-ink/15 hover:border-ink/40"
+                        : "border-ink/15 hover:border-copper hover:text-copper"
                     }`}
                   >
                     {v.name}
@@ -160,37 +209,39 @@ export default function ProductPage() {
           {/* Qty + add */}
           <div className="mt-6 flex items-center gap-3">
             <div className="flex items-center rounded-full border border-ink/15">
-              <button
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="grid h-11 w-11 place-items-center text-ink/70 hover:text-copper"
-                aria-label="Decrease quantity"
-              >
-                <Minus size={15} />
-              </button>
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="grid h-11 w-11 place-items-center text-ink/70 hover:text-copper" aria-label="Decrease quantity"><Minus size={15} /></button>
               <span className="w-8 text-center font-medium">{qty}</span>
-              <button
-                onClick={() => setQty((q) => q + 1)}
-                className="grid h-11 w-11 place-items-center text-ink/70 hover:text-copper"
-                aria-label="Increase quantity"
-              >
-                <Plus size={15} />
-              </button>
+              <button onClick={() => setQty((q) => q + 1)} className="grid h-11 w-11 place-items-center text-ink/70 hover:text-copper" aria-label="Increase quantity"><Plus size={15} /></button>
             </div>
-            <button
-              disabled={!inStock}
-              onClick={() => add(product, chosen, qty)}
-              className="btn-primary flex-1 py-3"
-            >
+            <button disabled={!inStock} onClick={() => add(product, chosen, qty)} className="btn-primary flex-1 py-3">
               {inStock ? `Add to cart · ${formatINR(unitPrice * qty)}` : "Out of stock"}
             </button>
           </div>
+          {inStock && chosen && (chosen.stock ?? product.stock) < 15 && (
+            <p className="mt-2 text-sm font-medium text-copper">Only {chosen.stock ?? product.stock} left — order soon!</p>
+          )}
 
           {/* Assurances */}
           <div className="mt-6 grid grid-cols-3 gap-3 border-t border-ink/10 pt-6 text-center text-xs text-ink/60">
             <div className="flex flex-col items-center gap-1"><Truck size={18} className="text-copper" /> Free shipping</div>
-            <div className="flex flex-col items-center gap-1"><ShieldCheck size={18} className="text-copper" /> Warranty</div>
+            <div className="flex flex-col items-center gap-1"><Zap size={18} className="text-copper" /> Induction-ready</div>
             <div className="flex flex-col items-center gap-1"><Recycle size={18} className="text-copper" /> Toxin-free</div>
           </div>
+
+          {/* Specifications */}
+          {specs.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold">Specifications</h2>
+              <dl className="mt-3 divide-y divide-ink/[0.06] overflow-hidden rounded-xl2 ring-1 ring-ink/[0.06]">
+                {specs.map(([k, v]) => (
+                  <div key={k} className="grid grid-cols-[110px_1fr] gap-3 px-4 py-3 text-sm odd:bg-sand/40">
+                    <dt className="font-medium text-ink/60">{k}</dt>
+                    <dd className="min-w-0 break-words text-ink/80">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
         </div>
       </div>
 
@@ -198,7 +249,7 @@ export default function ProductPage() {
       <div className="mt-14 grid gap-10 lg:grid-cols-2">
         <div>
           <h2 className="text-xl font-semibold">Description</h2>
-          <p className="mt-3 leading-relaxed text-ink/75">{product.description}</p>
+          <p className="mt-3 break-words leading-relaxed text-ink/75">{product.description}</p>
         </div>
         <div>
           <h2 className="text-xl font-semibold">Features</h2>
@@ -221,9 +272,7 @@ export default function ProductPage() {
               <div key={r.id} className="card p-5">
                 <div className="flex items-center justify-between">
                   <Rating value={r.rating} />
-                  {r.verified && (
-                    <span className="chip bg-forest/10 text-forest">Verified</span>
-                  )}
+                  {r.verified && <span className="chip bg-forest/10 text-forest">Verified</span>}
                 </div>
                 {r.title && <p className="mt-2 font-semibold">{r.title}</p>}
                 <p className="mt-1 text-sm text-ink/70">{r.body}</p>
@@ -239,15 +288,29 @@ export default function ProductPage() {
         <div className="mt-16">
           <h2 className="mb-6 text-2xl font-semibold">You may also like</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {related
-              .filter((p) => p.id !== product.id)
-              .slice(0, 4)
-              .map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+            {related.filter((p) => p.id !== product.id).slice(0, 4).map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         </div>
       )}
+
+      {/* Sticky mobile buy bar */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ink/10 bg-cream/95 px-4 py-2.5 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-container items-center gap-3 pr-[4.5rem]">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs text-ink/60">{product.name}</p>
+            <p className="text-base font-semibold">{formatINR(unitPrice)}</p>
+          </div>
+          <button
+            disabled={!inStock}
+            onClick={() => add(product, chosen, qty)}
+            className="btn-copper flex-shrink-0 gap-1.5"
+          >
+            <ShoppingBag size={16} /> {inStock ? "Add" : "Sold out"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
