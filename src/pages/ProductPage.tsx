@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Zap, Truck, Recycle, Check, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Flame, ShieldCheck, Recycle, Check, Minus, Plus, ShoppingBag, Truck } from "lucide-react";
 import { data } from "@/services";
 import { useAsync } from "@/lib/useAsync";
 import { formatINR, discountPct } from "@/lib/format";
@@ -226,11 +226,24 @@ export default function ProductPage() {
             <p className="mt-2 text-sm font-medium text-copper">Only {chosen.stock ?? product.stock} left — order soon!</p>
           )}
 
-          {/* Assurances */}
-          <div className="mt-6 grid grid-cols-3 gap-3 border-t border-ink/10 pt-6 text-center text-xs text-ink/60">
-            <div className="flex flex-col items-center gap-1"><Truck size={18} className="text-copper" /> Free shipping</div>
-            <div className="flex flex-col items-center gap-1"><Zap size={18} className="text-copper" /> Induction-ready</div>
-            <div className="flex flex-col items-center gap-1"><Recycle size={18} className="text-copper" /> Toxin-free</div>
+          {/* Revamped Assurances Grid */}
+          <div className="mt-8 border-y border-ink/[0.08] py-5 bg-sand/15 rounded-xl px-4 grid grid-cols-2 gap-4 text-xs">
+            {[
+              { Icon: Flame, t: "Even Heat", s: "Aluminium-core triply base" },
+              { Icon: ShieldCheck, t: "Induction-Ready", s: "Gas & induction compatibility" },
+              { Icon: Recycle, t: "Toxin-Free", s: "No harmful chemical coatings" },
+              { Icon: Truck, t: "Free Shipping", s: "Free shipping across India" },
+            ].map(({ Icon, t, s }) => (
+              <div key={t} className="flex items-center gap-2.5">
+                <div className="grid h-8 w-8 place-items-center rounded-full bg-copper/10 text-copper flex-shrink-0">
+                  <Icon size={16} />
+                </div>
+                <div className="leading-tight">
+                  <p className="font-bold text-ink">{t}</p>
+                  <p className="text-[10px] text-ink/50 mt-0.5">{s}</p>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Specifications */}
