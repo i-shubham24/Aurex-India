@@ -17,7 +17,7 @@ export default function CartPage() {
   const {
     lines, subtotal, discount, total, itemCount,
     coupon, couponMessage, applyCoupon, removeCoupon,
-    setQty, remove, clear,
+    setQty, remove, clear, campaignDiscount, activeCampaign
   } = useCart();
   const { user, openAuthModal } = useAuth();
 
@@ -205,7 +205,10 @@ export default function CartPage() {
             <dl className="mt-5 space-y-2 border-t border-ink/10 pt-5 text-sm">
               <div className="flex justify-between"><dt className="text-ink/60">Subtotal</dt><dd>{formatINR(subtotal)}</dd></div>
               {discount > 0 && (
-                <div className="flex justify-between text-forest"><dt>Discount</dt><dd>−{formatINR(discount)}</dd></div>
+                <div className="flex justify-between text-forest"><dt>Coupon Discount</dt><dd>−{formatINR(discount)}</dd></div>
+              )}
+              {campaignDiscount > 0 && (
+                <div className="flex justify-between text-forest"><dt>Promo ({activeCampaign?.name})</dt><dd>−{formatINR(campaignDiscount)}</dd></div>
               )}
               <div className="flex justify-between"><dt className="text-ink/60">Shipping</dt><dd className="text-forest">Free</dd></div>
               <div className="flex justify-between border-t border-ink/10 pt-3 text-base font-semibold">

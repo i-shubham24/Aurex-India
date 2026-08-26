@@ -16,6 +16,7 @@ interface CartContextValue {
   itemCount: number;
   subtotal: number;
   discount: number;
+  campaignDiscount: number;
   total: number;
   coupon: Coupon | null;
   couponMessage: string;
@@ -27,6 +28,7 @@ interface CartContextValue {
   remove: (productId: string, variantId?: string) => void;
   setQty: (productId: string, qty: number, variantId?: string) => void;
   clear: () => void;
+  activeCampaign: any;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -57,6 +59,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   });
   const [couponMessage, setCouponMessage] = useState("");
+  const [activeCampaign, setActiveCampaign] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("http://localhost:5002/api/v1/campaigns/active")
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.success && res.data?.campaign) {
+          setActiveCampaign(res.data.campaign);
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch active campaign.", err);
+      });
+  }, []);
 
   useEffect(() => {
     window.localStorage.setItem(LS_CART, JSON.stringify(lines));
@@ -177,11 +193,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
           subtotal
         )
       : 0;
+    const campaignDiscount = activeCampaign && activeCampaign.discountPercentage > 0
+      ? lines.reduce((sum, l) => {
+          const qualifies = !activeCampaign.discountedProductIds ||
+                            activeCampaign.discountedProductIds.length === 0 ||
+                            activeCampaign.discountedProductIds.includes(l.productId);
+          if (qualifies) {
+            return sum + Math.round(l.unitPrice * l.quantity * (activeCampaign.discountPercentage / 100));
+          }
+          return sum;
+        }, 0)
+      : 0;
     return {
       lines,
       subtotal,
       discount,
-      total: subtotal - discount,
+      campaignDiscount,
+      total: Math.max(0, subtotal - discount - campaignDiscount),
       itemCount,
       coupon,
       couponMessage,
@@ -193,8 +221,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       remove,
       setQty,
       clear,
+      activeCampaign,
     };
-  }, [lines, subtotal, coupon, couponMessage, applyCoupon, removeCoupon, isOpen, add, remove, setQty, clear]);
+  }, [lines, subtotal, coupon, couponMessage, applyCoupon, removeCoupon, isOpen, add, remove, setQty, clear, activeCampaign]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

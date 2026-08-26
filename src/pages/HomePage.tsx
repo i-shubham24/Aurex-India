@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, X, Tag } from "lucide-react";
 import { data } from "@/services";
@@ -118,6 +118,32 @@ export default function HomePage() {
   const { data: bestsellers } = useAsync(() => data.getProducts({ sort: "rating" }), []);
   const { data: allProducts } = useAsync(() => data.getProducts(), []);
 
+  const [heroSlides, setHeroSlides] = useState<any[]>(HERO_SLIDES);
+
+  useEffect(() => {
+    fetch("http://localhost:5002/api/v1/carousel")
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.success && res.data?.slides?.length > 0) {
+          const formatted = res.data.slides.map((s: any) => ({
+            chip: s.chip,
+            lead: s.lead,
+            accent: s.accent,
+            typewriter: s.typewriter?.length > 0 ? s.typewriter : undefined,
+            subtitle: s.subtitle,
+            cta: s.cta,
+            to: s.to,
+            image: s.image?.url || s.image,
+            alt: s.alt || s.lead,
+          }));
+          setHeroSlides(formatted);
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch dynamic carousel slides, falling back to local slides.", err);
+      });
+  }, []);
+
   const deals = useMemo(() => {
     if (!allProducts) return [];
     return distinctProducts(
@@ -145,7 +171,7 @@ export default function HomePage() {
         <div className="orb bottom-[-4rem] left-1/3 h-64 w-64 bg-sky/10" />
         
         <Carousel slideClassName="basis-full" gapClassName="gap-0" autoPlayMs={6500} showDots={true} showArrows={true} leftArrow={true} ariaLabel="Featured collections" className="rounded-xl2 overflow-hidden shadow-sm border border-ink/[0.04] bg-ink">
-          {HERO_SLIDES.map((s, i) => (
+          {heroSlides.map((s, i) => (
             <div
               key={i}
               className="relative min-h-[380px] sm:min-h-[480px] lg:min-h-[520px] flex items-center overflow-hidden w-full group/slide"

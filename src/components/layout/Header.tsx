@@ -23,12 +23,16 @@ const NAV = [
 ];
 
 export default function Header() {
-  const { itemCount, setOpen } = useCart();
+  const { itemCount, setOpen, activeCampaign } = useCart();
   const { user, openAuthModal } = useAuth();
   const { count: wishCount } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+
+  const marqueeItems = activeCampaign?.bannerText
+    ? [activeCampaign.bannerText, ...MARQUEE]
+    : MARQUEE;
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -45,7 +49,7 @@ export default function Header() {
         <div className="marquee-track text-xs font-medium">
           {[0, 1].map((dup) => (
             <span key={dup} className="flex shrink-0 items-center" aria-hidden={dup === 1}>
-              {MARQUEE.map((m, i) => (
+              {marqueeItems.map((m, i) => (
                 <span key={i} className="mx-6 inline-flex items-center gap-1.5">
                   <Truck size={13} className="text-gold" /> {m}
                 </span>
