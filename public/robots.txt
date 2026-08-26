@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Private / transactional pages — keep out of the index
+Disallow: /account
+Disallow: /admin
+Disallow: /cart
+Disallow: /login
+Disallow: /signup
+Disallow: /wishlist
+Disallow: /*?q=
+
+Sitemap: https://aurexindia.com/sitemap.xml

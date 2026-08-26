@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Off-canvas panels (cart drawer, mobile menu) sit beyond the right edge;
+       clip horizontal overflow so they never create a mobile side-scroll. */
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-copper/20;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-container px-5 sm:px-6 lg:px-8;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
+      text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed
+      disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-copper/50 focus-visible:ring-offset-2 focus-visible:ring-offset-cream;
+  }
+
+  .btn-primary {
+    @apply btn bg-ink text-cream hover:bg-charcoal active:scale-[0.98];
+  }
+
+  .btn-copper {
+    @apply btn bg-copper text-white hover:bg-copper-dark active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply btn border border-ink/15 bg-transparent text-ink hover:border-ink/40 hover:bg-ink/[0.03];
+  }
+
+  .btn-ghost {
+    @apply btn text-ink/70 hover:bg-ink/[0.05] hover:text-ink;
+  }
+
+  .card {
+    @apply rounded-xl2 bg-white shadow-card ring-1 ring-ink/[0.04];
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-sm text-ink
+      placeholder:text-ink/40 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink/80;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  }
+}
+
+/* Thin, tasteful scrollbar for the chat panel */
+.scroll-slim::-webkit-scrollbar { width: 6px; }
+.scroll-slim::-webkit-scrollbar-thumb { @apply rounded-full bg-ink/15; }
+
+/* ─── Fork cursor (thematic, for important interactive sections) ─── */
+.cursor-fork,
+.btn-primary,
+.btn-copper {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='32' viewBox='0 0 14 32'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23EDEFF2'/%3E%3Cstop offset='.34' stop-color='%23AEB5BD'/%3E%3Cstop offset='.52' stop-color='%23FBFCFD'/%3E%3Cstop offset='.72' stop-color='%23929AA3'/%3E%3Cstop offset='1' stop-color='%23C6CCD3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='url(%23s)' stroke='%235B6470' stroke-width='.5' stroke-linejoin='round' paint-order='stroke'%3E%3Crect x='2.7' y='1.5' width='1' height='9' rx='.5'/%3E%3Crect x='5.05' y='1.5' width='1' height='9' rx='.5'/%3E%3Crect x='7.4' y='1.5' width='1' height='9' rx='.5'/%3E%3Crect x='9.75' y='1.5' width='1' height='9' rx='.5'/%3E%3Cpath d='M2 9h9a.9.9 0 0 1 .9.9v.7a3.3 3.3 0 0 1-2.5 3.2c-.7.17-1.15.5-1.15 1.3V29a1.25 1.25 0 0 1-2.5 0V16.1c0-.8-.45-1.13-1.15-1.3A3.3 3.3 0 0 1 1.1 10.6v-.7A.9.9 0 0 1 2 9z'/%3E%3C/g%3E%3C/svg%3E") 7 2, pointer;
+}
+
+/* ─── Motion utilities ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+/* Typewriter caret */
+@keyframes caretBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.tw-caret {
+  display: inline-block;
+  width: 0.06em;
+  margin-left: 0.06em;
+  align-self: stretch;
+  background: currentColor;
+  animation: caretBlink 1s step-end infinite;
+  /* visually center the bar against the text line */
+  transform: translateY(0.08em);
+  height: 1em;
+}
+
+.animate-fade-up { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in { animation: fadeIn 0.9s ease both; }
+.animate-float { animation: floaty 5s ease-in-out infinite; }
+
+/* Scroll-reveal — toggled by the <Reveal> component */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: none;
+}
+
+/* Gentle lift for interactive cards */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Animated underline for text links */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease;
+}
+.link-underline:hover { background-size: 100% 1.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+  .animate-fade-up, .animate-fade-in, .animate-float { animation: none !important; }
+  .tw-caret { animation: none !important; }
+}
+
+/* Top announcement marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
