@@ -115,7 +115,6 @@ const faqs = [
 ];
 
 export default function HomePage() {
-  const { data: categories } = useAsync(() => data.getCategories(), []);
   const { data: bestsellers } = useAsync(() => data.getProducts({ sort: "rating" }), []);
   const { data: allProducts } = useAsync(() => data.getProducts(), []);
 

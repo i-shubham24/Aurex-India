@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2, Tag, X, ShoppingBag, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -20,7 +20,6 @@ export default function CartPage() {
     setQty, remove, clear,
   } = useCart();
   const { user, openAuthModal } = useAuth();
-  const navigate = useNavigate();
 
   const [code, setCode] = useState("");
   const [applying, setApplying] = useState(false);

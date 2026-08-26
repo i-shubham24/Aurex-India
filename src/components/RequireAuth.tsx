@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -10,7 +10,6 @@ export default function RequireAuth({
   admin?: boolean;
 }) {
   const { user, loading, isAdmin, openAuthModal } = useAuth();
-  const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
