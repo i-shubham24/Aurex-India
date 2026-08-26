@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Heart, Star, Eye } from "lucide-react";
+import { ShoppingBag, Heart, Star } from "lucide-react";
 import type { Product } from "@/services/types";
 import { formatINR, discountPct } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
@@ -46,12 +46,12 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* Floating Badges */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
           {off && (
-            <span className="bg-gold text-ink text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+            <span className="bg-gold text-ink text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
               Save {off}%
             </span>
           )}
           {product.isNew && (
-            <span className="bg-copper text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+            <span className="bg-copper text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
               New
             </span>
           )}
@@ -60,19 +60,21 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Floating Favorite (Heart) Button */}
       <button
-        onClick={() => toggle(product.id)}
-        className={`absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full transition-all duration-300 shadow-sm ${
-          wished ? "bg-copper text-white" : "bg-white/90 text-ink/50 hover:text-copper hover:scale-105"
+        onClick={() => toggle(product.id, product.name)}
+        className={`absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full transition-all duration-300 shadow-sm border border-ink/[0.04] ${
+          wished
+            ? "bg-copper text-white hover:bg-copper-dark"
+            : "bg-white/80 text-ink/50 hover:bg-white hover:text-copper hover:scale-105 backdrop-blur-[2px]"
         }`}
         aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
       >
-        <Heart size={15} className={wished ? "fill-current" : ""} />
+        <Heart size={14} className={wished ? "fill-current" : ""} />
       </button>
 
       {/* Details Container */}
       <div className="flex flex-1 flex-col p-4">
         {/* Material Tag */}
-        <span className="text-[10px] font-bold uppercase tracking-wider text-copper leading-none">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-copper/85 leading-none">
           {product.material ?? "Cookware"}
         </span>
 
@@ -84,23 +86,23 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         {/* Rating and Size Count */}
-        <div className="mt-1.5 flex items-center justify-between">
-          <div className="flex items-center gap-1 bg-forest/10 px-2 py-0.5 rounded-full text-forest text-[10px] font-bold">
-            <Star size={10} className="fill-current" />
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex items-center gap-1 text-[11px] font-bold text-ink/80">
+            <Star size={11} className="fill-gold text-gold" />
             <span>{product.rating ? product.rating.toFixed(1) : "5.0"}</span>
             {product.reviewCount !== undefined && (
-              <span className="text-forest/60 font-normal">({product.reviewCount})</span>
+              <span className="text-ink/40 font-normal">({product.reviewCount})</span>
             )}
           </div>
           {hasSizes && (
-            <span className="text-[10px] font-bold text-ink/40">
-              {product.variants.length} sizes available
+            <span className="text-[10px] font-medium text-ink/50">
+              {product.variants.length} sizes
             </span>
           )}
         </div>
 
         {/* Pricing */}
-        <div className="mt-3.5 flex items-baseline gap-1.5">
+        <div className="mt-3 flex items-baseline gap-2">
           <span className="text-lg font-black text-ink">
             {formatINR(product.price)}
           </span>
@@ -111,35 +113,15 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Dual Actions Footer Buttons */}
-        <div className="relative mt-4 flex items-center gap-2 pt-1 border-t border-ink/5">
-          {/* Secondary Action */}
-          {hasSizes ? (
-            <button
-              onClick={() => setPickSize((v) => !v)}
-              className="w-1/2 py-2 bg-sand/60 text-ink/70 hover:bg-sand hover:text-copper text-xs font-bold rounded-xl transition-all text-center flex items-center justify-center gap-1 border border-transparent hover:border-copper/10"
-              aria-label="View sizes"
-            >
-              Sizes ({product.variants.length})
-            </button>
-          ) : (
-            <Link
-              to={`/product/${product.slug}`}
-              className="w-1/2 py-2 bg-sand/60 text-ink/70 hover:bg-sand hover:text-copper text-xs font-bold rounded-xl transition-all text-center flex items-center justify-center gap-1 border border-transparent hover:border-copper/10"
-            >
-              <Eye size={12} />
-              Details
-            </Link>
-          )}
-
-          {/* Primary Action */}
+        {/* Action Button Footer */}
+        <div className="relative mt-4 pt-3 border-t border-ink/5">
           <button
             onClick={onAddDirect}
-            className="w-1/2 py-2 bg-copper text-white hover:bg-gold hover:text-ink text-xs font-bold rounded-xl transition-all text-center flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-fork"
-            aria-label={hasSizes ? "Add variant to cart" : "Add to cart"}
+            className="w-full py-2.5 bg-ink text-white hover:bg-copper hover:text-white text-xs font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-sm cursor-fork active:scale-95"
+            aria-label={hasSizes ? "Select Size" : "Add to Cart"}
           >
-            <ShoppingBag size={12} />
-            Add to Cart
+            <ShoppingBag size={13} />
+            <span>{hasSizes ? "Select Size" : "Add to Cart"}</span>
           </button>
 
           {/* Size chooser popover */}

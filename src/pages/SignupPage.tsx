@@ -3,23 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import PasswordMeter from "@/components/PasswordMeter";
 import {
-  nameError,
   emailError,
-  phoneError,
   passwordError,
-  normalizePhone,
 } from "@/lib/validation";
 
-type Field = "fullName" | "email" | "phone" | "password";
+type Field = "firstName" | "lastName" | "email" | "password";
 
 export default function SignupPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const [values, setValues] = useState<Record<Field, string>>({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    phone: "",
     password: "",
   });
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
@@ -28,9 +25,21 @@ export default function SignupPage() {
   const [busy, setBusy] = useState(false);
 
   const validators: Record<Field, (v: string) => string | null> = {
-    fullName: nameError,
+    firstName: (v) => {
+      const t = v.trim();
+      if (!t) return "Please enter your first name.";
+      if (t.length < 2) return "First name is too short.";
+      if (!/^[a-zA-Z\s.'-]+$/.test(t)) return "First name can only contain letters.";
+      return null;
+    },
+    lastName: (v) => {
+      const t = v.trim();
+      if (!t) return "Please enter your last name.";
+      if (t.length < 2) return "Last name is too short.";
+      if (!/^[a-zA-Z\s.'-]+$/.test(t)) return "Last name can only contain letters.";
+      return null;
+    },
     email: emailError,
-    phone: phoneError,
     password: passwordError,
   };
 
@@ -54,7 +63,7 @@ export default function SignupPage() {
     e.preventDefault();
     setFormError("");
     // Validate everything on submit
-    const allTouched = { fullName: true, email: true, phone: true, password: true };
+    const allTouched = { firstName: true, lastName: true, email: true, password: true };
     setTouched(allTouched);
     const nextErrors: Partial<Record<Field, string>> = {};
     (Object.keys(validators) as Field[]).forEach((f) => {
@@ -67,9 +76,8 @@ export default function SignupPage() {
     setBusy(true);
     try {
       await signUp({
-        fullName: values.fullName.trim(),
+        fullName: `${values.firstName.trim()} ${values.lastName.trim()}`,
         email: values.email.trim(),
-        phone: normalizePhone(values.phone),
         password: values.password,
       });
       navigate("/account", { replace: true });
@@ -91,20 +99,37 @@ export default function SignupPage() {
           <p className="mt-1 text-sm text-ink/60">Join Aurex for faster checkout and order tracking.</p>
 
           <form onSubmit={submit} noValidate className="mt-6 space-y-4">
-            <div>
-              <label className="label" htmlFor="name">Full name</label>
-              <input
-                id="name"
-                value={values.fullName}
-                onChange={(e) => set("fullName", e.target.value)}
-                onBlur={() => blur("fullName")}
-                className={`input ${errCls("fullName")}`}
-                placeholder="Priya Sharma"
-                autoComplete="name"
-              />
-              {touched.fullName && errors.fullName && (
-                <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label" htmlFor="firstName">First name</label>
+                <input
+                  id="firstName"
+                  value={values.firstName}
+                  onChange={(e) => set("firstName", e.target.value)}
+                  onBlur={() => blur("firstName")}
+                  className={`input ${errCls("firstName")}`}
+                  placeholder="Priya"
+                  autoComplete="given-name"
+                />
+                {touched.firstName && errors.firstName && (
+                  <p className="mt-1 text-xs text-red-600">{errors.firstName}</p>
+                )}
+              </div>
+              <div>
+                <label className="label" htmlFor="lastName">Last name</label>
+                <input
+                  id="lastName"
+                  value={values.lastName}
+                  onChange={(e) => set("lastName", e.target.value)}
+                  onBlur={() => blur("lastName")}
+                  className={`input ${errCls("lastName")}`}
+                  placeholder="Sharma"
+                  autoComplete="family-name"
+                />
+                {touched.lastName && errors.lastName && (
+                  <p className="mt-1 text-xs text-red-600">{errors.lastName}</p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -121,29 +146,6 @@ export default function SignupPage() {
               />
               {touched.email && errors.email && (
                 <p className="mt-1 text-xs text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="label" htmlFor="phone">Mobile number</label>
-              <div className="flex">
-                <span className="inline-flex items-center rounded-l-xl border border-r-0 border-ink/15 bg-sand px-3 text-sm text-ink/60">
-                  +91
-                </span>
-                <input
-                  id="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  value={values.phone}
-                  onChange={(e) => set("phone", e.target.value)}
-                  onBlur={() => blur("phone")}
-                  className={`input rounded-l-none ${errCls("phone")}`}
-                  placeholder="98765 43210"
-                  autoComplete="tel"
-                />
-              </div>
-              {touched.phone && errors.phone && (
-                <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
               )}
             </div>
 

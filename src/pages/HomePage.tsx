@@ -303,7 +303,7 @@ export default function HomePage() {
             View all <ArrowRight size={12} />
           </Link>
         </div>
-        <Carousel slideClassName="basis-[85%] sm:basis-1/3 lg:basis-1/4" gapClassName="gap-5" ariaLabel="Bestsellers">
+        <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Bestsellers">
           {distinctProducts(bestsellers ?? []).slice(0, 8).map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
@@ -320,7 +320,7 @@ export default function HomePage() {
               Use coupon code <b className="text-copper">WELCOME15</b> for an extra 15% discount on your first purchase.
             </p>
           </div>
-          <Carousel slideClassName="basis-[85%] sm:basis-1/3 lg:basis-1/4" gapClassName="gap-5" ariaLabel="Best deals">
+          <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Best deals">
             {deals.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

@@ -6,19 +6,22 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { ToastProvider } from "@/context/ToastContext";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
       <BrowserRouter>
-        <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </WishlistProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </WishlistProvider>
+          </AuthProvider>
+        </ToastProvider>
       </BrowserRouter>
     </ErrorBoundary>
   </StrictMode>

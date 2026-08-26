@@ -225,13 +225,13 @@ export default function ShopPage() {
           </details>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="card aspect-[3/4] animate-pulse bg-sand/60" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {products.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}

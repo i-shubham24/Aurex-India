@@ -9,6 +9,7 @@ import {
 } from "react";
 import { data } from "@/services";
 import type { Coupon, CartLine, Product, ProductVariant } from "@/services/types";
+import { useToast } from "@/context/ToastContext";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -37,6 +38,7 @@ function lineKey(productId: string, variantId?: string) {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const toast = useToast();
   const [lines, setLines] = useState<CartLine[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -89,9 +91,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           },
         ];
       });
+      toast.success(`Added ${product.name} to cart.`);
       setOpen(true);
     },
-    []
+    [toast]
   );
 
   const remove = useCallback((productId: string, variantId?: string) => {
@@ -126,7 +129,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCoupon(null);
     setCouponMessage("");
     window.localStorage.removeItem(LS_COUPON);
-  }, []);
+    toast.info("Coupon removed.");
+  }, [toast]);
 
   const applyCoupon = useCallback(
     async (code: string) => {
@@ -135,13 +139,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (res.ok && res.coupon) {
         setCoupon(res.coupon);
         window.localStorage.setItem(LS_COUPON, JSON.stringify(res.coupon));
+        toast.success(`Coupon "${code}" applied successfully!`);
         return true;
       }
       setCoupon(null);
       window.localStorage.removeItem(LS_COUPON);
+      toast.error(res.message || "Invalid coupon code.");
       return false;
     },
-    [subtotal]
+    [subtotal, toast]
   );
 
   const clear = useCallback(() => {

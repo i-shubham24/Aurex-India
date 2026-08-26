@@ -1,21 +1,16 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import OtpForm from "@/components/OtpForm";
 import PasswordMeter from "@/components/PasswordMeter";
 import {
-  nameError,
   emailError,
-  phoneError,
   passwordError,
-  normalizePhone,
 } from "@/lib/validation";
 
 export default function AuthModal() {
   const { authModalOpen, authModalMode, openAuthModal, closeAuthModal, signIn, signUp } = useAuth();
 
   // Login states
-  const [loginMode, setLoginMode] = useState<"password" | "otp">("password");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -23,9 +18,9 @@ export default function AuthModal() {
 
   // Signup states
   const [signupValues, setSignupValues] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    phone: "",
     password: "",
   });
   const [signupErrors, setSignupErrors] = useState<Partial<Record<string, string>>>({});
@@ -39,12 +34,9 @@ export default function AuthModal() {
     e.preventDefault();
     setLoginError("");
     const id = loginEmail.trim();
-    if (!id) {
-      setLoginError("Please enter your email or mobile number.");
-      return;
-    }
-    if (emailError(id) && phoneError(id)) {
-      setLoginError("Enter a valid email address or 10-digit mobile number.");
+    const emailValidation = emailError(id);
+    if (emailValidation) {
+      setLoginError(emailValidation);
       return;
     }
     if (!loginPassword) {
@@ -64,9 +56,21 @@ export default function AuthModal() {
 
   // Validation functions for signup
   const validators: Record<string, (v: string) => string | null> = {
-    fullName: nameError,
+    firstName: (v) => {
+      const t = v.trim();
+      if (!t) return "Please enter your first name.";
+      if (t.length < 2) return "First name is too short.";
+      if (!/^[a-zA-Z\s.'-]+$/.test(t)) return "First name can only contain letters.";
+      return null;
+    },
+    lastName: (v) => {
+      const t = v.trim();
+      if (!t) return "Please enter your last name.";
+      if (t.length < 2) return "Last name is too short.";
+      if (!/^[a-zA-Z\s.'-]+$/.test(t)) return "Last name can only contain letters.";
+      return null;
+    },
     email: emailError,
-    phone: phoneError,
     password: passwordError,
   };
 
@@ -89,7 +93,7 @@ export default function AuthModal() {
   async function handleSignupSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSignupFormError("");
-    const allTouched = { fullName: true, email: true, phone: true, password: true };
+    const allTouched = { firstName: true, lastName: true, email: true, password: true };
     setSignupTouched(allTouched);
     const nextErrors: Partial<Record<string, string>> = {};
     (Object.keys(validators) as string[]).forEach((f) => {
@@ -102,9 +106,8 @@ export default function AuthModal() {
     setSignupBusy(true);
     try {
       await signUp({
-        fullName: signupValues.fullName.trim(),
+        fullName: `${signupValues.firstName.trim()} ${signupValues.lastName.trim()}`,
         email: signupValues.email.trim(),
-        phone: normalizePhone(signupValues.phone),
         password: signupValues.password,
       });
       closeAuthModal();
@@ -123,7 +126,6 @@ export default function AuthModal() {
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-ink/65 backdrop-blur-sm transition-opacity" 
-        onClick={closeAuthModal}
       />
 
       {/* Modal Content */}
@@ -143,64 +145,36 @@ export default function AuthModal() {
             <h2 className="text-2xl font-black text-ink">Welcome back</h2>
             <p className="mt-1 text-xs text-ink/60">Sign in to your Aurex account.</p>
 
-            {/* Mode switch */}
-            <div className="mt-5 grid grid-cols-2 gap-1 rounded-full bg-sand p-1 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => setLoginMode("password")}
-                className={`rounded-full py-2 transition-all ${
-                  loginMode === "password" ? "bg-white text-ink shadow-sm" : "text-ink/50 hover:text-ink"
-                }`}
-              >
-                Password
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginMode("otp")}
-                className={`rounded-full py-2 transition-all ${
-                  loginMode === "otp" ? "bg-white text-ink shadow-sm" : "text-ink/50 hover:text-ink"
-                }`}
-              >
-                OTP
-              </button>
-            </div>
-
-            {loginMode === "otp" ? (
-              <div className="mt-6">
-                <OtpForm onSuccess={closeAuthModal} />
+            <form onSubmit={handleLoginSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-email">Email</label>
+                <input
+                  id="modal-email"
+                  type="email"
+                  required
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="input text-sm"
+                  placeholder="you@example.com"
+                />
               </div>
-            ) : (
-              <form onSubmit={handleLoginSubmit} className="mt-6 space-y-4">
-                <div>
-                  <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-email">Email or mobile number</label>
-                  <input
-                    id="modal-email"
-                    type="text"
-                    required
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="input text-sm"
-                    placeholder="you@example.com or 98765 43210"
-                  />
-                </div>
-                <div>
-                  <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-password">Password</label>
-                  <input
-                    id="modal-password"
-                    type="password"
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className="input text-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-                {loginError && <p className="text-xs text-red-600 font-medium">{loginError}</p>}
-                <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3 text-sm font-bold mt-2">
-                  {loginBusy ? "Signing in…" : "Sign in"}
-                </button>
-              </form>
-            )}
+              <div>
+                <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-password">Password</label>
+                <input
+                  id="modal-password"
+                  type="password"
+                  required
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="input text-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+              {loginError && <p className="text-xs text-red-600 font-medium">{loginError}</p>}
+              <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3 text-sm font-bold mt-2">
+                {loginBusy ? "Signing in…" : "Sign in"}
+              </button>
+            </form>
 
             <p className="mt-6 text-center text-xs text-ink/60 font-medium">
               New to Aurex?{" "}
@@ -224,20 +198,37 @@ export default function AuthModal() {
             <p className="mt-1 text-xs text-ink/60">Join Aurex for faster checkout and order tracking.</p>
 
             <form onSubmit={handleSignupSubmit} noValidate className="mt-6 space-y-4">
-              <div>
-                <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-name">Full name</label>
-                <input
-                  id="modal-name"
-                  value={signupValues.fullName}
-                  onChange={(e) => setSignupVal("fullName", e.target.value)}
-                  onBlur={() => blurSignupField("fullName")}
-                  className={`input text-sm ${errCls("fullName")}`}
-                  placeholder="Priya Sharma"
-                  autoComplete="name"
-                />
-                {signupTouched.fullName && signupErrors.fullName && (
-                  <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.fullName}</p>
-                )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-firstname">First name</label>
+                  <input
+                    id="modal-firstname"
+                    value={signupValues.firstName}
+                    onChange={(e) => setSignupVal("firstName", e.target.value)}
+                    onBlur={() => blurSignupField("firstName")}
+                    className={`input text-sm ${errCls("firstName")}`}
+                    placeholder="Priya"
+                    autoComplete="given-name"
+                  />
+                  {signupTouched.firstName && signupErrors.firstName && (
+                    <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.firstName}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-lastname">Last name</label>
+                  <input
+                    id="modal-lastname"
+                    value={signupValues.lastName}
+                    onChange={(e) => setSignupVal("lastName", e.target.value)}
+                    onBlur={() => blurSignupField("lastName")}
+                    className={`input text-sm ${errCls("lastName")}`}
+                    placeholder="Sharma"
+                    autoComplete="family-name"
+                  />
+                  {signupTouched.lastName && signupErrors.lastName && (
+                    <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.lastName}</p>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -254,29 +245,6 @@ export default function AuthModal() {
                 />
                 {signupTouched.email && signupErrors.email && (
                   <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="label text-xs font-extrabold uppercase text-ink/55" htmlFor="modal-phone">Mobile number</label>
-                <div className="flex">
-                  <span className="inline-flex items-center rounded-l-xl border border-r-0 border-ink/15 bg-sand px-3 text-sm text-ink/60">
-                    +91
-                  </span>
-                  <input
-                    id="modal-phone"
-                    type="tel"
-                    inputMode="numeric"
-                    value={signupValues.phone}
-                    onChange={(e) => setSignupVal("phone", e.target.value)}
-                    onBlur={() => blurSignupField("phone")}
-                    className={`input rounded-l-none text-sm ${errCls("phone")}`}
-                    placeholder="98765 43210"
-                    autoComplete="tel"
-                  />
-                </div>
-                {signupTouched.phone && signupErrors.phone && (
-                  <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.phone}</p>
                 )}
               </div>
 

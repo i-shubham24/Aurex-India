@@ -9,6 +9,7 @@ import {
 } from "react";
 import { data } from "@/services";
 import type { OtpChallenge, SignUpInput, User } from "@/services/types";
+import { useToast } from "@/context/ToastContext";
 
 interface AuthContextValue {
   user: User | null;
@@ -28,6 +29,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const toast = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,21 +55,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const u = await data.signIn(email, password);
-    setUser(u);
-    return u;
-  }, []);
+    try {
+      const u = await data.signIn(email, password);
+      setUser(u);
+      toast.success("Welcome back! Signed in successfully.");
+      return u;
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to sign in.");
+      throw err;
+    }
+  }, [toast]);
 
   const signUp = useCallback(async (input: SignUpInput) => {
-    const u = await data.signUp(input);
-    setUser(u);
-    return u;
-  }, []);
+    try {
+      const u = await data.signUp(input);
+      setUser(u);
+      toast.success("Account created successfully! Welcome to Aurex.");
+      return u;
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to create account.");
+      throw err;
+    }
+  }, [toast]);
 
   const signOut = useCallback(async () => {
     await data.signOut();
     setUser(null);
-  }, []);
+    toast.info("Signed out successfully.");
+  }, [toast]);
 
   const requestOtp = useCallback((phone: string) => data.requestOtp(phone), []);
 
