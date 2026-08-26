@@ -10,8 +10,7 @@ import ShopPage from "@/pages/ShopPage";
 import ProductPage from "@/pages/ProductPage";
 import CartPage from "@/pages/CartPage";
 import WishlistPage from "@/pages/WishlistPage";
-import LoginPage from "@/pages/LoginPage";
-import SignupPage from "@/pages/SignupPage";
+import AuthModal from "@/components/AuthModal";
 import AccountPage from "@/pages/AccountPage";
 import AboutPage from "@/pages/AboutPage";
 import StoryPage from "@/pages/StoryPage";
@@ -43,8 +42,7 @@ export default function App() {
           <Route path="/product/:slug" element={<ProductPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+
           <Route
             path="/account"
             element={
@@ -78,6 +76,7 @@ export default function App() {
       <Footer />
       <CartDrawer />
       <ChatWidget />
+      <AuthModal />
     </div>
   );
 }

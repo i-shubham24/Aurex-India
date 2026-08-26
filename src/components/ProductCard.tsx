@@ -139,7 +139,7 @@ export default function ProductCard({ product }: { product: Product }) {
             aria-label={hasSizes ? "Add variant to cart" : "Add to cart"}
           >
             <ShoppingBag size={12} />
-            Buy Now
+            Add to Cart
           </button>
 
           {/* Size chooser popover */}

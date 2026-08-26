@@ -24,7 +24,7 @@ const NAV = [
 
 export default function Header() {
   const { itemCount, setOpen } = useCart();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const { count: wishCount } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -95,7 +95,7 @@ export default function Header() {
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* Account Info */}
             <button
-              onClick={() => navigate(user ? "/account" : "/login")}
+              onClick={() => user ? navigate("/account") : openAuthModal("login")}
               className="hidden lg:flex items-center gap-3 text-right hover:opacity-85 transition-opacity group"
             >
               <div className="flex flex-col items-end leading-tight">
@@ -113,7 +113,7 @@ export default function Header() {
 
             <div className="lg:hidden">
               <button
-                onClick={() => navigate(user ? "/account" : "/login")}
+                onClick={() => user ? navigate("/account") : openAuthModal("login")}
                 className="p-2 text-ink/70 hover:text-copper hover:bg-copper/5 rounded-full transition-colors"
                 aria-label="Account"
               >
@@ -241,14 +241,20 @@ export default function Header() {
             </div>
 
             <div className="pt-6 border-t border-ink/10 space-y-3">
-              <NavLink
-                to={user ? "/account" : "/login"}
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 rounded-xl bg-copper/10 px-4 py-3 text-sm font-bold text-copper hover:bg-copper/20 transition-all text-center justify-center"
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  if (user) {
+                    navigate("/account");
+                  } else {
+                    openAuthModal("login");
+                  }
+                }}
+                className="flex w-full items-center gap-2 rounded-xl bg-copper/10 px-4 py-3 text-sm font-bold text-copper hover:bg-copper/20 transition-all text-center justify-center border-none"
               >
                 <UserIcon size={16} />
                 {user ? user.fullName?.split(" ")[0] ?? "Account" : "Sign In / Register"}
-              </NavLink>
+              </button>
             </div>
           </div>
         </div>

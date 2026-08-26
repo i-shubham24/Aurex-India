@@ -19,7 +19,7 @@ export default function CartPage() {
     coupon, couponMessage, applyCoupon, removeCoupon,
     setQty, remove, clear,
   } = useCart();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
   const [code, setCode] = useState("");
@@ -59,7 +59,7 @@ export default function CartPage() {
 
   async function checkout() {
     if (!user) {
-      navigate("/login", { state: { from: "/cart" } });
+      openAuthModal("login");
       return;
     }
     setPayError("");

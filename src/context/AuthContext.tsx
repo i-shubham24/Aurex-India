@@ -19,6 +19,10 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   requestOtp: (phone: string) => Promise<OtpChallenge>;
   verifyOtp: (phone: string, code: string, fullName?: string) => Promise<User>;
+  authModalOpen: boolean;
+  authModalMode: "login" | "signup";
+  openAuthModal: (mode?: "login" | "signup") => void;
+  closeAuthModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -26,6 +30,19 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Global Auth Modal states
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
+
+  const openAuthModal = useCallback((mode: "login" | "signup" = "login") => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setAuthModalOpen(false);
+  }, []);
 
   useEffect(() => {
     data
@@ -73,8 +90,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       requestOtp,
       verifyOtp,
+      authModalOpen,
+      authModalMode,
+      openAuthModal,
+      closeAuthModal,
     }),
-    [user, loading, signIn, signUp, signOut, requestOtp, verifyOtp]
+    [
+      user,
+      loading,
+      signIn,
+      signUp,
+      signOut,
+      requestOtp,
+      verifyOtp,
+      authModalOpen,
+      authModalMode,
+      openAuthModal,
+      closeAuthModal,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

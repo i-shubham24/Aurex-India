@@ -8,7 +8,7 @@ import { phoneError } from "@/lib/validation";
  * On the mock backend the code is shown on screen (devCode) since there's no
  * SMS provider; on Supabase a real SMS is sent and no code is surfaced.
  */
-export default function OtpForm({ redirectTo = "/account" }: { redirectTo?: string }) {
+export default function OtpForm({ redirectTo = "/account", onSuccess }: { redirectTo?: string; onSuccess?: () => void }) {
   const { requestOtp, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
@@ -48,7 +48,11 @@ export default function OtpForm({ redirectTo = "/account" }: { redirectTo?: stri
     setBusy(true);
     try {
       await verifyOtp(phone, code, name || undefined);
-      navigate(redirectTo, { replace: true });
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate(redirectTo, { replace: true });
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {

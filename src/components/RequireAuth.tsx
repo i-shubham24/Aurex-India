@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RequireAuth({
@@ -9,8 +9,14 @@ export default function RequireAuth({
   children: ReactNode;
   admin?: boolean;
 }) {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, openAuthModal } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      openAuthModal("login");
+    }
+  }, [loading, user, openAuthModal]);
 
   if (loading) {
     return (
@@ -21,7 +27,7 @@ export default function RequireAuth({
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (admin && !isAdmin) {
