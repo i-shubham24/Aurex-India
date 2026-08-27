@@ -8,9 +8,20 @@ import { useWishlist } from "@/context/WishlistContext";
 import ProductImage from "./ProductImage";
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { add, lines, setQty } = useCart();
+  const { add, lines, setQty, activeCampaign } = useCart();
   const { has, toggle } = useWishlist();
-  const off = discountPct(product.price, product.compareAtPrice);
+
+  const hasCampaign = activeCampaign && activeCampaign.discountPercentage > 0;
+  const qualifies = hasCampaign && (
+    !activeCampaign.discountedProductIds ||
+    activeCampaign.discountedProductIds.length === 0 ||
+    activeCampaign.discountedProductIds.includes(product.id)
+  );
+
+  const finalPrice = qualifies ? Math.round(product.price * (1 - activeCampaign.discountPercentage / 100)) : product.price;
+  const comparePrice = qualifies ? (product.compareAtPrice || product.price) : product.compareAtPrice;
+  const off = discountPct(finalPrice, comparePrice);
+
   const wished = has(product.id);
   const hasSizes = product.variants.length > 1;
   const [pickSize, setPickSize] = useState(false);
@@ -115,14 +126,18 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Pricing */}
-        <div className="mt-1.5 sm:mt-2.5 flex items-baseline gap-1.5 sm:gap-2">
+        <div className="mt-1.5 sm:mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-sm sm:text-base lg:text-lg font-black text-ink">
-            {formatINR(product.price)}
+            {formatINR(finalPrice)}
           </span>
-          {product.compareAtPrice && (
+          {comparePrice && comparePrice > finalPrice && (
             <span className="text-[10px] sm:text-xs text-ink/35 line-through">
-              {formatINR(product.compareAtPrice)}
+              {formatINR(comparePrice)}
+            </span>
+          )}
+          {qualifies && (
+            <span className="bg-forest/10 text-forest text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md">
+              {activeCampaign.name} - {activeCampaign.discountPercentage}%
             </span>
           )}
         </div>

@@ -5,7 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { formatINR } from "@/lib/format";
 
 export default function CartDrawer() {
-  const { isOpen, setOpen, lines, subtotal, itemCount, setQty, remove } = useCart();
+  const { isOpen, setOpen, lines, subtotal, itemCount, setQty, remove, campaignDiscount, activeCampaign } = useCart();
 
   const mrpTotal = useMemo(() => {
     return lines.reduce((sum, l) => {
@@ -157,14 +157,20 @@ export default function CartDrawer() {
                       <span className="line-through">{formatINR(mrpTotal)}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs text-forest">
-                      <span>Discount on MRP</span>
+                      <span>Discount on MRP ({mrpTotal > 0 ? Math.round((itemDiscount / mrpTotal) * 100) : 0}% Off)</span>
                       <span>−{formatINR(itemDiscount)}</span>
                     </div>
                   </>
                 )}
+                {campaignDiscount > 0 && (
+                  <div className="flex items-center justify-between text-xs text-forest">
+                    <span>Promo ({activeCampaign?.name} - {activeCampaign?.discountPercentage}%)</span>
+                    <span>−{formatINR(campaignDiscount)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between font-semibold pt-1">
                   <span className="text-ink/80">Subtotal</span>
-                  <span className="text-lg text-ink">{formatINR(subtotal)}</span>
+                  <span className="text-lg text-ink">{formatINR(Math.max(0, subtotal - campaignDiscount))}</span>
                 </div>
               </div>
               <p className="mb-3 text-center text-xs text-ink/50">

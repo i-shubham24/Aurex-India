@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { cartApi } from "@/api/cartApi";
 import { couponApi } from "@/api/couponApi";
 import { fireCouponConfetti } from "@/lib/confetti";
+import apiClient from "@/api/apiClient";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -45,7 +46,7 @@ function lineKey(productId: string, variantId?: string) {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const toast = useToast();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, openAuthModal } = useAuth();
   const [lines, setLines] = useState<CartLine[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -70,11 +71,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [activeCampaign, setActiveCampaign] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://localhost:5002/api/v1/campaigns/active")
-      .then((res) => res.json())
+    apiClient.get("/campaigns/active")
       .then((res) => {
-        if (res.success && res.data?.campaign) {
-          setActiveCampaign(res.data.campaign);
+        if (res.data?.success && res.data?.data?.campaign) {
+          setActiveCampaign(res.data.data.campaign);
         }
       })
       .catch((err) => {
@@ -235,6 +235,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const applyCoupon = useCallback(
     async (code: string) => {
+      if (!user) {
+        toast.info("Please sign in or register to apply coupons.");
+        openAuthModal("login");
+        return false;
+      }
       try {
         const res = await couponApi.validateCoupon(code, subtotal);
         if (res.success && res.data) {
@@ -260,7 +265,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return false;
     },
-    [subtotal, toast]
+    [subtotal, toast, user, openAuthModal]
   );
 
   const clear = useCallback(async () => {

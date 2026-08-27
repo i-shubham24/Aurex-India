@@ -40,7 +40,7 @@ function parseSpecs(product: Product): [string, string][] {
 
 export default function ProductPage() {
   const { slug } = useParams();
-  const { add, lines, setQty } = useCart();
+  const { add, lines, setQty, activeCampaign } = useCart();
   const { has, toggle } = useWishlist();
   const { user, openAuthModal } = useAuth();
   const { show } = useToast();
@@ -142,7 +142,17 @@ export default function ProductPage() {
   const chosen = variant ?? product.variants.find((v) => !v.priceDelta) ?? product.variants[0];
   const gallery = chosen?.images?.length ? chosen.images : product.images;
   const unitPrice = product.price + (chosen?.priceDelta ?? 0);
-  const off = discountPct(product.price, product.compareAtPrice);
+
+  const hasCampaign = activeCampaign && activeCampaign.discountPercentage > 0;
+  const qualifies = hasCampaign && (
+    !activeCampaign.discountedProductIds ||
+    activeCampaign.discountedProductIds.length === 0 ||
+    activeCampaign.discountedProductIds.includes(product.id)
+  );
+
+  const finalUnitPrice = qualifies ? Math.round(unitPrice * (1 - activeCampaign.discountPercentage / 100)) : unitPrice;
+  const comparePrice = qualifies ? (product.compareAtPrice ? (product.compareAtPrice + (chosen?.priceDelta ?? 0)) : unitPrice) : (product.compareAtPrice ? (product.compareAtPrice + (chosen?.priceDelta ?? 0)) : undefined);
+  const off = discountPct(finalUnitPrice, comparePrice);
   const inStock = (chosen?.stock ?? product.stock) > 0;
 
   function selectVariant(v: ProductVariant) {
@@ -240,17 +250,26 @@ export default function ProductPage() {
             <Rating value={product.rating} count={product.reviewCount} />
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <span className="text-3xl font-semibold">{formatINR(unitPrice)}</span>
-            {product.compareAtPrice && (
-              <>
-                <span className="text-lg text-ink/40 line-through">
-                  {formatINR(product.compareAtPrice + (chosen?.priceDelta ?? 0))}
+          <div className="mt-5 flex flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-3xl font-semibold">{formatINR(finalUnitPrice)}</span>
+              {comparePrice && comparePrice > finalUnitPrice && (
+                <>
+                  <span className="text-lg text-ink/40 line-through">
+                    {formatINR(comparePrice)}
+                  </span>
+                  {off && <span className="chip bg-copper text-white">{off}% off</span>}
+                </>
+              )}
+              <span className="text-xs text-ink/50">(incl. of all taxes)</span>
+            </div>
+            {qualifies && (
+              <div className="mt-0.5">
+                <span className="inline-block bg-forest/10 text-forest text-xs font-bold px-2.5 py-1 rounded-lg">
+                  🎉 Auto-applied campaign discount: <strong>{activeCampaign.name}</strong> ({activeCampaign.discountPercentage}% Off)
                 </span>
-                {off && <span className="chip bg-copper text-white">{off}% off</span>}
-              </>
+              </div>
             )}
-            <span className="text-xs text-ink/50">(incl. of all taxes)</span>
           </div>
 
           <p className="mt-4 break-words text-ink/70">{product.shortDescription}</p>

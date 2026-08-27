@@ -221,6 +221,7 @@ export default function AccountPage() {
   const [reviewHover, setReviewHover] = useState(0);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [localReviewedIds, setLocalReviewedIds] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem("aurex_reviewed_products") || "[]");
@@ -250,7 +251,7 @@ export default function AccountPage() {
         title: reviewTitle.trim() || `${reviewRating} Star Review`,
         comment: reviewComment.trim() || "Excellent cookware! Heats evenly and very durable.",
       });
-      show("⭐ Thank you! Your product review and rating are now live.", "success");
+      toast.success("⭐ Thank you! Your product review and rating are now live.");
       const updated = [...localReviewedIds, reviewingItem.productId];
       setLocalReviewedIds(updated);
       localStorage.setItem("aurex_reviewed_products", JSON.stringify(updated));
@@ -261,7 +262,7 @@ export default function AccountPage() {
       setReviewComment("");
       setReviewRating(5);
     } catch (err: any) {
-      show(err.response?.data?.message || "Failed to submit review", "error");
+      toast.error(err.response?.data?.message || "Failed to submit review");
     } finally {
       setIsSubmittingReview(false);
     }
