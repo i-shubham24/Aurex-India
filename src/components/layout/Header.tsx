@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ShoppingBag, User as UserIcon, Search, Menu, X, Truck, Heart, ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -28,7 +29,7 @@ const NAV = [
 
 export default function Header() {
   const { itemCount, setOpen, activeCampaign } = useCart();
-  const { user, openAuthModal } = useAuth();
+  const { user, loading, openAuthModal } = useAuth();
   const { count: wishCount } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -36,6 +37,18 @@ export default function Header() {
   const debouncedQ = useDebounce(q, 300);
   const navigate = useNavigate();
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -121,7 +134,7 @@ export default function Header() {
                 <Search size={14} />
               </button>
             </form>
-            
+
             {/* Desktop Live Search Dropdown */}
             {isFocused && q.trim().length > 1 && (
               <div className="absolute top-[48px] left-0 w-full bg-white rounded-xl shadow-2xl border border-ink/[0.04] overflow-hidden z-50 flex flex-col">
@@ -131,8 +144,8 @@ export default function Header() {
                   <>
                     <div className="flex flex-col max-h-[350px] overflow-y-auto p-2">
                       {searchResults.map(product => (
-                        <Link 
-                          key={product.id} 
+                        <Link
+                          key={product.id}
                           to={`/product/${product.slug}`}
                           onClick={() => {
                             setIsFocused(false);
@@ -148,7 +161,7 @@ export default function Header() {
                         </Link>
                       ))}
                     </div>
-                    <Link 
+                    <Link
                       to={`/shop?search=${encodeURIComponent(q.trim())}`}
                       onClick={() => setIsFocused(false)}
                       className="p-3 bg-sand/30 text-center text-xs font-bold text-copper hover:bg-sand/60 transition-colors uppercase tracking-wider"
@@ -169,17 +182,27 @@ export default function Header() {
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* Account Info */}
             <button
-              onClick={() => user ? navigate("/account") : openAuthModal("login")}
+              onClick={() => {
+                if (loading) return;
+                user ? navigate("/account") : openAuthModal("login");
+              }}
               className="hidden lg:flex items-center gap-3 text-right hover:opacity-85 transition-opacity group"
             >
-              <div className="flex flex-col items-end leading-tight">
-                <span className="text-[10px] text-ink/50 font-bold uppercase tracking-wider">
-                  {user ? `Hello, ${user.fullName?.split(" ")[0]}` : "Hello, Guest"}
-                </span>
-                <span className="text-xs font-black text-ink group-hover:text-copper transition-colors">
-                  {user ? "My Account" : "Sign In or Register"}
-                </span>
-              </div>
+              {loading ? (
+                <div className="flex flex-col items-end gap-1.5 animate-pulse">
+                  <div className="h-2.5 w-16 bg-ink/10 rounded" />
+                  <div className="h-3.5 w-24 bg-ink/15 rounded" />
+                </div>
+              ) : (
+                <div className="flex flex-col items-end leading-tight">
+                  <span className="text-[10px] text-ink/50 font-bold uppercase tracking-wider">
+                    {user ? `Hello, ${user.fullName?.split(" ")[0]}` : "Hello, Guest"}
+                  </span>
+                  <span className="text-xs font-black text-ink group-hover:text-copper transition-colors">
+                    {user ? "My Account" : "Sign In or Register"}
+                  </span>
+                </div>
+              )}
               <div className="p-2.5 text-ink/50 group-hover:text-copper group-hover:bg-copper/5 rounded-full transition-all duration-300">
                 <UserIcon size={20} />
               </div>
@@ -245,7 +268,7 @@ export default function Header() {
               <Search size={12} />
             </button>
           </form>
-          
+
           {/* Mobile Live Search Dropdown */}
           {q.trim().length > 1 && (
             <div className="absolute top-[44px] left-0 w-full bg-white rounded-xl shadow-2xl border border-ink/[0.04] overflow-hidden z-50 flex flex-col">
@@ -255,8 +278,8 @@ export default function Header() {
                 <>
                   <div className="flex flex-col max-h-[250px] overflow-y-auto p-2">
                     {searchResults.map(product => (
-                      <Link 
-                        key={product.id} 
+                      <Link
+                        key={product.id}
                         to={`/product/${product.slug}`}
                         onClick={() => {
                           setQ("");
@@ -271,7 +294,7 @@ export default function Header() {
                       </Link>
                     ))}
                   </div>
-                  <Link 
+                  <Link
                     to={`/shop?search=${encodeURIComponent(q.trim())}`}
                     onClick={() => setQ("")}
                     className="p-3 bg-sand/30 text-center text-[10px] font-bold text-copper hover:bg-sand/60 transition-colors uppercase tracking-wider"
@@ -317,63 +340,82 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile Menu Slideout */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" aria-modal="true" role="dialog">
-          <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="fixed inset-y-0 left-0 w-[80%] max-w-sm bg-cream shadow-2xl p-6 flex flex-col justify-between animate-fade-in">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-ink/10">
-                <Logo />
+      {/* Mobile Menu Slideout with Portal to escape sticky header stacking context */}
+      {mobileOpen && typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] lg:hidden animate-fade-in" aria-modal="true" role="dialog">
+            {/* Dark Backdrop */}
+            <div
+              className="fixed inset-0 bg-ink/60 backdrop-blur-sm transition-opacity"
+              onClick={() => setMobileOpen(false)}
+            />
+
+            {/* Solid White Drawer */}
+            <div className="fixed inset-y-0 left-0 w-[82%] max-w-xs bg-white shadow-2xl p-6 flex flex-col justify-between z-10 border-r border-ink/10 animate-fade-in overflow-y-auto">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-ink/10">
+                  <Logo />
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="p-1.5 hover:bg-sand/60 rounded-full text-ink"
+                    aria-label="Close menu"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  {NAV.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      onClick={() => setMobileOpen(false)}
+                      className={({ isActive }) =>
+                        `block rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${isActive
+                          ? "bg-copper text-white shadow-sm"
+                          : "text-ink/80 hover:bg-sand/50 hover:text-copper"
+                        }`
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                  <NavLink
+                    to="/blog"
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `block rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${isActive
+                        ? "bg-copper text-white shadow-sm"
+                        : "text-ink/80 hover:bg-sand/50 hover:text-copper"
+                      }`
+                    }
+                  >
+                    Blogs
+                  </NavLink>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-ink/10 space-y-3">
                 <button
-                  onClick={() => setMobileOpen(false)}
-                  className="p-1 hover:bg-copper/10 rounded-full text-ink"
-                  aria-label="Close menu"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (user) {
+                      navigate("/account");
+                    } else {
+                      openAuthModal("login");
+                    }
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl bg-copper text-white px-4 py-3 text-sm font-bold shadow-sm hover:opacity-90 transition-all text-center justify-center border-none"
                 >
-                  <X size={20} />
+                  <UserIcon size={16} />
+                  {user ? "My Account Dashboard" : "Sign In / Register"}
                 </button>
               </div>
-
-              <div className="flex flex-col gap-2">
-                {NAV.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-ink/80 hover:bg-copper/10 hover:text-copper transition-colors"
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
-                <NavLink
-                  to="/blog"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-ink/80 hover:bg-copper/10 hover:text-copper transition-colors"
-                >
-                  Blogs
-                </NavLink>
-              </div>
             </div>
-
-            <div className="pt-6 border-t border-ink/10 space-y-3">
-              <button
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (user) {
-                    navigate("/account");
-                  } else {
-                    openAuthModal("login");
-                  }
-                }}
-                className="flex w-full items-center gap-2 rounded-xl bg-copper/10 px-4 py-3 text-sm font-bold text-copper hover:bg-copper/20 transition-all text-center justify-center border-none"
-              >
-                <UserIcon size={16} />
-                {user ? user.fullName?.split(" ")[0] ?? "Account" : "Sign In / Register"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </header>
   );
 }

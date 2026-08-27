@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -6,6 +6,17 @@ import { formatINR } from "@/lib/format";
 
 export default function CartDrawer() {
   const { isOpen, setOpen, lines, subtotal, itemCount, setQty, remove } = useCart();
+
+  const mrpTotal = useMemo(() => {
+    return lines.reduce((sum, l) => {
+      const mrp = l.compareAtPrice && l.compareAtPrice > l.unitPrice ? l.compareAtPrice : l.unitPrice;
+      return sum + mrp * l.quantity;
+    }, 0);
+  }, [lines]);
+
+  const itemDiscount = useMemo(() => {
+    return Math.max(0, mrpTotal - subtotal);
+  }, [mrpTotal, subtotal]);
 
   useEffect(() => {
     if (isOpen) {
@@ -83,6 +94,9 @@ export default function CartDrawer() {
                       >
                         {l.name}
                       </Link>
+                      {l.shortDescription && (
+                        <p className="mt-1 line-clamp-1 text-xs text-ink/60">{l.shortDescription}</p>
+                      )}
                       {l.variantName && (
                         <span className="mt-0.5 text-xs text-ink/50">{l.variantName}</span>
                       )}
@@ -105,9 +119,21 @@ export default function CartDrawer() {
                             <Plus size={13} />
                           </button>
                         </div>
-                        <span className="text-sm font-semibold">
-                          {formatINR(l.unitPrice * l.quantity)}
-                        </span>
+                        <div className="flex flex-col items-end leading-tight">
+                          <span className="text-sm font-semibold">
+                            {formatINR(l.unitPrice * l.quantity)}
+                          </span>
+                          {l.compareAtPrice && l.compareAtPrice > l.unitPrice && (
+                            <div className="flex items-center gap-1.5 mt-0.5 text-[11px]">
+                              <span className="text-ink/40 line-through">
+                                {formatINR(l.compareAtPrice * l.quantity)}
+                              </span>
+                              <span className="font-medium text-green-600">
+                                {Math.round(((l.compareAtPrice - l.unitPrice) / l.compareAtPrice) * 100)}% OFF
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <button
@@ -123,9 +149,23 @@ export default function CartDrawer() {
             </div>
 
             <footer className="border-t border-ink/10 px-5 py-4">
-              <div className="mb-3 flex items-center justify-between text-sm">
-                <span className="text-ink/60">Subtotal</span>
-                <span className="text-lg font-semibold">{formatINR(subtotal)}</span>
+              <div className="space-y-1.5 mb-3 text-sm">
+                {itemDiscount > 0 && (
+                  <>
+                    <div className="flex items-center justify-between text-xs text-ink/60">
+                      <span>Total MRP</span>
+                      <span className="line-through">{formatINR(mrpTotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-forest">
+                      <span>Discount on MRP</span>
+                      <span>−{formatINR(itemDiscount)}</span>
+                    </div>
+                  </>
+                )}
+                <div className="flex items-center justify-between font-semibold pt-1">
+                  <span className="text-ink/80">Subtotal</span>
+                  <span className="text-lg text-ink">{formatINR(subtotal)}</span>
+                </div>
               </div>
               <p className="mb-3 text-center text-xs text-ink/50">
                 Free shipping · Taxes calculated at checkout

@@ -4,12 +4,14 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ChatWidget from "@/components/ChatWidget";
+import DeliveredOrderReviewPrompt from "@/components/DeliveredOrderReviewPrompt";
 
 import HomePage from "@/pages/HomePage";
 import ShopPage from "@/pages/ShopPage";
 import ProductPage from "@/pages/ProductPage";
 import CartPage from "@/pages/CartPage";
 import WishlistPage from "@/pages/WishlistPage";
+import CheckoutPage from "@/pages/CheckoutPage";
 import AuthModal from "@/components/AuthModal";
 import AccountPage from "@/pages/AccountPage";
 import AboutPage from "@/pages/AboutPage";
@@ -41,6 +43,14 @@ export default function App() {
           <Route path="/shop/:category" element={<ShopPage />} />
           <Route path="/product/:slug" element={<ProductPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route
+            path="/checkout"
+            element={
+              <RequireAuth>
+                <CheckoutPage />
+              </RequireAuth>
+            }
+          />
           <Route path="/wishlist" element={<WishlistPage />} />
 
           <Route
@@ -77,6 +87,7 @@ export default function App() {
       <CartDrawer />
       <ChatWidget />
       <AuthModal />
+      <DeliveredOrderReviewPrompt />
     </div>
   );
 }

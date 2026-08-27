@@ -1,16 +1,18 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
-import { data } from "@/services";
+import { getProducts } from "@/api/productApi";
 import { useAsync } from "@/lib/useAsync";
 import { useWishlist } from "@/context/WishlistContext";
 import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 
+import type { Product } from "@/services/types";
+
 export default function WishlistPage() {
   const { ids, count, clear } = useWishlist();
-  const { data: products, loading } = useAsync(() => data.getProducts(), []);
+  const { data: products, loading } = useAsync(() => getProducts({ limit: 1000 }), []);
 
-  const wished = (products ?? []).filter((p) => ids.includes(p.id));
+  const wished = (products ?? []).filter((p: Product) => ids.includes(p.id));
 
   return (
     <div className="container-x py-10">

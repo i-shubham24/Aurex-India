@@ -156,23 +156,53 @@ export default function AuthModal() {
         </div>
 
         {/* Right Column - Auth Forms */}
-        <div className="w-full md:w-7/12 p-8 md:p-12 relative flex flex-col justify-center">
-          {/* Close Button */}
+        <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-12 relative flex flex-col justify-center">
+          {/* Close Button with generous clearance */}
           <button
             type="button"
             onClick={closeAuthModal}
-            className="absolute right-4 top-4 md:right-6 md:top-6 rounded-full p-1.5 text-ink/40 hover:bg-sand/65 hover:text-ink transition-all"
+            className="absolute right-4 top-4 sm:right-6 sm:top-6 z-30 rounded-full p-2 text-ink/40 hover:bg-sand/60 hover:text-ink transition-all"
             aria-label="Close modal"
           >
             <X size={18} />
           </button>
 
           {authModalMode === "login" ? (
-            <div className="max-w-sm mx-auto w-full">
-              <h2 className="text-3xl font-black text-ink">Welcome back</h2>
-              <p className="mt-1.5 text-sm text-ink/60">Sign in to your Aurex account.</p>
+            <div className="max-w-sm mx-auto w-full pt-2 sm:pt-0">
+              {/* New Member 15% OFF Banner */}
+              <div className="mb-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-sand/40 to-copper/10 border border-amber-600/20 p-3 sm:p-3.5 shadow-2xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="flex-shrink-0 grid h-7 w-7 place-items-center rounded-lg bg-amber-600/15 text-amber-900 text-xs font-black">
+                      %
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-bold text-ink">New Member Offer</span>
+                        <span className="font-mono text-[10px] font-black text-copper bg-white px-1.5 py-0.5 rounded border border-copper/30">
+                          NEWUSER15
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-ink/60 leading-tight mt-0.5">
+                        Get 15% off your first cookware order
+                      </p>
+                    </div>
+                  </div>
 
-              <form onSubmit={handleLoginSubmit} className="mt-8 space-y-5">
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal("signup")}
+                    className="text-[11px] font-black uppercase text-copper hover:text-copper-dark hover:underline flex-shrink-0 whitespace-nowrap bg-white px-2.5 py-1.5 rounded-xl border border-copper/25 shadow-2xs active:scale-95 transition-all"
+                  >
+                    Claim →
+                  </button>
+                </div>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-black text-ink">Welcome back</h2>
+              <p className="mt-1 text-xs sm:text-sm text-ink/60">Sign in to your Aurex account.</p>
+
+              <form onSubmit={handleLoginSubmit} className="mt-5 sm:mt-6 space-y-4">
                 <div>
                   <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-email">Email Address</label>
                   <input
@@ -181,7 +211,7 @@ export default function AuthModal() {
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    className="input text-sm mt-1.5"
+                    className="input text-sm mt-1"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -194,7 +224,7 @@ export default function AuthModal() {
                       required
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
-                      className="input text-sm mt-1.5 w-full pr-10"
+                      className="input text-sm mt-1 w-full pr-10"
                       placeholder="••••••••"
                     />
                     <button
@@ -208,34 +238,54 @@ export default function AuthModal() {
                   </div>
                 </div>
                 {loginError && <p className="text-xs text-red-600 font-medium">{loginError}</p>}
-                <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-2 shadow-md">
+                <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-1 shadow-md">
                   {loginBusy ? "Signing in…" : "Sign in"}
                 </button>
               </form>
 
-              <p className="mt-8 text-center text-sm text-ink/60 font-medium border-t border-ink/[0.06] pt-6">
+              <p className="mt-5 sm:mt-7 text-center text-xs sm:text-sm text-ink/60 font-medium border-t border-ink/[0.06] pt-4 sm:pt-5">
                 New to Aurex?{" "}
                 <button 
                   onClick={() => openAuthModal("signup")} 
                   className="font-bold text-copper hover:text-gold transition-colors outline-none"
                 >
-                  Create an account
+                  Create an account (Get 15% OFF)
                 </button>
               </p>
 
               {import.meta.env.DEV && (
-                <div className="mt-6 rounded-xl bg-sand/40 p-4 text-center text-[11px] text-ink/60 leading-relaxed border border-ink/[0.04]">
+                <div className="mt-4 rounded-xl bg-sand/40 p-2.5 text-center text-[10px] text-ink/60 leading-relaxed border border-ink/[0.04]">
                   <b className="text-ink/80">Dev only:</b> admin@aurexindia.com · admin123
                 </div>
               )}
             </div>
           ) : (
-            <div className="max-w-sm mx-auto w-full">
-              <h2 className="text-3xl font-black text-ink">Create account</h2>
-              <p className="mt-1.5 text-sm text-ink/60">Join Aurex to claim your 15% discount.</p>
+            <div className="max-w-sm mx-auto w-full pt-2 sm:pt-0">
+              {/* 15% OFF Welcome Banner for Signup */}
+              <div className="mb-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-sand/40 to-copper/10 border border-emerald-500/30 p-3 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex-shrink-0 grid h-7 w-7 place-items-center rounded-lg bg-emerald-600/15 text-emerald-800 text-xs font-black">
+                    15%
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-bold text-ink">15% Welcome Discount</span>
+                      <span className="font-mono text-[10px] font-black text-emerald-800 bg-white px-1.5 py-0.5 rounded border border-emerald-300">
+                        NEWUSER15
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-ink/60 leading-tight mt-0.5">
+                      Coupon code ready automatically at checkout!
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              <form onSubmit={handleSignupSubmit} noValidate className="mt-8 space-y-5">
-                <div className="grid grid-cols-2 gap-4">
+              <h2 className="text-2xl sm:text-3xl font-black text-ink">Create account</h2>
+              <p className="mt-1 text-xs sm:text-sm text-ink/60">Join Aurex & unlock your 15% welcome savings.</p>
+
+              <form onSubmit={handleSignupSubmit} noValidate className="mt-5 space-y-3.5 sm:space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-firstname">First name</label>
                     <input
@@ -243,12 +293,12 @@ export default function AuthModal() {
                       value={signupValues.firstName}
                       onChange={(e) => setSignupVal("firstName", e.target.value)}
                       onBlur={() => blurSignupField("firstName")}
-                      className={`input text-sm mt-1.5 ${errCls("firstName")}`}
+                      className={`input text-sm mt-1 ${errCls("firstName")}`}
                       placeholder="Priya"
                       autoComplete="given-name"
                     />
                     {signupTouched.firstName && signupErrors.firstName && (
-                      <p className="mt-1.5 text-[11px] text-red-600 font-medium">{signupErrors.firstName}</p>
+                      <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.firstName}</p>
                     )}
                   </div>
                   <div>
@@ -258,12 +308,12 @@ export default function AuthModal() {
                       value={signupValues.lastName}
                       onChange={(e) => setSignupVal("lastName", e.target.value)}
                       onBlur={() => blurSignupField("lastName")}
-                      className={`input text-sm mt-1.5 ${errCls("lastName")}`}
+                      className={`input text-sm mt-1 ${errCls("lastName")}`}
                       placeholder="Sharma"
                       autoComplete="family-name"
                     />
                     {signupTouched.lastName && signupErrors.lastName && (
-                      <p className="mt-1.5 text-[11px] text-red-600 font-medium">{signupErrors.lastName}</p>
+                      <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.lastName}</p>
                     )}
                   </div>
                 </div>
@@ -276,12 +326,12 @@ export default function AuthModal() {
                     value={signupValues.email}
                     onChange={(e) => setSignupVal("email", e.target.value)}
                     onBlur={() => blurSignupField("email")}
-                    className={`input text-sm mt-1.5 ${errCls("email")}`}
+                    className={`input text-sm mt-1 ${errCls("email")}`}
                     placeholder="you@example.com"
                     autoComplete="email"
                   />
                   {signupTouched.email && signupErrors.email && (
-                    <p className="mt-1.5 text-[11px] text-red-600 font-medium">{signupErrors.email}</p>
+                    <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.email}</p>
                   )}
                 </div>
 
@@ -294,7 +344,7 @@ export default function AuthModal() {
                       value={signupValues.password}
                       onChange={(e) => setSignupVal("password", e.target.value)}
                       onBlur={() => blurSignupField("password")}
-                      className={`input text-sm mt-1.5 w-full pr-10 ${errCls("password")}`}
+                      className={`input text-sm mt-1 w-full pr-10 ${errCls("password")}`}
                       placeholder="At least 8 characters"
                       autoComplete="new-password"
                     />
@@ -307,21 +357,21 @@ export default function AuthModal() {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  <div className="mt-1.5">
+                  <div className="mt-1">
                     <PasswordMeter value={signupValues.password} />
                   </div>
                   {signupTouched.password && signupErrors.password && (
-                    <p className="mt-1.5 text-[11px] text-red-600 font-medium">{signupErrors.password}</p>
+                    <p className="mt-1 text-[11px] text-red-600 font-medium">{signupErrors.password}</p>
                   )}
                 </div>
 
                 {signupFormError && <p className="text-xs text-red-600 font-medium">{signupFormError}</p>}
-                <button type="submit" disabled={signupBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-2 shadow-md">
+                <button type="submit" disabled={signupBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-1 shadow-md">
                   {signupBusy ? "Creating account…" : "Create account"}
                 </button>
               </form>
 
-              <p className="mt-8 text-center text-sm text-ink/60 font-medium border-t border-ink/[0.06] pt-6">
+              <p className="mt-5 sm:mt-7 text-center text-xs sm:text-sm text-ink/60 font-medium border-t border-ink/[0.06] pt-4 sm:pt-5">
                 Already have an account?{" "}
                 <button 
                   onClick={() => openAuthModal("login")} 

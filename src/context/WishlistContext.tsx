@@ -6,8 +6,11 @@ import {
   useMemo,
   useState,
   type ReactNode,
+  useRef,
 } from "react";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
+import { wishlistApi } from "@/api/wishlistApi";
 
 interface WishlistContextValue {
   ids: string[];
@@ -20,9 +23,12 @@ interface WishlistContextValue {
 
 const WishlistContext = createContext<WishlistContextValue | null>(null);
 const LS_WISHLIST = "aurex.wishlist";
+const LS_PENDING_WISHLIST = "aurex.pending_wishlist";
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const toast = useToast();
+  const { user, openAuthModal } = useAuth();
+
   const [ids, setIds] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -32,27 +38,104 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const idsRef = useRef(ids);
+
   useEffect(() => {
+    idsRef.current = ids;
     window.localStorage.setItem(LS_WISHLIST, JSON.stringify(ids));
   }, [ids]);
 
+  useEffect(() => {
+    if (user) {
+      wishlistApi.getWishlist().then((res) => {
+        console.log("DEBUG WISHLIST RES:", res);
+        const data = res.data?.wishlist?.products || res.wishlist?.products || res.data?.products || res.products || (Array.isArray(res.data) ? res.data : []) || (Array.isArray(res) ? res : []);
+        console.log("DEBUG WISHLIST DATA EXTRACTED:", data);
+        const validIds = Array.isArray(data) ? data.map((i: any) => i.product?._id || i._id || i.id || i.product?.id).filter(Boolean) : [];
+        console.log("DEBUG WISHLIST VALID IDS:", validIds);
+        setIds(validIds);
+      }).catch(err => {
+        console.error("DEBUG WISHLIST ERROR:", err);
+      });
+    } else {
+      setIds([]);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      const pendingId = window.localStorage.getItem(LS_PENDING_WISHLIST);
+      if (pendingId) {
+        window.localStorage.removeItem(LS_PENDING_WISHLIST);
+        wishlistApi.addToWishlist(pendingId).then(() => {
+          setIds((prev) => {
+            if (!prev.includes(pendingId)) return [...prev, pendingId];
+            return prev;
+          });
+          toast.success("Added pending item to wishlist.");
+        }).catch(console.error);
+      }
+    }
+  }, [user, toast]);
+
   const has = useCallback((id: string) => ids.includes(id), [ids]);
+
   const toggle = useCallback(
-    (id: string, productName?: string) =>
-      setIds((prev) => {
-        const isWished = prev.includes(id);
+    async (id: string, productName?: string) => {
+      if (!user) {
+        window.localStorage.setItem(LS_PENDING_WISHLIST, id);
+        toast.info("Please login to wishlist this item.");
+        openAuthModal("login");
+        return;
+      }
+
+      const isWished = idsRef.current.includes(id);
+
+      // Optimistic update
+      setIds((prev) => isWished ? prev.filter((x) => x !== id) : [...prev, id]);
+
+      try {
         if (isWished) {
+          await wishlistApi.removeFromWishlist(id);
           toast.info(productName ? `Removed ${productName} from wishlist.` : "Removed from wishlist.");
-          return prev.filter((x) => x !== id);
         } else {
+          await wishlistApi.addToWishlist(id);
           toast.success(productName ? `Added ${productName} to wishlist.` : "Added to wishlist.");
-          return [...prev, id];
         }
-      }),
-    [toast]
+      } catch (error) {
+        // Revert on failure
+        setIds((prev) => isWished ? [...prev, id] : prev.filter((x) => x !== id));
+        toast.error("Failed to update wishlist.");
+      }
+    },
+    [user, openAuthModal, toast]
   );
-  const remove = useCallback((id: string) => setIds((prev) => prev.filter((x) => x !== id)), []);
-  const clear = useCallback(() => setIds([]), []);
+
+  const remove = useCallback(async (id: string) => {
+    if (!user) {
+      setIds((prev) => prev.filter((x) => x !== id));
+      return;
+    }
+
+    setIds((prev) => prev.filter((x) => x !== id));
+    try {
+      await wishlistApi.removeFromWishlist(id);
+    } catch (error) {
+      setIds((prev) => [...prev, id]);
+      toast.error("Failed to remove from wishlist.");
+    }
+  }, [user, toast]);
+  const clear = useCallback(async () => {
+    const currentIds = idsRef.current;
+    setIds([]);
+    if (user && currentIds.length > 0) {
+      try {
+        await Promise.all(currentIds.map(id => wishlistApi.removeFromWishlist(id)));
+      } catch (err) {
+        console.error("Failed to clear wishlist on server", err);
+      }
+    }
+  }, [user]);
 
   const value = useMemo<WishlistContextValue>(
     () => ({ ids, count: ids.length, has, toggle, remove, clear }),

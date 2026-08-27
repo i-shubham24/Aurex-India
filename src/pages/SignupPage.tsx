@@ -95,8 +95,24 @@ export default function SignupPage() {
     <div className="container-x flex min-h-[70vh] items-center justify-center py-12">
       <div className="w-full max-w-md">
         <div className="card p-8">
+          {/* 15% OFF Welcome Banner for Signup */}
+          <div className="mb-5 flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-sand/40 to-copper/10 border border-emerald-500/30 p-3 shadow-2xs">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs flex-shrink-0 shadow-sm">
+              15%
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black text-ink flex items-center gap-1.5">
+                <span>15% Welcome Discount</span>
+                <span className="text-[10px] font-mono font-bold bg-white text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-300">NEWUSER15</span>
+              </p>
+              <p className="text-[11px] text-ink/65 leading-tight mt-0.5">
+                Your 15% coupon will be automatically ready at checkout!
+              </p>
+            </div>
+          </div>
+
           <h1 className="text-2xl font-semibold">Create your account</h1>
-          <p className="mt-1 text-sm text-ink/60">Join Aurex for faster checkout and order tracking.</p>
+          <p className="mt-1 text-sm text-ink/60">Join Aurex & unlock your 15% welcome savings.</p>
 
           <form onSubmit={submit} noValidate className="mt-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">

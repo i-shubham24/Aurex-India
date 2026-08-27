@@ -249,9 +249,9 @@ export default function ShopPage() {
           </details>
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="flex flex-col gap-3 p-4 border border-ink/[0.04] rounded-xl2 bg-white shadow-sm">
+                <div key={i} className="flex flex-col gap-2.5 p-3 sm:p-4 border border-ink/[0.04] rounded-xl sm:rounded-xl2 bg-white shadow-sm">
                   <div className="w-full aspect-square bg-gray-200 animate-pulse rounded-lg" />
                   <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded mt-2" />
                   <div className="h-3 w-1/2 bg-gray-200 animate-pulse rounded" />
@@ -261,7 +261,7 @@ export default function ShopPage() {
             </div>
           ) : products && products.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-4">
                 {products.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}

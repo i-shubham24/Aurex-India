@@ -44,6 +44,30 @@ export default function LoginPage() {
       <Seo title="Login" noindex />
       <div className="w-full max-w-md">
         <div className="card p-8">
+          {/* New Member Offer */}
+          <div className="mb-5 flex items-center justify-between gap-2.5 rounded-2xl bg-gradient-to-r from-copper/10 via-sand/40 to-amber-500/10 border border-copper/30 p-3 shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-copper text-white flex items-center justify-center font-black text-xs flex-shrink-0 shadow-sm">
+                15%
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black text-ink flex items-center gap-1.5">
+                  <span>New Member Offer</span>
+                  <span className="text-[10px] font-mono font-bold bg-white text-copper px-1.5 py-0.5 rounded border border-copper/30">NEWUSER15</span>
+                </p>
+                <p className="text-[11px] text-ink/65 leading-tight mt-0.5">
+                  New user? Sign up & get 15% off your 1st order!
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/signup"
+              className="text-[11px] font-black uppercase text-copper hover:text-copper-dark hover:underline flex-shrink-0 whitespace-nowrap bg-white px-2.5 py-1.5 rounded-xl border border-copper/25 shadow-2xs active:scale-95 transition-all"
+            >
+              Claim →
+            </Link>
+          </div>
+
           <h1 className="text-2xl font-semibold">Welcome back</h1>
           <p className="mt-1 text-sm text-ink/60">Sign in to your Aurex account.</p>
 

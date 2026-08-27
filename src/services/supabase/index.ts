@@ -236,8 +236,8 @@ export const supabaseService: DataService = {
     return (data as Order) ?? null;
   },
 
-  async createOrder(userId: ID, lines: CartLine[], address?: Address) {
-    const total = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
+  async createOrder(userId: ID, lines: CartLine[], address?: Address, couponCode?: string) {
+    const total = lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
     const { data, error } = await db()
       .from("orders")
       .insert({

@@ -5,11 +5,15 @@ import {
   useEffect,
   useMemo,
   useState,
+  useRef,
   type ReactNode,
 } from "react";
-import { data } from "@/services";
 import type { Coupon, CartLine, Product, ProductVariant } from "@/services/types";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
+import { cartApi } from "@/api/cartApi";
+import { couponApi } from "@/api/couponApi";
+import { fireCouponConfetti } from "@/lib/confetti";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -41,6 +45,7 @@ function lineKey(productId: string, variantId?: string) {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const toast = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [lines, setLines] = useState<CartLine[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -49,6 +54,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [];
     }
   });
+  const linesRef = useRef(lines);
+  const prevUser = useRef(user);
+
   const [isOpen, setOpen] = useState(false);
   const [coupon, setCoupon] = useState<Coupon | null>(() => {
     if (typeof window === "undefined") return null;
@@ -75,13 +83,52 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    linesRef.current = lines;
     window.localStorage.setItem(LS_CART, JSON.stringify(lines));
   }, [lines]);
 
+  useEffect(() => {
+    if (authLoading) return;
+    
+    const loggedOut = prevUser.current && !user;
+    prevUser.current = user;
+
+    if (loggedOut) {
+      setLines([]);
+      return;
+    }
+
+    if (user) {
+      const syncCart = async () => {
+        try {
+          const res = await cartApi.getCart();
+          const serverItems = res.data?.cart?.items || [];
+          
+          const newLines: CartLine[] = serverItems.map((item: any) => ({
+            productId: item.product._id || item.product,
+            slug: item.product.slug || "",
+            name: item.product.name || "Product",
+            shortDescription: item.product.shortDescription || "",
+            image: item.product.images?.[0]?.url || item.product.images?.[0] || "",
+            unitPrice: item.priceSnapshot,
+            compareAtPrice: item.product.pricing?.mrp,
+            quantity: item.quantity,
+          }));
+          
+          setLines(newLines);
+        } catch (error) {
+          console.error("Failed to sync cart", error);
+        }
+      };
+      syncCart();
+    }
+  }, [user, authLoading, toast]);
+
   const add = useCallback(
-    (product: Product, variant?: ProductVariant, qty = 1) => {
+    async (product: Product, variant?: ProductVariant, qty = 1) => {
       const unitPrice = product.price + (variant?.priceDelta ?? 0);
       const key = lineKey(product.id, variant?.id);
+      const originalLines = linesRef.current;
       setLines((prev) => {
         const existing = prev.find(
           (l) => lineKey(l.productId, l.variantId) === key
@@ -99,30 +146,52 @@ export function CartProvider({ children }: { children: ReactNode }) {
             productId: product.id,
             slug: product.slug,
             name: product.name,
+            shortDescription: product.shortDescription,
             image: variant?.images?.[0] ?? product.images[0],
             variantId: variant?.id,
             variantName: variant?.name,
             unitPrice,
+            compareAtPrice: product.compareAtPrice,
             quantity: qty,
           },
         ];
       });
       toast.success(`Added ${product.name} to cart.`);
       setOpen(true);
+      
+      if (user) {
+        try {
+          await cartApi.addToCart(product.id, qty);
+        } catch (error) {
+          console.error("Cart add error", error);
+          toast.error("Failed to sync cart item");
+          setLines(originalLines);
+        }
+      }
     },
-    [toast]
+    [toast, user]
   );
 
-  const remove = useCallback((productId: string, variantId?: string) => {
+  const remove = useCallback(async (productId: string, variantId?: string) => {
     const key = lineKey(productId, variantId);
+    const originalLines = linesRef.current;
     setLines((prev) =>
       prev.filter((l) => lineKey(l.productId, l.variantId) !== key)
     );
-  }, []);
+    if (user) {
+      try {
+        await cartApi.removeCartItem(productId);
+      } catch (error) {
+        toast.error("Failed to remove from server cart");
+        setLines(originalLines);
+      }
+    }
+  }, [user, toast]);
 
   const setQty = useCallback(
-    (productId: string, qty: number, variantId?: string) => {
+    async (productId: string, qty: number, variantId?: string) => {
       const key = lineKey(productId, variantId);
+      const originalLines = linesRef.current;
       setLines((prev) =>
         qty <= 0
           ? prev.filter((l) => lineKey(l.productId, l.variantId) !== key)
@@ -132,8 +201,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 : l
             )
       );
+      if (user) {
+        try {
+          if (qty <= 0) {
+            await cartApi.removeCartItem(productId);
+          } else {
+            await cartApi.updateCartItem(productId, qty);
+          }
+        } catch (error) {
+          toast.error("Failed to update server cart");
+          setLines(originalLines);
+        }
+      }
     },
-    []
+    [user, toast]
   );
 
   const subtotal = useMemo(
@@ -141,42 +222,69 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [lines]
   );
 
-  const removeCoupon = useCallback(() => {
-    setCoupon(null);
+  const removeCoupon = useCallback((notify = true) => {
+    setCoupon((prev) => {
+      if (prev && notify) {
+        toast.info("Coupon removed.");
+      }
+      return null;
+    });
     setCouponMessage("");
     window.localStorage.removeItem(LS_COUPON);
-    toast.info("Coupon removed.");
   }, [toast]);
 
   const applyCoupon = useCallback(
     async (code: string) => {
-      const res = await data.validateCoupon(code, subtotal);
-      setCouponMessage(res.message);
-      if (res.ok && res.coupon) {
-        setCoupon(res.coupon);
-        window.localStorage.setItem(LS_COUPON, JSON.stringify(res.coupon));
-        toast.success(`Coupon "${code}" applied successfully!`);
-        return true;
+      try {
+        const res = await couponApi.validateCoupon(code, subtotal);
+        if (res.success && res.data) {
+          const validCoupon: Coupon = {
+            code,
+            label: `${code}`,
+            type: "flat", // Backend calculates exact discount amount
+            value: res.data.discount
+          };
+          setCoupon(validCoupon);
+          setCouponMessage(res.message);
+          window.localStorage.setItem(LS_COUPON, JSON.stringify(validCoupon));
+          fireCouponConfetti();
+          toast.success(`Coupon "${code}" applied successfully!`);
+          return true;
+        }
+      } catch (error: any) {
+        setCoupon(null);
+        window.localStorage.removeItem(LS_COUPON);
+        setCouponMessage(error.message || "Invalid coupon code.");
+        toast.error(error.message || "Invalid coupon code.");
+        return false;
       }
-      setCoupon(null);
-      window.localStorage.removeItem(LS_COUPON);
-      toast.error(res.message || "Invalid coupon code.");
       return false;
     },
     [subtotal, toast]
   );
 
-  const clear = useCallback(() => {
+  const clear = useCallback(async () => {
+    const originalLines = linesRef.current;
     setLines([]);
-    removeCoupon();
-  }, [removeCoupon]);
+    removeCoupon(false);
+    if (user) {
+      try {
+        await cartApi.clearCart();
+      } catch (error) {
+        console.error("Failed to clear server cart", error);
+        setLines(originalLines);
+      }
+    }
+  }, [user, removeCoupon]);
 
   // Re-validate the coupon whenever the subtotal changes (e.g. a min-spend
   // coupon that no longer qualifies after removing items).
   useEffect(() => {
-    if (!coupon) return;
-    data.validateCoupon(coupon.code, subtotal).then((res) => {
-      if (!res.ok) removeCoupon();
+    if (!coupon || subtotal <= 0) return;
+    couponApi.validateCoupon(coupon.code, subtotal).then((res) => {
+      if (!res.success) removeCoupon(true);
+    }).catch(() => {
+      removeCoupon(true);
     });
   }, [subtotal, coupon, removeCoupon]);
 

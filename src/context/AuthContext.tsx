@@ -52,9 +52,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       authApi.getMe()
         .then(({ user }) => setUser(user))
-        .catch(() => {
-          localStorage.removeItem("aurex_token");
-          setUser(null);
+        .catch((err: any) => {
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            localStorage.removeItem("aurex_token");
+            setUser(null);
+          } else {
+            console.error("getMe failed:", err);
+            // Don't toast on AbortError/CanceledError to avoid noise on normal reloads
+            if (err.name !== 'CanceledError' && err.message !== 'canceled') {
+              toast.error("Network error while verifying session. Please refresh.");
+            }
+          }
         })
         .finally(() => setLoading(false));
     } else {

@@ -48,6 +48,7 @@ const HERO_SLIDES = [
 import { useQuery } from "@tanstack/react-query";
 import { getCategories } from "@/api/categoryApi";
 import { getProducts } from "@/api/productApi";
+import { getRecentReviews } from "@/api/reviewApi";
 
 const testimonials = [
   { name: "Priya Nair", place: "Kochi", rating: 5, text: "The triply kadai heats so evenly — no more burnt centres. Feels like a lifetime purchase." },
@@ -120,6 +121,24 @@ export default function HomePage() {
     queryFn: getCategories,
   });
 
+  const { data: recentReviews = [] } = useQuery({
+    queryKey: ['reviews', 'recent'],
+    queryFn: getRecentReviews,
+  });
+
+  const displayReviews = useMemo(() => {
+    if (recentReviews && recentReviews.length > 0) {
+      const dynamic = recentReviews.map((r: any) => ({
+        name: r.user ? `${r.user.firstName || ''} ${r.user.lastName || ''}`.trim() || 'Verified Customer' : 'Verified Customer',
+        place: typeof r.product === 'object' && r.product?.name ? r.product.name : 'Aurex Cookware',
+        rating: r.rating || 5,
+        text: r.comment || r.title || 'Exceptional cookware that delivers restaurant quality results at home.',
+      }));
+      return [...dynamic, ...testimonials].slice(0, 8);
+    }
+    return testimonials;
+  }, [recentReviews]);
+
   const categories = categoriesResponse?.data?.categories || [];
 
   const [heroSlides, setHeroSlides] = useState<any[]>(HERO_SLIDES);
@@ -173,13 +192,13 @@ export default function HomePage() {
       />
 
       {/* Hero Carousel Banner Section */}
-      <section className="relative pt-6 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative pt-2 sm:pt-6 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        <Carousel slideClassName="basis-full" gapClassName="gap-0" autoPlayMs={6500} showDots={true} showArrows={true} leftArrow={true} ariaLabel="Featured collections" className="rounded-lg overflow-hidden shadow-sm border border-ink/[0.04] bg-ink">
+        <Carousel slideClassName="basis-full" gapClassName="gap-0" autoPlayMs={6500} showDots={false} showArrows={true} leftArrow={true} ariaLabel="Featured collections" className="rounded-lg overflow-hidden shadow-sm border border-ink/[0.04] bg-ink">
           {heroSlides.map((s, i) => (
             <div
               key={i}
-              className="relative min-h-[420px] sm:min-h-[500px] lg:min-h-[580px] flex items-center overflow-hidden w-full group/slide"
+              className="relative min-h-[340px] sm:min-h-[500px] lg:min-h-[580px] flex items-center overflow-hidden w-full group/slide"
             >
               {/* Background image */}
               <img
@@ -193,12 +212,12 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent md:bg-gradient-to-r md:from-ink/85 md:via-ink/40 md:to-transparent" />
               
               {/* Content overlay */}
-              <div className="relative z-10 px-6 sm:px-12 lg:px-20 py-12 max-w-xl sm:max-w-2xl text-cream">
-                <span className="block text-gold/90 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+              <div className="relative z-10 px-5 sm:px-12 lg:px-20 py-8 sm:py-12 max-w-xl sm:max-w-2xl text-cream">
+                <span className="block text-gold/90 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-2 sm:mb-4">
                   {s.chip}
                 </span>
                 
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[1.1]">
+                <h1 className="text-2xl sm:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[1.15]">
                   {s.lead}{" "}
                   {s.typewriter ? (
                     <span className="text-cream/90 italic font-light">{s.typewriter[0]}</span>
@@ -207,12 +226,12 @@ export default function HomePage() {
                   )}
                 </h1>
                 
-                <p className="mt-6 text-sm sm:text-base lg:text-lg text-cream/70 font-light leading-relaxed max-w-md">
+                <p className="mt-3 sm:mt-6 text-xs sm:text-base lg:text-lg text-cream/70 font-light leading-relaxed max-w-md">
                   {s.subtitle}
                 </p>
                 
-                <div className="mt-10 flex flex-wrap gap-4">
-                  <Link to={s.to} className="inline-flex items-center justify-center gap-2 rounded-sm bg-white text-ink hover:bg-cream transition-colors text-sm font-semibold px-8 py-3.5">
+                <div className="mt-5 sm:mt-10 flex flex-wrap gap-4">
+                  <Link to={s.to} className="inline-flex items-center justify-center gap-2 rounded-sm bg-white text-ink hover:bg-cream transition-colors text-xs sm:text-sm font-semibold px-6 sm:px-8 py-2.5 sm:py-3.5">
                     {s.cta}
                   </Link>
                 </div>
@@ -224,14 +243,14 @@ export default function HomePage() {
 
 
       {/* Section 1: Browse by Categories (Circular slider layout) */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="mb-8 flex items-center justify-between relative">
-          <h2 className="text-2xl sm:text-3xl font-black text-ink">
+      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+        <div className="mb-4 sm:mb-8 flex items-center justify-between relative">
+          <h2 className="text-xl sm:text-3xl font-black text-ink">
             Browse by <span className="text-copper">Categories</span>
           </h2>
           <Link
             to="/shop"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-copper text-copper hover:bg-copper hover:text-white transition-all text-xs font-bold shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-copper text-copper hover:bg-copper hover:text-white transition-all text-[11px] sm:text-xs font-bold shadow-sm"
           >
             View all <ArrowRight size={12} />
           </Link>
@@ -281,15 +300,15 @@ export default function HomePage() {
 
       {/* Promo Banner Grid */}
       {promoCats.length > 0 && (
-        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid gap-6 md:grid-cols-2">
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
             {promoCats.map((cat, idx) => {
               const tint = idx % 2 === 0 ? "from-ink/95 via-ink/60" : "from-forest/95 via-forest/55";
               return (
                 <Reveal key={cat._id}>
                   <Link
                     to={`/shop/${cat.slug}`}
-                    className="group relative isolate flex min-h-[260px] items-end overflow-hidden rounded-xl2 hover-lift sm:min-h-[320px] shadow-sm border border-ink/[0.04]"
+                    className="group relative isolate flex min-h-[200px] sm:min-h-[320px] items-end overflow-hidden rounded-xl2 hover-lift shadow-sm border border-ink/[0.04]"
                   >
                     <img
                       src={cat.image?.url || "/brand/full-range.webp"}
@@ -298,13 +317,13 @@ export default function HomePage() {
                       className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className={`absolute inset-0 -z-10 bg-gradient-to-t ${tint} to-transparent`} />
-                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 z-10 pointer-events-none">
+                    <div className="absolute top-3 left-3 sm:top-5 sm:left-5 z-10 pointer-events-none">
                       <img src="/brand/logo.png" alt="Aurex" className="h-4 sm:h-5 object-contain" />
                     </div>
-                    <div className="p-6 sm:p-8 text-cream">
-                      <h3 className="text-xl sm:text-2xl font-bold">{cat.name}</h3>
-                      <p className="mt-2 max-w-xs text-xs sm:text-sm text-cream/80 line-clamp-2">{cat.description}</p>
-                      <span className="btn-copper mt-4 inline-flex text-xs py-2 px-4 items-center gap-1.5">
+                    <div className="p-4 sm:p-8 text-cream">
+                      <h3 className="text-lg sm:text-2xl font-bold">{cat.name}</h3>
+                      <p className="mt-1 sm:mt-2 max-w-xs text-xs sm:text-sm text-cream/80 line-clamp-2">{cat.description}</p>
+                      <span className="btn-copper mt-3 sm:mt-4 inline-flex text-xs py-1.5 sm:py-2 px-3.5 sm:px-4 items-center gap-1.5">
                         Shop {cat.name} <ArrowRight size={13} />
                       </span>
                     </div>
@@ -318,13 +337,13 @@ export default function HomePage() {
 
 
       {/* Bestsellers Products */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-14 border-t border-ink/[0.05]">
-        <div className="mb-8 flex items-center justify-between">
+      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-14 border-t border-ink/[0.05]">
+        <div className="mb-4 sm:mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-ink">Bestsellers</h2>
-            <p className="mt-1 text-xs sm:text-sm text-ink/65">Most-loved items by home cooks across India.</p>
+            <h2 className="text-xl sm:text-3xl font-black text-ink">Bestsellers</h2>
+            <p className="mt-0.5 text-xs sm:text-sm text-ink/65">Most-loved items by home cooks across India.</p>
           </div>
-          <Link to="/shop?sort=rating" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-copper text-copper hover:bg-copper hover:text-white transition-all text-xs font-bold shadow-sm">
+          <Link to="/shop?sort=rating" className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-copper text-copper hover:bg-copper hover:text-white transition-all text-[11px] sm:text-xs font-bold shadow-sm">
             View all <ArrowRight size={12} />
           </Link>
         </div>
@@ -350,12 +369,12 @@ export default function HomePage() {
       </section>
 
       {/* Best Deals Banner & Carousel */}
-      <section className="border-y border-ink/[0.06] bg-gradient-to-r from-copper/[0.06] via-white to-gold/[0.1] my-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="mb-8 max-w-xl">
+      <section className="border-y border-ink/[0.06] bg-gradient-to-r from-copper/[0.06] via-white to-gold/[0.1] my-4 sm:my-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-14">
+          <div className="mb-4 sm:mb-8 max-w-xl">
             <span className="chip bg-gold text-ink text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"><Tag size={12} className="mr-1 inline" /> Best Deals</span>
-            <h2 className="mt-3 text-2xl sm:text-3xl font-black text-ink">Weekly Special Offers</h2>
-            <p className="mt-1.5 text-sm text-ink/65">
+            <h2 className="mt-2 text-xl sm:text-3xl font-black text-ink">Weekly Special Offers</h2>
+            <p className="mt-1 text-xs sm:text-sm text-ink/65">
               Use coupon code <b className="text-copper">WELCOME15</b> for an extra 15% discount on your first purchase.
             </p>
           </div>
@@ -384,42 +403,42 @@ export default function HomePage() {
 
       {/* Triply construction — the material/layers story */}
       <Reveal>
-        <section className="border-t border-ink/[0.06] bg-gradient-to-b from-white to-sand/20 py-16">
+        <section className="border-t border-ink/[0.06] bg-gradient-to-b from-white to-sand/20 py-8 sm:py-16">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <span className="chip bg-copper/15 text-copper font-bold">The Aurex Difference</span>
-              <h2 className="mt-4 text-3xl font-black text-ink">Engineered in three layers</h2>
-              <p className="mt-3 text-sm text-ink/65 leading-relaxed">
+              <h2 className="mt-3 text-2xl sm:text-3xl font-black text-ink">Engineered in three layers</h2>
+              <p className="mt-2 text-xs sm:text-sm text-ink/65 leading-relaxed">
                 Food-grade 304 steel on the inside, a heat-spreading aluminium core, and induction-ready 430 steel outside — no coatings, no hotspots, built to last.
               </p>
             </div>
 
-            <div className="mt-10 grid gap-8 lg:grid-cols-2 items-center max-w-5xl mx-auto">
+            <div className="mt-6 sm:mt-10 grid gap-6 sm:gap-8 lg:grid-cols-2 items-center max-w-5xl mx-auto">
               {/* Left Column: Contained Diagram Image */}
-              <div className="flex items-center justify-center bg-white p-6 rounded-xl2 border border-ink/[0.04] shadow-sm max-h-[380px] overflow-hidden">
+              <div className="flex items-center justify-center bg-white p-4 sm:p-6 rounded-xl2 border border-ink/[0.04] shadow-sm max-h-[380px] overflow-hidden">
                 <img
                   src="/brand/construction.webp"
                   alt="Aurex triply construction"
                   loading="lazy"
-                  className="max-h-[320px] object-contain"
+                  className="max-h-[240px] sm:max-h-[320px] object-contain"
                 />
               </div>
 
               {/* Right Column: Layer specifications */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {[
                   { badge: "304", title: "Inner Layer", desc: "Food-grade steel — corrosion-resistant & non-reactive." },
                   { badge: "Al", title: "Aluminium Core", desc: "Superior heat distribution for even cooking." },
                   { badge: "430", title: "Outer Layer", desc: "Food-grade & magnetic — fully induction ready." },
                   { badge: "★", title: "No Hotspots", desc: "Uniform heating across the whole surface." },
                 ].map((l) => (
-                  <div key={l.title} className="card p-5 bg-white shadow-sm border border-ink/[0.04] flex gap-4 items-start text-left">
-                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-copper/10 text-xs font-black text-copper flex-shrink-0">
+                  <div key={l.title} className="card p-4 sm:p-5 bg-white shadow-sm border border-ink/[0.04] flex gap-3.5 sm:gap-4 items-start text-left">
+                    <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl bg-copper/10 text-xs font-black text-copper flex-shrink-0">
                       {l.badge}
                     </div>
                     <div>
-                      <p className="font-bold text-ink text-sm leading-tight">{l.title}</p>
-                      <p className="text-xs leading-normal text-ink/65 mt-1.5">{l.desc}</p>
+                      <p className="font-bold text-ink text-xs sm:text-sm leading-tight">{l.title}</p>
+                      <p className="text-[11px] sm:text-xs leading-normal text-ink/65 mt-1">{l.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -431,11 +450,11 @@ export default function HomePage() {
 
       {/* Aurex vs ordinary — comparison */}
       <Reveal>
-        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="mx-auto max-w-2xl text-center mb-10">
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+          <div className="mx-auto max-w-2xl text-center mb-6 sm:mb-10">
             <span className="chip bg-copper/15 text-copper font-bold">Why Aurex</span>
-            <h2 className="mt-4 text-3xl font-black text-ink">Aurex vs ordinary cookware</h2>
-            <p className="mt-3 text-sm text-ink/65">Built to a higher standard — here's how we compare.</p>
+            <h2 className="mt-3 text-2xl sm:text-3xl font-black text-ink">Aurex vs ordinary cookware</h2>
+            <p className="mt-2 text-xs sm:text-sm text-ink/65">Built to a higher standard — here's how we compare.</p>
           </div>
           
           <div className="mx-auto max-w-3xl overflow-hidden rounded-xl2 border border-ink/[0.08] shadow-sm bg-white">
@@ -477,15 +496,15 @@ export default function HomePage() {
           className="absolute inset-0 h-full w-full scale-105 object-cover motion-safe:animate-[kenburns_18s_ease-in-out_infinite_alternate] -z-10"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/75 to-ink/30 -z-10" />
-        <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex min-h-[460px] flex-col justify-center py-20">
+        <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex min-h-[340px] sm:min-h-[460px] flex-col justify-center py-10 sm:py-20">
           <div className="max-w-xl">
             <Reveal>
               <span className="chip bg-gold/25 text-cream ring-1 ring-cream/20 font-bold">The Art of Manufacturing</span>
-              <h2 className="mt-4 text-3xl sm:text-4xl font-black text-cream">Five decades in the making</h2>
-              <p className="mt-5 text-sm sm:text-base leading-relaxed text-cream/80">
+              <h2 className="mt-3 text-2xl sm:text-4xl font-black text-cream">Five decades in the making</h2>
+              <p className="mt-3 sm:mt-5 text-xs sm:text-base leading-relaxed text-cream/80">
                 Aurex's manufacturing roots go back more than fifty years. Every piece is engineered in-house — from bonding the triply base to hand-finishing each cast iron pan — so what reaches your kitchen is built to be passed down.
               </p>
-              <Link to="/story" className="btn-copper mt-8 text-xs px-5 py-2.5">
+              <Link to="/story" className="btn-copper mt-6 sm:mt-8 text-xs px-5 py-2.5">
                 Read our story <ArrowRight size={14} className="ml-1" />
               </Link>
             </Reveal>
@@ -495,10 +514,10 @@ export default function HomePage() {
 
       {/* Customer Reviews Section */}
       <section className="border-b border-ink/[0.06] bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="mb-10 text-center">
-            <h2 className="text-3xl font-black text-ink">Loved by Home Cooks</h2>
-            <p className="mt-2 text-xs sm:text-sm text-ink/65">4.7★ average rating from 5,000+ kitchen transformations.</p>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+          <div className="mb-6 sm:mb-10 text-center">
+            <h2 className="text-2xl sm:text-3xl font-black text-ink">Loved by Home Cooks</h2>
+            <p className="mt-1 text-xs sm:text-sm text-ink/65">4.7★ average rating from 5,000+ kitchen transformations.</p>
           </div>
           <Carousel
             slideClassName="basis-full sm:basis-1/2 lg:basis-1/3"
@@ -506,8 +525,8 @@ export default function HomePage() {
             autoPlayMs={4500}
             ariaLabel="Customer reviews"
           >
-            {testimonials.map((t) => (
-              <figure key={t.name} className="card flex h-full flex-col p-6 border border-ink/5 shadow-sm bg-cream/10">
+            {displayReviews.map((t, idx) => (
+              <figure key={t.name + idx} className="card flex h-full flex-col p-6 border border-ink/5 shadow-sm bg-cream/10">
                 <Rating value={t.rating} />
                 <blockquote className="mt-3 flex-1 text-sm text-ink/75 italic">“{t.text}”</blockquote>
                 <figcaption className="mt-4 pt-3 border-t border-ink/5 text-xs font-bold text-ink">
@@ -522,16 +541,16 @@ export default function HomePage() {
       </section>
 
       {/* Frequently Asked Questions */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <h2 className="mb-10 text-center text-3xl font-black text-ink">Frequently Asked Questions</h2>
+      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-20">
+        <h2 className="mb-6 sm:mb-10 text-center text-2xl sm:text-3xl font-black text-ink">Frequently Asked Questions</h2>
         <div className="mx-auto max-w-3xl divide-y divide-ink/10 rounded-xl2 bg-white shadow-sm border border-ink/[0.04]">
           {faqs.map((f) => (
-            <details key={f.q} className="group p-5">
+            <details key={f.q} className="group p-4 sm:p-5">
               <summary className="flex cursor-pointer items-center justify-between font-bold text-sm sm:text-base text-ink select-none outline-none">
                 {f.q}
                 <span className="text-copper group-open:rotate-45 transition-transform duration-200 text-lg font-bold">+</span>
               </summary>
-              <p className="mt-3 text-xs sm:text-sm text-ink/65 leading-relaxed">
+              <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm text-ink/65 leading-relaxed">
                 {f.a}
               </p>
             </details>

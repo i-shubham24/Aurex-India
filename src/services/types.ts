@@ -60,10 +60,12 @@ export interface CartLine {
   productId: ID;
   slug: string;
   name: string;
+  shortDescription?: string;
   image: string;
   variantId?: ID;
   variantName?: string;
   unitPrice: number;
+  compareAtPrice?: number;
   quantity: number;
 }
 
@@ -182,7 +184,7 @@ export interface DataService {
   // Orders (admin + account)
   getOrders(userId?: ID): Promise<Order[]>;
   getOrder(id: ID): Promise<Order | null>;
-  createOrder(userId: ID, lines: CartLine[], address?: Address): Promise<Order>;
+  createOrder(userId: ID, lines: CartLine[], address?: Address, couponCode?: string): Promise<Order>;
   updateOrderStatus(id: ID, status: OrderStatus): Promise<Order>;
 
   // Admin: catalog management
