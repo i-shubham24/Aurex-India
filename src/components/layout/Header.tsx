@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ShoppingBag, User as UserIcon, Search, Menu, X, Truck, Heart, ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import Logo from "@/components/Logo";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { getProductsPaginated } from "@/api/productApi";
+import { useDebounce } from "@/lib/useDebounce";
+import { formatINR } from "@/lib/format";
 
 const MARQUEE = [
   "Free shipping across India on all orders",
@@ -28,7 +32,29 @@ export default function Header() {
   const { count: wishCount } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [q, setQ] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const debouncedQ = useDebounce(q, 300);
   const navigate = useNavigate();
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const { data: searchData, isLoading: isSearching } = useQuery({
+    queryKey: ['products', 'search', debouncedQ],
+    queryFn: () => getProductsPaginated({ search: debouncedQ, limit: 5 }),
+    enabled: debouncedQ.trim().length > 1,
+  });
+
+  const searchResults = searchData?.products || [];
 
   const marqueeItems = activeCampaign?.bannerText
     ? [activeCampaign.bannerText, ...MARQUEE]
@@ -37,8 +63,9 @@ export default function Header() {
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
     if (q.trim()) {
-      navigate(`/shop?q=${encodeURIComponent(q.trim())}`);
+      navigate(`/shop?search=${encodeURIComponent(q.trim())}`);
       setMobileOpen(false);
+      setIsFocused(false);
     }
   }
 
@@ -75,12 +102,13 @@ export default function Header() {
           </div>
 
           {/* Centered Search Bar */}
-          <div className="hidden lg:flex flex-1 max-w-xl mx-auto">
-            <form onSubmit={submitSearch} className="relative flex items-center w-full">
+          <div className="hidden lg:flex flex-1 max-w-xl mx-auto relative" ref={searchContainerRef}>
+            <form onSubmit={submitSearch} className="relative flex items-center w-full z-50">
               <input
                 type="text"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                onFocus={() => setIsFocused(true)}
                 placeholder="What are you looking for today?"
                 className="w-full h-[42px] bg-sand/50 hover:bg-sand/80 focus:bg-white text-ink placeholder:text-ink/40 text-sm px-6 pr-12 rounded-full border border-transparent focus:border-copper focus:ring-4 focus:ring-copper/10 transition-all duration-300 outline-none shadow-sm focus:shadow-md"
                 aria-label="Search products"
@@ -93,6 +121,48 @@ export default function Header() {
                 <Search size={14} />
               </button>
             </form>
+            
+            {/* Desktop Live Search Dropdown */}
+            {isFocused && q.trim().length > 1 && (
+              <div className="absolute top-[48px] left-0 w-full bg-white rounded-xl shadow-2xl border border-ink/[0.04] overflow-hidden z-50 flex flex-col">
+                {isSearching ? (
+                  <div className="p-6 text-center text-sm text-ink/60">Searching...</div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    <div className="flex flex-col max-h-[350px] overflow-y-auto p-2">
+                      {searchResults.map(product => (
+                        <Link 
+                          key={product.id} 
+                          to={`/product/${product.slug}`}
+                          onClick={() => {
+                            setIsFocused(false);
+                            setQ("");
+                          }}
+                          className="flex items-center gap-4 p-3 hover:bg-sand/40 rounded-lg transition-colors"
+                        >
+                          <img src={product.images[0]} alt={product.name} className="w-12 h-12 object-cover rounded bg-sand" />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-semibold text-ink truncate">{product.name}</span>
+                            <span className="text-xs text-ink/60 font-medium">{formatINR(product.price)}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link 
+                      to={`/shop?search=${encodeURIComponent(q.trim())}`}
+                      onClick={() => setIsFocused(false)}
+                      className="p-3 bg-sand/30 text-center text-xs font-bold text-copper hover:bg-sand/60 transition-colors uppercase tracking-wider"
+                    >
+                      View all {searchData?.pagination?.total} results
+                    </Link>
+                  </>
+                ) : (
+                  <div className="p-8 text-center">
+                    <p className="text-sm text-ink/70">No products found for "{q}"</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Controls */}
@@ -158,7 +228,7 @@ export default function Header() {
         </div>
 
         {/* Mobile Search Input */}
-        <div className="lg:hidden pb-3">
+        <div className="lg:hidden pb-3 relative">
           <form onSubmit={submitSearch} className="relative flex items-center w-full">
             <input
               type="text"
@@ -175,6 +245,47 @@ export default function Header() {
               <Search size={12} />
             </button>
           </form>
+          
+          {/* Mobile Live Search Dropdown */}
+          {q.trim().length > 1 && (
+            <div className="absolute top-[44px] left-0 w-full bg-white rounded-xl shadow-2xl border border-ink/[0.04] overflow-hidden z-50 flex flex-col">
+              {isSearching ? (
+                <div className="p-4 text-center text-xs text-ink/60">Searching...</div>
+              ) : searchResults.length > 0 ? (
+                <>
+                  <div className="flex flex-col max-h-[250px] overflow-y-auto p-2">
+                    {searchResults.map(product => (
+                      <Link 
+                        key={product.id} 
+                        to={`/product/${product.slug}`}
+                        onClick={() => {
+                          setQ("");
+                        }}
+                        className="flex items-center gap-3 p-2 hover:bg-sand/40 rounded-lg transition-colors"
+                      >
+                        <img src={product.images[0]} alt={product.name} className="w-10 h-10 object-cover rounded bg-sand" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs font-semibold text-ink truncate">{product.name}</span>
+                          <span className="text-[10px] text-ink/60 font-medium">{formatINR(product.price)}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link 
+                    to={`/shop?search=${encodeURIComponent(q.trim())}`}
+                    onClick={() => setQ("")}
+                    className="p-3 bg-sand/30 text-center text-[10px] font-bold text-copper hover:bg-sand/60 transition-colors uppercase tracking-wider"
+                  >
+                    View all {searchData?.pagination?.total} results
+                  </Link>
+                </>
+              ) : (
+                <div className="p-6 text-center">
+                  <p className="text-xs text-ink/70">No products found for "{q}"</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
