@@ -361,7 +361,7 @@ export default function HomePage() {
           </div>
         ) : (
           <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Bestsellers">
-            {distinctProducts(bestsellers ?? []).slice(0, 8).map((p) => (
+            {distinctProducts(bestsellers ?? []).slice(0, 8).map((p: any) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </Carousel>

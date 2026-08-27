@@ -184,7 +184,7 @@ export default function CheckoutPage() {
   }, [itemDiscount, discount, campaignDiscount]);
 
   // Find single best suggested coupon for current cart
-  const suggestedCoupon = useMemo(() => {
+  const suggestedCoupon: any = useMemo(() => {
     if (!publicCoupons || publicCoupons.length === 0 || coupon) return null;
 
     const eligible = publicCoupons

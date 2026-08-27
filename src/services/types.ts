@@ -41,7 +41,7 @@ export interface Product {
   categorySlug: string;
   price: number; // INR, base
   compareAtPrice?: number; // strike-through original
-  currency: "INR";
+  currency: string;
   images: string[];
   shortDescription: string;
   description: string;

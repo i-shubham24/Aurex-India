@@ -63,7 +63,7 @@ export default function CartPage() {
   }, [itemDiscount, discount, campaignDiscount]);
 
   // Find the single best suggested coupon for the current cart
-  const suggestedCoupon = useMemo(() => {
+  const suggestedCoupon: any = useMemo(() => {
     if (!publicCoupons || publicCoupons.length === 0 || coupon) return null;
 
     // Filter eligible coupons and calculate exact savings

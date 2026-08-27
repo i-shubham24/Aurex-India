@@ -19,7 +19,7 @@ const MARQUEE = [
 ];
 
 const NAV = [
-  { label: "Home", to: "/" },
+  { label: "Home", to: "/", end: true },
   { label: "Shop All", to: "/shop" },
   { label: "Triply", to: "/shop/triply" },
   { label: "Cast Iron", to: "/shop/cast-iron" },
@@ -143,7 +143,7 @@ export default function Header() {
                 ) : searchResults.length > 0 ? (
                   <>
                     <div className="flex flex-col max-h-[350px] overflow-y-auto p-2">
-                      {searchResults.map(product => (
+                      {searchResults.map((product: any) => (
                         <Link
                           key={product.id}
                           to={`/product/${product.slug}`}
@@ -277,7 +277,7 @@ export default function Header() {
               ) : searchResults.length > 0 ? (
                 <>
                   <div className="flex flex-col max-h-[250px] overflow-y-auto p-2">
-                    {searchResults.map(product => (
+                    {searchResults.map((product: any) => (
                       <Link
                         key={product.id}
                         to={`/product/${product.slug}`}

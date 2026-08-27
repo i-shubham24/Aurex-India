@@ -43,7 +43,7 @@ export default function ProductPage() {
   const { add, lines, setQty, activeCampaign } = useCart();
   const { has, toggle } = useWishlist();
   const { user, openAuthModal } = useAuth();
-  const { show } = useToast();
+  const toast = useToast();
 
   const { data: product, isLoading: loading } = useQuery({
     queryKey: ['product', slug],
@@ -94,14 +94,14 @@ export default function ProductPage() {
         title: newTitle.trim() || `${newRating} Star Rating`,
         comment: newComment.trim() || "Great quality cookware, very happy with the purchase.",
       });
-      show("⭐ Review submitted successfully! Thank you for your verified feedback.", "success");
+      toast.success("⭐ Review submitted successfully! Thank you for your verified feedback.");
       setShowReviewModal(false);
       setNewTitle("");
       setNewComment("");
       setNewRating(5);
       refetchReviews();
     } catch (err: any) {
-      show(err.response?.data?.message || "Failed to submit review", "error");
+      toast.error(err.response?.data?.message || "Failed to submit review");
     } finally {
       setIsSubmitting(false);
     }

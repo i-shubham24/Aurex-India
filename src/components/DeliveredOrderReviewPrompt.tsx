@@ -8,7 +8,7 @@ import { useToast } from "@/context/ToastContext";
 
 export default function DeliveredOrderReviewPrompt() {
   const { user } = useAuth();
-  const { show } = useToast();
+  const toast = useToast();
   const queryClient = useQueryClient();
 
   const { data: myReviewsData } = useQuery({
@@ -121,7 +121,7 @@ export default function DeliveredOrderReviewPrompt() {
       });
 
       setIsSubmitted(true);
-      show("⭐ Thank you! Your review is now live.", "success");
+      toast.success("⭐ Thank you! Your review is now live.");
 
       const reviewed: string[] = JSON.parse(
         localStorage.getItem("aurex_reviewed_products") || "[]"
@@ -137,7 +137,7 @@ export default function DeliveredOrderReviewPrompt() {
         setIsSubmitted(false);
       }, 2200);
     } catch (err: any) {
-      show(err.response?.data?.message || "Failed to submit rating", "error");
+      toast.error(err.response?.data?.message || "Failed to submit rating");
       setIsSubmitting(false);
     }
   };

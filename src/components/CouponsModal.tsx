@@ -33,7 +33,7 @@ export default function CouponsModal({
   onApplyCoupon,
   onRemoveCoupon,
 }: CouponsModalProps) {
-  const { show } = useToast();
+  const toast = useToast();
   const [manualCode, setManualCode] = useState("");
   const [applyingCode, setApplyingCode] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export default function CouponsModal({
     e.stopPropagation();
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    show(`Copied code "${code}"`, "success");
+    toast.success(`Copied code "${code}"`);
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
