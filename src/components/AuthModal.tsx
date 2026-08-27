@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import PasswordMeter from "@/components/PasswordMeter";
 import {
@@ -27,6 +27,8 @@ export default function AuthModal() {
   const [signupTouched, setSignupTouched] = useState<Partial<Record<string, boolean>>>({});
   const [signupFormError, setSignupFormError] = useState("");
   const [signupBusy, setSignupBusy] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!authModalOpen) return null;
 
@@ -185,15 +187,25 @@ export default function AuthModal() {
                 </div>
                 <div>
                   <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-password">Password</label>
-                  <input
-                    id="modal-password"
-                    type="password"
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className="input text-sm mt-1.5"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      id="modal-password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className="input text-sm mt-1.5 w-full pr-10"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink transition-colors mt-0.5"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
                 {loginError && <p className="text-xs text-red-600 font-medium">{loginError}</p>}
                 <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-2 shadow-md">
@@ -275,16 +287,26 @@ export default function AuthModal() {
 
                 <div>
                   <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-signup-password">Password</label>
-                  <input
-                    id="modal-signup-password"
-                    type="password"
-                    value={signupValues.password}
-                    onChange={(e) => setSignupVal("password", e.target.value)}
-                    onBlur={() => blurSignupField("password")}
-                    className={`input text-sm mt-1.5 ${errCls("password")}`}
-                    placeholder="At least 8 characters"
-                    autoComplete="new-password"
-                  />
+                  <div className="relative">
+                    <input
+                      id="modal-signup-password"
+                      type={showPassword ? "text" : "password"}
+                      value={signupValues.password}
+                      onChange={(e) => setSignupVal("password", e.target.value)}
+                      onBlur={() => blurSignupField("password")}
+                      className={`input text-sm mt-1.5 w-full pr-10 ${errCls("password")}`}
+                      placeholder="At least 8 characters"
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink transition-colors mt-0.5"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   <div className="mt-1.5">
                     <PasswordMeter value={signupValues.password} />
                   </div>

@@ -10,6 +10,7 @@ import {
 import { data } from "@/services";
 import type { OtpChallenge, SignUpInput, User } from "@/services/types";
 import { useToast } from "@/context/ToastContext";
+import { authApi } from "@/api/authApi";
 
 interface AuthContextValue {
   user: User | null;
@@ -47,39 +48,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    data
-      .getCurrentUser()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    const token = localStorage.getItem("aurex_token");
+    if (token) {
+      authApi.getMe()
+        .then(({ user }) => setUser(user))
+        .catch(() => {
+          localStorage.removeItem("aurex_token");
+          setUser(null);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const u = await data.signIn(email, password);
+      const { token, user: u } = await authApi.login(email, password);
+      localStorage.setItem("aurex_token", token);
       setUser(u);
       toast.success("Welcome back! Signed in successfully.");
       return u;
-    } catch (err) {
-      toast.error((err as Error).message || "Failed to sign in.");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Failed to sign in.";
+      toast.error(msg);
       throw err;
     }
   }, [toast]);
 
   const signUp = useCallback(async (input: SignUpInput) => {
     try {
-      const u = await data.signUp(input);
+      const { token, user: u } = await authApi.register(input);
+      localStorage.setItem("aurex_token", token);
       setUser(u);
       toast.success("Account created successfully! Welcome to Aurex.");
       return u;
-    } catch (err) {
-      toast.error((err as Error).message || "Failed to create account.");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Failed to create account.";
+      toast.error(msg);
       throw err;
     }
   }, [toast]);
 
   const signOut = useCallback(async () => {
-    await data.signOut();
+    localStorage.removeItem("aurex_token");
     setUser(null);
     toast.info("Signed out successfully.");
   }, [toast]);

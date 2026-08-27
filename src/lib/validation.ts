@@ -34,12 +34,10 @@ export function phoneError(v: string): string | null {
   return null;
 }
 
-/** Strong password: 8+ chars with lower, upper and a number. */
+/** Password: 8+ chars with a number. */
 export function passwordError(v: string): string | null {
   if (!v) return "Please create a password.";
   if (v.length < 8) return "Use at least 8 characters.";
-  if (!/[a-z]/.test(v)) return "Add a lowercase letter.";
-  if (!/[A-Z]/.test(v)) return "Add an uppercase letter.";
   if (!/\d/.test(v)) return "Add a number.";
   return null;
 }
