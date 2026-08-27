@@ -150,6 +150,8 @@ export interface ProductQuery {
   isFeatured?: boolean;
   priceMin?: number;
   priceMax?: number;
+  page?: number;
+  limit?: number;
 }
 
 /** The single contract every backend adapter must satisfy. */

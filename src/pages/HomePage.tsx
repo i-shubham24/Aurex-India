@@ -1,8 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, X, Tag } from "lucide-react";
-import { data } from "@/services";
-import { useAsync } from "@/lib/useAsync";
 import { discountPct } from "@/lib/format";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
@@ -47,16 +45,9 @@ const HERO_SLIDES = [
   },
 ];
 
-const MOCK_CATEGORIES = [
-  { key: "cat-triply", name: "Triply Steel", to: "/shop/triply", image: "/products/wc-653-0.webp" },
-  { key: "cat-castiron", name: "Cast Iron", to: "/shop/cast-iron", image: "/products/663-0.png" },
-  { key: "cat-kadhai", name: "Kadhais", to: "/shop/kadhai", image: "/products/wc-981-0.webp" },
-  { key: "cat-honeycomb", name: "Honeycomb", to: "/shop/honeycomb", image: "/products/wc-655-0.webp" },
-  { key: "cat-sets", name: "Cookware Sets", to: "/shop?q=set", image: "/products/wc-644-0.webp" },
-  { key: "cat-tawas", name: "Tawas & Grids", to: "/shop?q=tawa", image: "/products/wc-649-0.webp" },
-  { key: "cat-frypans", name: "Fry Pans", to: "/shop?q=pan", image: "/products/wc-646-s0-0.webp" },
-  { key: "cat-saucepans", name: "Sauce Pots", to: "/shop?q=sauce", image: "/products/wc-661-0.webp" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getCategories } from "@/api/categoryApi";
+import { getProducts } from "@/api/productApi";
 
 const testimonials = [
   { name: "Priya Nair", place: "Kochi", rating: 5, text: "The triply kadai heats so evenly — no more burnt centres. Feels like a lifetime purchase." },
@@ -114,8 +105,22 @@ const faqs = [
 ];
 
 export default function HomePage() {
-  const { data: bestsellers } = useAsync(() => data.getProducts({ sort: "rating" }), []);
-  const { data: allProducts } = useAsync(() => data.getProducts(), []);
+  const { data: bestsellers, isLoading: isLoadingBestsellers } = useQuery({
+    queryKey: ['products', 'bestsellers'],
+    queryFn: () => getProducts({ sort: "rating" })
+  });
+
+  const { data: allProducts, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['products', 'all'],
+    queryFn: () => getProducts()
+  });
+
+  const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
+  });
+
+  const categories = categoriesResponse?.data?.categories || [];
 
   const [heroSlides, setHeroSlides] = useState<any[]>(HERO_SLIDES);
 
@@ -152,7 +157,11 @@ export default function HomePage() {
     ).slice(0, 6);
   }, [allProducts]);
 
-
+  const promoCats = useMemo(() => {
+    if (!categories.length) return [];
+    const shuffled = [...categories].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 2);
+  }, [categories]);
 
   return (
     <div className="w-full bg-cream min-h-screen">
@@ -206,9 +215,6 @@ export default function HomePage() {
                   <Link to={s.to} className="inline-flex items-center justify-center gap-2 rounded-sm bg-white text-ink hover:bg-cream transition-colors text-sm font-semibold px-8 py-3.5">
                     {s.cta}
                   </Link>
-                  <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-sm border border-white/30 hover:border-white hover:bg-white/5 transition-colors text-sm font-medium text-cream px-8 py-3.5">
-                    Explore collection
-                  </Link>
                 </div>
               </div>
             </div>
@@ -231,84 +237,84 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="marquee overflow-hidden py-4 w-full select-none">
-          <div className="marquee-track flex gap-8 items-center" style={{ animationDuration: "50s" }}>
-            {[0, 1].map((dup) => (
-              <div key={dup} className="flex shrink-0 gap-8 items-center" aria-hidden={dup === 1}>
-                {MOCK_CATEGORIES.map((t) => (
-                  <Link key={t.key + (dup ? "-dup" : "")} to={t.to} className="group flex flex-col items-center text-center cursor-fork py-2">
-                    <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-white border border-ink/[0.06] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105">
-                      {/* Image fades and scales down on hover */}
-                      <img
-                        src={t.image}
-                        alt={t.name}
-                        loading="lazy"
-                        className="w-[75%] h-[75%] object-contain transition-all duration-300 group-hover:scale-50 group-hover:opacity-0"
-                      />
-                      
-                      {/* Translucent cover overlay fades in on hover */}
-                      <div className="absolute inset-0 bg-copper/85 backdrop-blur-[2px] flex items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                        <span className="text-white text-[9px] sm:text-[11px] font-black tracking-wider uppercase text-center leading-tight">
-                          {t.name}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="mt-3 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider max-w-[100px] sm:max-w-[120px] truncate">
-                      {t.name}
-                    </span>
-                  </Link>
-                ))}
+        {isLoadingCategories ? (
+          <div className="flex gap-8 overflow-hidden py-4 w-full">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="flex shrink-0 flex-col items-center gap-3">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-gray-200 animate-pulse border border-ink/[0.06]" />
+                <div className="h-3 w-16 bg-gray-200 animate-pulse rounded" />
               </div>
             ))}
           </div>
-        </div>
+        ) : (
+          <div className="marquee overflow-hidden py-4 w-full select-none">
+            <div className="marquee-track flex gap-8 items-center" style={{ animationDuration: "50s" }}>
+              {[0, 1].map((dup) => (
+                <div key={dup} className="flex shrink-0 gap-8 items-center" aria-hidden={dup === 1}>
+                  {categories.map((t: any) => (
+                    <Link key={t._id + (dup ? "-dup" : "")} to={`/shop/${t.slug}`} className="group flex flex-col items-center text-center cursor-fork py-2">
+                      <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-white border border-ink/[0.06] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105">
+                        <img
+                          src={t.image?.url}
+                          alt={t.name}
+                          loading="lazy"
+                          className="w-[75%] h-[75%] object-contain transition-all duration-300 group-hover:scale-50 group-hover:opacity-0"
+                        />
+                        
+                        <div className="absolute inset-0 bg-copper/85 backdrop-blur-[2px] flex items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                          <span className="text-white text-[9px] sm:text-[11px] font-black tracking-wider uppercase text-center leading-tight">
+                            {t.name}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="mt-3 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider max-w-[100px] sm:max-w-[120px] truncate">
+                        {t.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Promo Banner Grid */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          {[
-            {
-              title: "Triply Collection",
-              sub: "Three bonded layers for fast, even, professional heat distribution.",
-              to: "/shop/triply",
-              cta: "Shop Triply",
-              image: "/brand/tri-ply-range.webp",
-              tint: "from-ink/95 via-ink/60",
-            },
-            {
-              title: "Cast Iron, Reimagined",
-              sub: "Pre-seasoned, naturally non-stick, chemical-free and toxin-free.",
-              to: "/shop/cast-iron",
-              cta: "Shop Cast Iron",
-              image: "/brand/cast-iron-range.webp",
-              tint: "from-forest/95 via-forest/55",
-            },
-          ].map((b) => (
-            <Reveal key={b.title}>
-              <Link
-                to={b.to}
-                className="group relative isolate flex min-h-[260px] items-end overflow-hidden rounded-xl2 hover-lift sm:min-h-[320px] shadow-sm border border-ink/[0.04]"
-              >
-                <img
-                  src={b.image}
-                  alt={b.title}
-                  loading="lazy"
-                  className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className={`absolute inset-0 -z-10 bg-gradient-to-t ${b.tint} to-transparent`} />
-                <div className="p-6 sm:p-8 text-cream">
-                  <h3 className="text-xl sm:text-2xl font-bold">{b.title}</h3>
-                  <p className="mt-2 max-w-xs text-xs sm:text-sm text-cream/80">{b.sub}</p>
-                  <span className="btn-copper mt-4 inline-flex text-xs py-2 px-4">
-                    {b.cta} <ArrowRight size={13} />
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      {promoCats.length > 0 && (
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {promoCats.map((cat, idx) => {
+              const tint = idx % 2 === 0 ? "from-ink/95 via-ink/60" : "from-forest/95 via-forest/55";
+              return (
+                <Reveal key={cat._id}>
+                  <Link
+                    to={`/shop/${cat.slug}`}
+                    className="group relative isolate flex min-h-[260px] items-end overflow-hidden rounded-xl2 hover-lift sm:min-h-[320px] shadow-sm border border-ink/[0.04]"
+                  >
+                    <img
+                      src={cat.image?.url || "/brand/full-range.webp"}
+                      alt={cat.name}
+                      loading="lazy"
+                      className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className={`absolute inset-0 -z-10 bg-gradient-to-t ${tint} to-transparent`} />
+                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 z-10 pointer-events-none">
+                      <img src="/brand/logo.png" alt="Aurex" className="h-4 sm:h-5 object-contain" />
+                    </div>
+                    <div className="p-6 sm:p-8 text-cream">
+                      <h3 className="text-xl sm:text-2xl font-bold">{cat.name}</h3>
+                      <p className="mt-2 max-w-xs text-xs sm:text-sm text-cream/80 line-clamp-2">{cat.description}</p>
+                      <span className="btn-copper mt-4 inline-flex text-xs py-2 px-4 items-center gap-1.5">
+                        Shop {cat.name} <ArrowRight size={13} />
+                      </span>
+                    </div>
+                  </Link>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
 
       {/* Bestsellers Products */}
@@ -322,11 +328,25 @@ export default function HomePage() {
             View all <ArrowRight size={12} />
           </Link>
         </div>
-        <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Bestsellers">
-          {distinctProducts(bestsellers ?? []).slice(0, 8).map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </Carousel>
+        
+        {isLoadingBestsellers ? (
+          <div className="flex gap-5 overflow-hidden w-full">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="basis-[75%] sm:basis-1/4 lg:basis-1/5 shrink-0 flex flex-col gap-3 p-4 border border-ink/[0.04] rounded-xl2 bg-white">
+                <div className="w-full aspect-square bg-gray-200 animate-pulse rounded-lg" />
+                <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded mt-2" />
+                <div className="h-3 w-1/2 bg-gray-200 animate-pulse rounded" />
+                <div className="h-4 w-1/3 bg-gray-200 animate-pulse rounded mt-2" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Bestsellers">
+            {distinctProducts(bestsellers ?? []).slice(0, 8).map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </Carousel>
+        )}
       </section>
 
       {/* Best Deals Banner & Carousel */}
@@ -339,11 +359,25 @@ export default function HomePage() {
               Use coupon code <b className="text-copper">WELCOME15</b> for an extra 15% discount on your first purchase.
             </p>
           </div>
-          <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Best deals">
-            {deals.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </Carousel>
+          
+          {isLoadingProducts ? (
+            <div className="flex gap-5 overflow-hidden w-full">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="basis-[75%] sm:basis-1/4 lg:basis-1/5 shrink-0 flex flex-col gap-3 p-4 border border-ink/[0.04] rounded-xl2 bg-white">
+                  <div className="w-full aspect-square bg-gray-200 animate-pulse rounded-lg" />
+                  <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded mt-2" />
+                  <div className="h-3 w-1/2 bg-gray-200 animate-pulse rounded" />
+                  <div className="h-4 w-1/3 bg-gray-200 animate-pulse rounded mt-2" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Carousel slideClassName="basis-[75%] sm:basis-1/4 lg:basis-1/5" gapClassName="gap-5" ariaLabel="Best deals">
+              {deals.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </Carousel>
+          )}
         </div>
       </section>
 

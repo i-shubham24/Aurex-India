@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Flame, ShieldCheck, Recycle, Check, Minus, Plus, ShoppingBag, Truck } from "lucide-react";
-import { data } from "@/services";
-import { useAsync } from "@/lib/useAsync";
+import { useQuery } from "@tanstack/react-query";
+import { getProductBySlug, getProducts } from "@/api/productApi";
 import { formatINR, discountPct } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import Rating from "@/components/Rating";
@@ -36,15 +36,21 @@ function parseSpecs(product: Product): [string, string][] {
 export default function ProductPage() {
   const { slug } = useParams();
   const { add } = useCart();
-  const { data: product, loading } = useAsync(() => data.getProduct(slug!), [slug]);
-  const { data: reviews } = useAsync(
-    () => (product ? data.getReviews(product.id) : Promise.resolve([])),
-    [product?.id]
-  );
-  const { data: related } = useAsync(
-    () => (product ? data.getProducts({ categorySlug: product.categorySlug }) : Promise.resolve([])),
-    [product?.categorySlug]
-  );
+  const { data: product, isLoading: loading } = useQuery({
+    queryKey: ['product', slug],
+    queryFn: () => getProductBySlug(slug!),
+    enabled: !!slug,
+  });
+  
+  // Reviews aren't fully integrated in the backend yet, defaulting to empty
+  const reviews: any[] = [];
+  
+  const { data: relatedResponse } = useQuery({
+    queryKey: ['products', 'related', product?.categorySlug],
+    queryFn: () => getProducts({ categorySlug: product?.categorySlug }),
+    enabled: !!product?.categorySlug,
+  });
+  const related = relatedResponse || [];
 
   const [activeImg, setActiveImg] = useState(0);
   const [variant, setVariant] = useState<ProductVariant | undefined>(undefined);
