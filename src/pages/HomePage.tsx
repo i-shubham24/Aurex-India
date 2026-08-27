@@ -7,7 +7,6 @@ import { discountPct } from "@/lib/format";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
 import Reveal from "@/components/Reveal";
-import Typewriter from "@/components/Typewriter";
 import Carousel from "@/components/Carousel";
 import Seo from "@/components/Seo";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
@@ -165,55 +164,50 @@ export default function HomePage() {
       />
 
       {/* Hero Carousel Banner Section */}
-      <section className="relative overflow-hidden pt-6 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="orb -left-24 -top-16 h-72 w-72 bg-copper/15" />
-        <div className="orb right-[-6rem] top-40 h-80 w-80 bg-gold/15" />
-        <div className="orb bottom-[-4rem] left-1/3 h-64 w-64 bg-sky/10" />
+      <section className="relative pt-6 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        <Carousel slideClassName="basis-full" gapClassName="gap-0" autoPlayMs={6500} showDots={true} showArrows={true} leftArrow={true} ariaLabel="Featured collections" className="rounded-xl2 overflow-hidden shadow-sm border border-ink/[0.04] bg-ink">
+        <Carousel slideClassName="basis-full" gapClassName="gap-0" autoPlayMs={6500} showDots={true} showArrows={true} leftArrow={true} ariaLabel="Featured collections" className="rounded-lg overflow-hidden shadow-sm border border-ink/[0.04] bg-ink">
           {heroSlides.map((s, i) => (
             <div
               key={i}
-              className="relative min-h-[380px] sm:min-h-[480px] lg:min-h-[520px] flex items-center overflow-hidden w-full group/slide"
+              className="relative min-h-[420px] sm:min-h-[500px] lg:min-h-[580px] flex items-center overflow-hidden w-full group/slide"
             >
-              {/* Background image with subtle panning animation */}
+              {/* Background image */}
               <img
                 src={s.image}
                 alt={s.alt}
                 loading={i === 0 ? "eager" : "lazy"}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[12000ms] ease-out scale-100 group-hover/slide:scale-105"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-[8000ms] ease-out scale-100 group-hover/slide:scale-[1.02]"
               />
               
-              {/* Responsive Gradient overlay/scrim for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/65 to-black/20 md:bg-gradient-to-r md:from-ink/95 md:via-ink/75 md:to-transparent" />
+              {/* Elegant Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent md:bg-gradient-to-r md:from-ink/85 md:via-ink/40 md:to-transparent" />
               
               {/* Content overlay */}
               <div className="relative z-10 px-6 sm:px-12 lg:px-20 py-12 max-w-xl sm:max-w-2xl text-cream">
-                <span className="inline-block bg-white/10 backdrop-blur-md border border-white/10 text-gold text-[10px] sm:text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                <span className="block text-gold/90 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-4">
                   {s.chip}
                 </span>
                 
-                <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white">
-                  <span className="block">{s.lead}</span>
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif text-white tracking-tight leading-[1.1]">
+                  {s.lead}{" "}
                   {s.typewriter ? (
-                    <span className="block min-h-[1.15em] text-gold">
-                      <Typewriter className="text-gold" words={s.typewriter} />
-                    </span>
+                    <span className="text-cream/90 italic font-light">{s.typewriter[0]}</span>
                   ) : (
-                    <span className="text-gold">{s.accent}</span>
+                    <span className="text-cream/90 italic font-light">{s.accent}</span>
                   )}
                 </h1>
                 
-                <p className="mt-4 text-sm sm:text-base lg:text-lg text-cream/80 font-normal leading-relaxed max-w-md sm:max-w-lg">
+                <p className="mt-6 text-sm sm:text-base lg:text-lg text-cream/70 font-light leading-relaxed max-w-md">
                   {s.subtitle}
                 </p>
                 
-                <div className="mt-8 flex flex-wrap gap-3.5">
-                  <Link to={s.to} className="inline-flex items-center justify-center gap-2 rounded-full bg-gold text-ink hover:bg-gold-light hover:scale-105 active:scale-95 transition-all text-sm font-black px-6 py-3 shadow-md">
-                    {s.cta} <ArrowRight size={16} />
+                <div className="mt-10 flex flex-wrap gap-4">
+                  <Link to={s.to} className="inline-flex items-center justify-center gap-2 rounded-sm bg-white text-ink hover:bg-cream transition-colors text-sm font-semibold px-8 py-3.5">
+                    {s.cta}
                   </Link>
-                  <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-full border border-cream/35 bg-white/5 hover:bg-white hover:text-ink hover:border-white transition-all text-sm font-bold text-cream px-6 py-3 backdrop-blur-sm">
-                    Shop all
+                  <Link to="/shop" className="inline-flex items-center justify-center gap-2 rounded-sm border border-white/30 hover:border-white hover:bg-white/5 transition-colors text-sm font-medium text-cream px-8 py-3.5">
+                    Explore collection
                   </Link>
                 </div>
               </div>
