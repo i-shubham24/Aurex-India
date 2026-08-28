@@ -19,7 +19,6 @@ export const authApi = {
   },
   
   register: async (input: SignUpInput): Promise<{ token: string; user: User }> => {
-    // The backend register endpoint expects firstName, lastName, email, password
     const names = input.fullName.split(' ');
     const firstName = names[0];
     const lastName = names.slice(1).join(' ') || ' ';
@@ -41,8 +40,11 @@ export const authApi = {
     return { user: mapUser(response.data.data.user) };
   },
 
-  firebaseLogin: async (idToken: string): Promise<{ token: string; user: User }> => {
-    const response = await apiClient.post('/auth/firebase-login', { idToken });
+  firebaseLogin: async (
+    idToken: string,
+    profile?: { firstName?: string; lastName?: string; email?: string }
+  ): Promise<{ token: string; user: User }> => {
+    const response = await apiClient.post('/auth/firebase-login', { idToken, ...profile });
     return {
       token: response.data.data.token || response.data.data.accessToken,
       user: mapUser(response.data.data.user)

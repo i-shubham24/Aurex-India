@@ -18,7 +18,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   signIn: (identifier: string, password: string) => Promise<User>;
   signUp: (input: SignUpInput) => Promise<User>;
-  signInWithFirebaseToken: (idToken: string) => Promise<User>;
+  signInWithFirebaseToken: (idToken: string, profile?: { firstName?: string; lastName?: string; email?: string }) => Promise<User>;
   signOut: () => Promise<void>;
   requestOtp: (phone: string) => Promise<OtpChallenge>;
   verifyOtp: (phone: string, code: string, fullName?: string) => Promise<User>;
@@ -99,12 +99,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const signInWithFirebaseToken = useCallback(async (idToken: string) => {
+  const signInWithFirebaseToken = useCallback(async (
+    idToken: string,
+    profile?: { firstName?: string; lastName?: string; email?: string }
+  ) => {
     try {
-      const { token, user: u } = await authApi.firebaseLogin(idToken);
+      const { token, user: u } = await authApi.firebaseLogin(idToken, profile);
       localStorage.setItem("aurex_token", token);
       setUser(u);
-      toast.success("Signed in successfully with Phone OTP!");
+      toast.success(profile ? "Account created! Welcome to Aurex 🎉" : "Signed in successfully with Phone OTP!");
       return u;
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || "OTP Authentication failed.";
