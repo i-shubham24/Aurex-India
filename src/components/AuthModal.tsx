@@ -48,13 +48,20 @@ export default function AuthModal() {
 
   // ── reCAPTCHA helper ──────────────────────────────────────────────────────
   const getFreshVerifier = () => {
+    // Destroy any existing verifier and its container
     if ((window as any)._rcv) {
       try { (window as any)._rcv.clear(); } catch (_) {}
       (window as any)._rcv = null;
     }
-    const el = document.getElementById("recaptcha-container");
-    if (el) el.innerHTML = "";
-    (window as any)._rcv = new RecaptchaVerifier(auth, "recaptcha-container", {
+    if ((window as any)._rcvEl && (window as any)._rcvEl.parentNode) {
+      (window as any)._rcvEl.parentNode.removeChild((window as any)._rcvEl);
+    }
+    // Create a fresh hidden div on the body each time
+    const el = document.createElement("div");
+    el.style.display = "none";
+    document.body.appendChild(el);
+    (window as any)._rcvEl = el;
+    (window as any)._rcv = new RecaptchaVerifier(auth, el, {
       size: "invisible",
       callback: () => {},
       "expired-callback": () => { (window as any)._rcv = null; },
@@ -65,6 +72,10 @@ export default function AuthModal() {
   const clearVerifier = () => {
     try { (window as any)._rcv?.clear(); } catch (_) {}
     (window as any)._rcv = null;
+    if ((window as any)._rcvEl && (window as any)._rcvEl.parentNode) {
+      (window as any)._rcvEl.parentNode.removeChild((window as any)._rcvEl);
+      (window as any)._rcvEl = null;
+    }
   };
 
   // ── LOGIN: Send OTP ───────────────────────────────────────────────────────
@@ -189,8 +200,6 @@ export default function AuthModal() {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-ink/70 backdrop-blur-md animate-fade-in overflow-y-auto">
-      {/* Invisible reCAPTCHA container */}
-      <div id="recaptcha-container" />
 
       <div
         className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20 flex flex-col md:flex-row my-auto max-h-[90vh] md:max-h-[85vh]"
