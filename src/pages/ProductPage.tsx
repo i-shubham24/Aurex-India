@@ -42,6 +42,83 @@ function parseSpecs(product: Product): [string, string][] {
   return rows;
 }
 
+function ProductPageSkeleton() {
+  return (
+    <div className="container-x py-10 pb-24 lg:pb-10">
+      {/* Breadcrumb Skeleton */}
+      <div className="mb-6 flex items-center gap-2">
+        <div className="h-4 w-12 skeleton-shimmer rounded" />
+        <span className="text-ink/20">/</span>
+        <div className="h-4 w-16 skeleton-shimmer rounded" />
+        <span className="text-ink/20">/</span>
+        <div className="h-4 w-40 skeleton-shimmer rounded" />
+      </div>
+
+      <div className="grid gap-10 lg:grid-cols-2">
+        {/* Left Column: Image & Thumbnails Skeleton */}
+        <div className="space-y-4">
+          <div className="aspect-square w-full skeleton-shimmer rounded-xl2 ring-1 ring-ink/5" />
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-16 w-16 flex-shrink-0 skeleton-shimmer rounded-xl ring-1 ring-ink/5" />
+            ))}
+          </div>
+        </div>
+
+        {/* Right Column: Details Skeleton */}
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="h-3.5 w-28 skeleton-shimmer rounded" />
+            <div className="h-9 w-4/5 skeleton-shimmer rounded-lg" />
+            <div className="h-4 w-36 skeleton-shimmer rounded" />
+          </div>
+
+          <div className="flex items-baseline gap-3 pt-2">
+            <div className="h-9 w-28 skeleton-shimmer rounded-lg" />
+            <div className="h-5 w-16 skeleton-shimmer rounded" />
+            <div className="h-6 w-32 skeleton-shimmer rounded-full" />
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <div className="h-4 w-full skeleton-shimmer rounded" />
+            <div className="h-4 w-11/12 skeleton-shimmer rounded" />
+            <div className="h-4 w-4/5 skeleton-shimmer rounded" />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <div className="h-12 flex-1 skeleton-shimmer rounded-xl" />
+            <div className="h-12 w-12 skeleton-shimmer rounded-xl" />
+          </div>
+
+          {/* Trust Badges Grid Skeleton */}
+          <div className="grid grid-cols-2 gap-3 pt-6 border-t border-ink/5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-ink/5 bg-white shadow-sm">
+                <div className="h-8 w-8 rounded-lg skeleton-shimmer flex-shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <div className="h-3.5 w-20 skeleton-shimmer rounded" />
+                  <div className="h-2.5 w-28 skeleton-shimmer rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Specifications & Description Skeleton */}
+      <div className="mt-14 space-y-6 border-t border-ink/10 pt-10">
+        <div className="h-6 w-36 skeleton-shimmer rounded" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="h-12 skeleton-shimmer rounded-xl" />
+          <div className="h-12 skeleton-shimmer rounded-xl" />
+          <div className="h-12 skeleton-shimmer rounded-xl" />
+          <div className="h-12 skeleton-shimmer rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductPage() {
   const { slug } = useParams();
   const { add, lines, setQty, activeCampaign } = useCart();
@@ -141,11 +218,7 @@ export default function ProductPage() {
   const specs = useMemo(() => (product ? parseSpecs(product) : []), [product]);
 
   if (loading) {
-    return (
-      <div className="container-x flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink/20 border-t-copper" />
-      </div>
-    );
+    return <ProductPageSkeleton />;
   }
   if (!product) {
     return (

@@ -22,6 +22,7 @@ const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const StoryPage = lazy(() => import("@/pages/StoryPage"));
 const ContactPage = lazy(() => import("@/pages/ContactPage"));
 const BlogPage = lazy(() => import("@/pages/BlogPage"));
+const BlogDetailPage = lazy(() => import("@/pages/BlogDetailPage"));
 const ContentPage = lazy(() => import("@/pages/ContentPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage"));
@@ -85,6 +86,7 @@ export default function App() {
             <Route path="/story" element={<StoryPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
             {/* Policy pages share one content component */}
             <Route path="/shipping" element={<ContentPage slug="shipping" />} />
             <Route path="/returns" element={<ContentPage slug="returns" />} />
