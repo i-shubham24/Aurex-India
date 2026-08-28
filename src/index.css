@@ -29,6 +29,13 @@
   ::selection {
     @apply bg-copper/20;
   }
+
+  /* Hide default floating reCAPTCHA badge so it doesn't block mobile screen or chat widget */
+  .grecaptcha-badge {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 }
 
 @layer components {
