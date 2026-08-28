@@ -62,7 +62,7 @@ export default function ProductCard({ product }: { product: Product }) {
   })();
 
   return (
-    <div className="group card relative flex flex-col overflow-hidden hover-lift cursor-fork w-full bg-white rounded-xl sm:rounded-xl2 border border-ink/[0.04] shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="group card relative flex flex-col overflow-hidden hover-lift cursor-fork w-full bg-white rounded-xl sm:rounded-xl2 border border-ink/10 shadow-card hover:shadow-lift transition-all duration-300">
       
       {/* Product Image Section */}
       <Link to={`/product/${product.slug}`} onMouseEnter={handlePrefetch} className="block relative aspect-square overflow-hidden bg-sand/30">

@@ -62,7 +62,7 @@
   }
 
   .card {
-    @apply rounded-xl2 bg-white shadow-card ring-1 ring-ink/[0.04];
+    @apply rounded-xl2 bg-white shadow-card ring-1 ring-ink/10;
   }
 
   .input {

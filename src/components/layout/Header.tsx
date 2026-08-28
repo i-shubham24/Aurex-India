@@ -83,7 +83,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/[0.06] bg-cream/95 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80 w-full">
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80 w-full shadow-sm">
       {/* Announcement marquee */}
       <div className="marquee overflow-hidden bg-ink py-2 text-cream">
         <div className="marquee-track text-xs font-medium">
@@ -123,15 +123,15 @@ export default function Header() {
                 onChange={(e) => setQ(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 placeholder="What are you looking for today?"
-                className="w-full h-[42px] bg-sand/50 hover:bg-sand/80 focus:bg-white text-ink placeholder:text-ink/40 text-sm px-6 pr-12 rounded-full border border-transparent focus:border-copper focus:ring-4 focus:ring-copper/10 transition-all duration-300 outline-none shadow-sm focus:shadow-md"
+                className="w-full h-[44px] bg-white text-ink placeholder:text-ink/50 text-sm px-6 pr-12 rounded-full border border-ink/15 hover:border-copper/60 focus:border-copper focus:ring-4 focus:ring-copper/15 transition-all duration-300 outline-none shadow-sm focus:shadow-md font-medium"
                 aria-label="Search products"
               />
               <button
                 type="submit"
-                className="absolute right-1.5 w-[30px] h-[30px] bg-copper rounded-full flex items-center justify-center text-white shadow-sm hover:bg-gold hover:text-ink transition-colors border-none outline-none"
+                className="absolute right-1.5 w-[32px] h-[32px] bg-copper rounded-full flex items-center justify-center text-white shadow-md hover:bg-copper-dark transition-all duration-200 border-none outline-none hover:scale-105 active:scale-95"
                 aria-label="Search"
               >
-                <Search size={14} />
+                <Search size={15} />
               </button>
             </form>
 
