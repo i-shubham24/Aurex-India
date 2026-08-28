@@ -6,6 +6,39 @@ import { useAuth } from "@/context/AuthContext";
 import PasswordMeter from "@/components/PasswordMeter";
 import { emailError, passwordError } from "@/lib/validation";
 
+/** Converts technical Firebase / backend error messages into friendly UI copy. */
+const friendlyError = (err: any): string => {
+  const code: string = err?.code || "";
+  const msg: string = (err?.response?.data?.message || err?.message || "").toLowerCase();
+
+  if (code === "auth/invalid-verification-code" || msg.includes("invalid verification code") || msg.includes("invalid-verification-code"))
+    return "Incorrect OTP — please double-check the code and try again.";
+  if (code === "auth/code-expired" || msg.includes("code-expired") || msg.includes("expired"))
+    return "Your OTP has expired. Please request a new one.";
+  if (code === "auth/too-many-requests" || msg.includes("too-many-requests") || msg.includes("too many"))
+    return "Too many attempts. Please wait a few minutes before trying again.";
+  if (code === "auth/captcha-check-failed" || msg.includes("captcha") || msg.includes("recaptcha"))
+    return "Verification check failed. Please refresh the page and try again.";
+  if (code === "auth/invalid-phone-number" || msg.includes("invalid-phone-number"))
+    return "This phone number doesn't look right. Please re-enter it.";
+  if (code === "auth/network-request-failed" || msg.includes("network"))
+    return "No internet connection. Please check your network and try again.";
+  if (code === "auth/session-expired" || msg.includes("session"))
+    return "Your session expired. Please go back and request a new OTP.";
+  if (msg.includes("duplicate") || msg.includes("duplicate_key") || msg.includes("already exists"))
+    return "This number is already registered. Please sign in instead.";
+  if (msg.includes("deactivated") || msg.includes("forbidden"))
+    return "This account has been deactivated. Please contact support.";
+  if (msg.includes("invalid or expired firebase"))
+    return "OTP session expired. Please request a fresh code.";
+  if (msg.includes("not found") || msg.includes("404"))
+    return "Service unavailable. Please try again in a moment.";
+
+  // Strip "Firebase: " prefix and auth/code from raw Firebase messages for cleaner display
+  const raw = err?.message || "Something went wrong. Please try again.";
+  return raw.replace(/^Firebase:\s*/i, "").replace(/\s*\(auth\/[^)]+\)\s*\.?$/, "").trim() || "Something went wrong. Please try again.";
+};
+
 export default function AuthModal() {
   const { authModalOpen, authModalMode, openAuthModal, closeAuthModal, signInWithFirebaseToken } = useAuth();
 
@@ -95,7 +128,7 @@ export default function AuthModal() {
       setLoginResendTimer(60);
     } catch (err: any) {
       console.error("Login OTP send error:", err);
-      setLoginError(err.message || "Failed to send OTP. Please try again.");
+      setLoginError(friendlyError(err));
       clearVerifier();
     } finally {
       setLoginBusy(false);
@@ -122,7 +155,7 @@ export default function AuthModal() {
       closeAuthModal();
     } catch (err: any) {
       console.error("Login OTP verify error:", err);
-      const msg = err.response?.data?.message || err.message || "Invalid OTP. Please try again.";
+      const msg = friendlyError(err);
       setLoginError(msg);
     } finally {
       setLoginBusy(false);
@@ -159,7 +192,7 @@ export default function AuthModal() {
       setSignupResendTimer(60);
     } catch (err: any) {
       console.error("Signup OTP send error:", err);
-      setSignupError(err.message || "Failed to send OTP. Please try again.");
+      setSignupError(friendlyError(err));
       clearVerifier();
     } finally {
       setSignupBusy(false);
@@ -190,7 +223,7 @@ export default function AuthModal() {
       closeAuthModal();
     } catch (err: any) {
       console.error("Signup OTP verify error:", err);
-      const msg = err.response?.data?.message || err.message || "Invalid OTP. Please try again.";
+      const msg = friendlyError(err);
       setSignupError(msg);
     } finally {
       setSignupBusy(false);
