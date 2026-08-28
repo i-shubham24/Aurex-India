@@ -62,10 +62,10 @@ export default function ProductCard({ product }: { product: Product }) {
   })();
 
   return (
-    <div className="group card relative flex flex-col overflow-hidden hover-lift cursor-fork w-full bg-white rounded-xl sm:rounded-xl2 border border-ink/10 shadow-card hover:shadow-lift transition-all duration-300">
+    <div className="group card relative flex flex-col justify-between h-full overflow-hidden hover-lift cursor-fork w-full bg-white rounded-xl sm:rounded-2xl border border-ink/10 shadow-card hover:shadow-lift transition-all duration-300">
       
       {/* Product Image Section */}
-      <Link to={`/product/${product.slug}`} onMouseEnter={handlePrefetch} className="block relative aspect-square overflow-hidden bg-sand/30">
+      <Link to={`/product/${product.slug}`} onMouseEnter={handlePrefetch} className="block relative aspect-square overflow-hidden bg-sand/30 flex-shrink-0">
         <ProductImage
           src={product.images[0]}
           alt={product.name}
@@ -82,109 +82,120 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
 
         {/* Floating Badges */}
-        <div className="absolute left-2 top-2 sm:left-3 sm:top-3 flex flex-col gap-1 z-10">
+        <div className="absolute left-1.5 top-1.5 sm:left-2.5 sm:top-2.5 flex flex-col gap-1 z-10">
           {off && (
-            <span className="bg-gold text-ink text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+            <span className="bg-gold/95 backdrop-blur-xs text-ink text-[8px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full shadow-2xs">
               Save {off}%
             </span>
           )}
           {product.isNew && (
-            <span className="bg-copper text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+            <span className="bg-copper text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full shadow-2xs">
               New
             </span>
           )}
         </div>
+
+        {/* Floating Favorite (Heart) Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle(product.id, product.name);
+          }}
+          className={`absolute right-1.5 top-1.5 sm:right-2.5 sm:top-2.5 z-10 grid h-6 w-6 sm:h-8 sm:w-8 place-items-center rounded-full transition-all duration-300 shadow-2xs border border-ink/[0.06] ${
+            wished
+              ? "bg-copper text-white hover:bg-copper-dark"
+              : "bg-white/85 text-ink/50 hover:bg-white hover:text-copper hover:scale-105 backdrop-blur-xs"
+          }`}
+          aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart size={11} className={`sm:w-3.5 sm:h-3.5 ${wished ? "fill-current" : ""}`} />
+        </button>
       </Link>
 
-      {/* Floating Favorite (Heart) Button */}
-      <button
-        onClick={() => toggle(product.id, product.name)}
-        className={`absolute right-2 top-2 sm:right-3 sm:top-3 z-10 grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-full transition-all duration-300 shadow-sm border border-ink/[0.04] ${
-          wished
-            ? "bg-copper text-white hover:bg-copper-dark"
-            : "bg-white/80 text-ink/50 hover:bg-white hover:text-copper hover:scale-105 backdrop-blur-[2px]"
-        }`}
-        aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
-      >
-        <Heart size={13} className={wished ? "fill-current" : ""} />
-      </button>
-
       {/* Details Container */}
-      <div className="flex flex-1 flex-col p-2.5 sm:p-4">
-        {/* Material Tag */}
-        <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-copper/85 leading-none truncate">
-          {cleanMaterial}
-        </span>
+      <div className="flex flex-1 flex-col justify-between p-2 sm:p-3.5">
+        <div>
+          {/* Material Tag */}
+          <span className="text-[8px] sm:text-[10px] font-extrabold uppercase tracking-wider text-copper/85 leading-none truncate block">
+            {cleanMaterial}
+          </span>
 
-        {/* Product Title */}
-        <Link to={`/product/${product.slug}`} className="mt-1 block">
-          <h3 className="line-clamp-2 text-xs sm:text-sm font-bold leading-snug sm:leading-tight text-ink group-hover:text-copper transition-colors min-h-[2rem] sm:min-h-[2.4rem]">
-            {product.name}
-          </h3>
-        </Link>
+          {/* Product Title (Consistent 2-line height so all cards align) */}
+          <Link to={`/product/${product.slug}`} className="mt-0.5 sm:mt-1 block">
+            <h3 className="line-clamp-2 text-[11px] sm:text-sm font-bold leading-snug sm:leading-tight text-ink group-hover:text-copper transition-colors h-[2.1rem] sm:h-[2.4rem] flex items-start">
+              {product.name}
+            </h3>
+          </Link>
 
-        {/* Rating and Size Count */}
-        <div className="mt-1.5 sm:mt-2 flex items-center justify-between">
-          <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-ink/80">
-            <Star size={10} className="fill-gold text-gold sm:w-[11px] sm:h-[11px]" />
-            <span>{product.rating ? product.rating.toFixed(1) : "5.0"}</span>
-            {product.reviewCount !== undefined && (
-              <span className="text-ink/40 font-normal text-[9px] sm:text-[10px]">({product.reviewCount})</span>
+          {/* Rating and Size Count */}
+          <div className="mt-1 sm:mt-1.5 flex items-center justify-between">
+            <div className="flex items-center gap-1 text-[9px] sm:text-[11px] font-bold text-ink/80">
+              <Star size={9} className="fill-gold text-gold sm:w-2.5 sm:h-2.5" />
+              <span>{product.rating ? product.rating.toFixed(1) : "5.0"}</span>
+              {product.reviewCount !== undefined && (
+                <span className="text-ink/40 font-normal text-[8px] sm:text-[10px]">({product.reviewCount})</span>
+              )}
+            </div>
+            {hasSizes && (
+              <span className="text-[8px] sm:text-[10px] font-semibold text-ink/45">
+                {product.variants.length} sizes
+              </span>
             )}
           </div>
-          {hasSizes && (
-            <span className="text-[9px] sm:text-[10px] font-medium text-ink/50">
-              {product.variants.length} sizes
-            </span>
-          )}
+
+          {/* Price and Offers */}
+          <div className="mt-1.5 sm:mt-2 flex flex-col gap-0.5">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-xs sm:text-base font-black text-ink leading-none">
+                {formatINR(finalPrice)}
+              </span>
+              {comparePrice && comparePrice > finalPrice && (
+                <span className="text-[9px] sm:text-xs text-ink/35 line-through leading-none">
+                  {formatINR(comparePrice)}
+                </span>
+              )}
+            </div>
+            {qualifies && (
+              <div className="mt-0.5">
+                <span className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[8px] sm:text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded truncate max-w-full">
+                  {activeCampaign.name} · {activeCampaign.discountPercentage}% OFF
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="mt-1.5 sm:mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-sm sm:text-base lg:text-lg font-black text-ink">
-            {formatINR(finalPrice)}
-          </span>
-          {comparePrice && comparePrice > finalPrice && (
-            <span className="text-[10px] sm:text-xs text-ink/35 line-through">
-              {formatINR(comparePrice)}
-            </span>
-          )}
-          {qualifies && (
-            <span className="bg-forest/10 text-forest text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md">
-              {activeCampaign.name} - {activeCampaign.discountPercentage}%
-            </span>
-          )}
-        </div>
-
-        {/* Action Button Footer */}
-        <div className="relative mt-2.5 sm:mt-3 pt-2 sm:pt-3 border-t border-ink/5">
+        {/* Action Button Footer — Pinned to bottom (mt-auto) */}
+        <div className="relative mt-2 sm:mt-3 pt-1.5 sm:pt-2.5 border-t border-ink/5">
           {!hasSizes && cartQty > 0 ? (
-            /* Item already in cart → show inline qty stepper */
-            <div className="flex items-center justify-between w-full rounded-lg sm:rounded-xl border border-copper bg-copper/5 px-1 py-0.5">
+            /* Item already in cart → inline qty stepper */
+            <div className="flex items-center justify-between w-full h-7 sm:h-9 rounded-lg sm:rounded-xl border border-copper bg-copper/5 px-1">
               <button
                 onClick={() => setQty(product.id, cartQty - 1)}
-                className="grid h-6 w-6 sm:h-7 sm:w-7 place-items-center text-copper hover:bg-copper/10 rounded transition-colors active:scale-95"
+                className="grid h-5 w-5 sm:h-7 sm:w-7 place-items-center text-copper hover:bg-copper/10 rounded transition-colors active:scale-95"
                 aria-label="Decrease quantity"
               >
-                <Minus size={12} />
+                <Minus size={10} className="sm:w-3 sm:h-3" />
               </button>
-              <span className="text-xs font-bold text-copper">{cartQty} in cart</span>
+              <span className="text-[10px] sm:text-xs font-bold text-copper">{cartQty} in cart</span>
               <button
                 disabled={cartQty >= product.stock}
                 onClick={() => setQty(product.id, cartQty + 1)}
-                className="grid h-6 w-6 sm:h-7 sm:w-7 place-items-center text-copper hover:bg-copper/10 rounded transition-colors active:scale-95 disabled:opacity-30"
+                className="grid h-5 w-5 sm:h-7 sm:w-7 place-items-center text-copper hover:bg-copper/10 rounded transition-colors active:scale-95 disabled:opacity-30"
                 aria-label="Increase quantity"
               >
-                <Plus size={12} />
+                <Plus size={10} className="sm:w-3 sm:h-3" />
               </button>
             </div>
           ) : (
-            /* Not in cart → normal Add to Cart button */
+            /* Not in cart → Add to Cart button */
             <button
               onClick={onAddDirect}
-              className="w-full py-1.5 sm:py-2.5 bg-ink text-white hover:bg-copper hover:text-white text-[11px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm cursor-fork active:scale-95"
+              className="w-full h-7 sm:h-9 bg-ink text-white hover:bg-copper hover:text-white text-[10px] sm:text-xs font-bold rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-1 sm:gap-1.5 shadow-2xs cursor-fork active:scale-95"
               aria-label={hasSizes ? "Select Size" : "Add to Cart"}
             >
-              <ShoppingBag size={12} />
+              <ShoppingBag size={11} className="sm:w-3 sm:h-3" />
               <span>{hasSizes ? "Select Size" : "Add to Cart"}</span>
             </button>
           )}
@@ -197,8 +208,8 @@ export default function ProductCard({ product }: { product: Product }) {
                 className="fixed inset-0 z-20 cursor-default"
                 onClick={() => setPickSize(false)}
               />
-              <div className="absolute bottom-10 sm:bottom-12 left-0 right-0 z-30 rounded-xl bg-white p-2.5 sm:p-3 shadow-lift border border-ink/10 animate-fade-up">
-                <p className="px-0.5 pb-1.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide text-ink/40">
+              <div className="absolute bottom-9 sm:bottom-11 left-0 right-0 z-30 rounded-xl bg-white p-2 sm:p-3 shadow-lift border border-ink/10 animate-fade-up">
+                <p className="px-0.5 pb-1 text-[8px] sm:text-[10px] font-bold uppercase tracking-wide text-ink/40">
                   Select Size
                 </p>
                 <div className="flex flex-wrap gap-1">
@@ -210,7 +221,7 @@ export default function ProductCard({ product }: { product: Product }) {
                         add(product, v);
                         setPickSize(false);
                       }}
-                      className="rounded-lg border border-ink/15 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold transition-all hover:border-copper hover:bg-copper hover:text-white disabled:opacity-40"
+                      className="rounded-lg border border-ink/15 px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-bold transition-all hover:border-copper hover:bg-copper hover:text-white disabled:opacity-40"
                     >
                       {v.name}
                     </button>
