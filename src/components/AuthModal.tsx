@@ -56,16 +56,19 @@ export default function AuthModal() {
 
   if (!authModalOpen) return null;
 
-  const getRecaptchaVerifier = () => {
-    if (!(window as any)._rcv) {
-      const el = document.getElementById('recaptcha-container');
-      if (el) el.innerHTML = '';
-      (window as any)._rcv = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {},
-        'expired-callback': () => { (window as any)._rcv = null; },
-      });
+  const getFreshRecaptchaVerifier = () => {
+    // Always destroy existing verifier to prevent CAPTCHA_CHECK_FAILED DUPE error
+    if ((window as any)._rcv) {
+      try { (window as any)._rcv.clear(); } catch (_) {}
+      (window as any)._rcv = null;
     }
+    const el = document.getElementById('recaptcha-container');
+    if (el) el.innerHTML = '';
+    (window as any)._rcv = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      size: 'invisible',
+      callback: () => {},
+      'expired-callback': () => { (window as any)._rcv = null; },
+    });
     return (window as any)._rcv;
   };
 
@@ -80,7 +83,7 @@ export default function AuthModal() {
     setOtpBusy(true);
     try {
       const formattedPhone = `+91${cleanPhone}`;
-      const verifier = getRecaptchaVerifier();
+      const verifier = getFreshRecaptchaVerifier();
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
       setConfirmationResult(confirmation);
       setOtpStep("verify");
