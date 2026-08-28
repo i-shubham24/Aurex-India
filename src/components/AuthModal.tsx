@@ -312,7 +312,7 @@ export default function AuthModal() {
                   <div>
                     <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="login-phone">Mobile Number</label>
                     <div className="relative mt-1 flex rounded-xl border border-ink/15 overflow-hidden focus-within:border-copper focus-within:ring-2 focus-within:ring-copper/15">
-                      <span className="px-3.5 bg-sand/50 text-xs font-bold text-ink/70 flex items-center border-r border-ink/10">🇮🇳 +91</span>
+                      <span className="flex-shrink-0 whitespace-nowrap px-3.5 bg-sand/50 text-xs font-bold text-ink/70 flex items-center border-r border-ink/10">🇮🇳 +91</span>
                       <input
                         id="login-phone"
                         type="tel"
@@ -424,7 +424,7 @@ export default function AuthModal() {
                   <div>
                     <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="su-phone">Mobile Number</label>
                     <div className="relative mt-1 flex rounded-xl border border-ink/15 overflow-hidden focus-within:border-copper focus-within:ring-2 focus-within:ring-copper/15">
-                      <span className="px-3.5 bg-sand/50 text-xs font-bold text-ink/70 flex items-center border-r border-ink/10">🇮🇳 +91</span>
+                      <span className="flex-shrink-0 whitespace-nowrap px-3.5 bg-sand/50 text-xs font-bold text-ink/70 flex items-center border-r border-ink/10">🇮🇳 +91</span>
                       <input id="su-phone" type="tel" required maxLength={10}
                         value={signupPhone}
                         onChange={(e) => setSignupPhone(e.target.value.replace(/\D/g, ""))}
