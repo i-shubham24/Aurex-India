@@ -197,25 +197,35 @@ export default function AuthModal() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Left column ───────────────────────────────────────────────── */}
-        <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-ink via-ink-light to-copper/30 p-8 md:p-12 flex-col justify-between relative overflow-hidden text-cream">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-copper/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="hidden md:flex md:w-5/12 relative flex-col justify-between p-8 md:p-12 overflow-hidden text-cream">
+          {/* Hero image */}
+          <img
+            src="/auth-hero.webp"
+            alt="Aurex premium cookware"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            loading="eager"
+          />
+          {/* Dark gradient overlay so text is readable */}
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/60 to-ink/30" />
+
+          {/* Content on top of image */}
           <div className="relative z-10">
-            <span className="chip bg-white/10 text-gold border border-white/15 text-[11px] font-black uppercase tracking-widest px-3 py-1">Aurex India</span>
-            <h3 className="mt-6 text-2xl font-black font-serif text-cream leading-tight">
+            <span className="chip bg-white/10 text-gold border border-white/20 text-[11px] font-black uppercase tracking-widest px-3 py-1 backdrop-blur-sm">Aurex India</span>
+            <h3 className="mt-6 text-2xl font-black font-serif text-cream leading-tight drop-shadow-lg">
               {authModalMode === "signup" ? "Join 10,000+ happy kitchens" : "Unlock 15% Off"}
             </h3>
-            <p className="text-cream/70 text-sm font-light leading-relaxed mt-3">
+            <p className="text-cream/80 text-sm font-light leading-relaxed mt-3 drop-shadow">
               {authModalMode === "signup"
                 ? "Create your Aurex account and get 15% off your first order of premium triply and cast iron cookware."
                 : "Sign in to your Aurex account and enjoy exclusive offers on premium triply and cast iron cookware."}
             </p>
           </div>
-          <div className="relative z-10 pt-8 border-t border-white/10 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-copper/20 flex items-center justify-center text-copper font-bold text-sm">✨</div>
-            <p className="text-xs text-cream/70 font-medium">Free Shipping Across India & Lifetime Warranty</p>
+          <div className="relative z-10 pt-8 border-t border-white/15 flex items-center gap-3 backdrop-blur-sm">
+            <div className="w-9 h-9 rounded-full bg-copper/30 border border-copper/40 flex items-center justify-center text-gold font-bold text-sm">✨</div>
+            <p className="text-xs text-cream/80 font-medium">Free Shipping Across India & Lifetime Warranty</p>
           </div>
         </div>
+
 
         {/* ── Right column ──────────────────────────────────────────────── */}
         <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-10 relative flex flex-col justify-center overflow-y-auto">
