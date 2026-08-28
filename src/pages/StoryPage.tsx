@@ -145,20 +145,26 @@ export default function StoryPage() {
           <span className="chip bg-forest/10 text-forest">Our Journey</span>
           <h2 className="mt-4 font-serif text-3xl font-semibold sm:text-4xl">From foundry to your kitchen</h2>
         </div>
-        <ol className="relative mx-auto mt-12 max-w-3xl border-l-2 border-copper/25 pl-8">
-          {TIMELINE.map((m, i) => (
-            <Reveal key={m.year} delay={i * 90}>
-              <li className="relative pb-10 last:pb-0">
-                <span className="absolute -left-[2.6rem] grid h-8 w-8 place-items-center rounded-full bg-copper text-xs font-bold text-white ring-4 ring-cream">
-                  {i + 1}
-                </span>
-                <p className="text-sm font-semibold uppercase tracking-wide text-copper">{m.year}</p>
-                <h3 className="mt-1 text-lg font-semibold">{m.title}</h3>
-                <p className="mt-1 text-ink/65">{m.text}</p>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
+        <div className="relative mx-auto mt-12 max-w-3xl pl-10">
+          {/* Vertical connecting line - centered through number badges and stopping at the last circle */}
+          <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-copper/30" />
+
+          <ol className="space-y-10">
+            {TIMELINE.map((m, i) => (
+              <Reveal key={m.year} delay={i * 90}>
+                <li className="relative pl-6">
+                  {/* Badge Number Circle - Center is at x = 16px */}
+                  <span className="absolute -left-10 top-0 grid h-8 w-8 place-items-center rounded-full bg-copper text-xs font-bold text-white ring-4 ring-cream shadow-sm z-10">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm font-semibold uppercase tracking-wide text-copper">{m.year}</p>
+                  <h3 className="mt-1 text-lg font-semibold text-ink">{m.title}</h3>
+                  <p className="mt-1 text-ink/65 leading-relaxed">{m.text}</p>
+                </li>
+              </Reveal>
+            ))}
+          </ol>
+        </div>
       </section>
 
       {/* Values */}
