@@ -87,25 +87,38 @@ export default function ProductPage() {
     );
   }, [user, product, userOrders]);
 
+  const hasAlreadyReviewed = useMemo(() => {
+    if (!user || !liveReviews || !liveReviews.length) return false;
+    return liveReviews.some((r: any) => {
+      const rUserId = typeof r.user === 'object' && r.user !== null ? (r.user._id || r.user.id) : r.user;
+      return rUserId === user.id || rUserId === (user as any)._id;
+    });
+  }, [user, liveReviews]);
+
   const handleCreateReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
+    if (hasAlreadyReviewed) {
+      toast.error("You have already submitted a rating for this product.");
+      setShowReviewModal(false);
+      return;
+    }
     setIsSubmitting(true);
     try {
       await createReview({
         productId: product.id,
         rating: newRating,
-        title: newTitle.trim() || `${newRating} Star Rating`,
-        comment: newComment.trim() || "Great quality cookware, very happy with the purchase.",
+        title: newTitle.trim(),
+        comment: newComment.trim(),
       });
-      toast.success("⭐ Review submitted successfully! Thank you for your verified feedback.");
+      toast.success("⭐ Rating submitted successfully! Thank you for your feedback.");
       setShowReviewModal(false);
       setNewTitle("");
       setNewComment("");
       setNewRating(5);
       refetchReviews();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to submit review");
+      toast.error(err.response?.data?.message || "Failed to submit rating");
     } finally {
       setIsSubmitting(false);
     }
@@ -428,12 +441,18 @@ export default function ProductPage() {
           </div>
 
           {hasPurchasedAndDelivered && (
-            <button
-              onClick={() => setShowReviewModal(true)}
-              className="btn-copper text-xs py-2.5 px-4 font-bold flex items-center gap-2 w-fit shadow-sm"
-            >
-              <Star size={13} className="fill-gold text-gold" /> Rate Your Purchase
-            </button>
+            hasAlreadyReviewed ? (
+              <div className="bg-sand/60 text-ink/70 border border-ink/10 text-xs py-2 px-3.5 font-bold rounded-xl flex items-center gap-1.5 w-fit">
+                <Check size={14} className="text-forest" /> Rating Already Submitted
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowReviewModal(true)}
+                className="btn-copper text-xs py-2.5 px-4 font-bold flex items-center gap-2 w-fit shadow-sm"
+              >
+                <Star size={13} className="fill-gold text-gold" /> Rate Your Purchase
+              </button>
+            )
           )}
         </div>
 
@@ -538,7 +557,9 @@ export default function ProductPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-ink mb-1">Headline</label>
+                <label className="block text-xs font-bold text-ink mb-1">
+                  Headline <span className="text-ink/40 font-normal">(Optional)</span>
+                </label>
                 <input
                   type="text"
                   value={newTitle}
@@ -549,7 +570,9 @@ export default function ProductPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-ink mb-1">Your Detailed Experience</label>
+                <label className="block text-xs font-bold text-ink mb-1">
+                  Your Detailed Experience <span className="text-ink/40 font-normal">(Optional)</span>
+                </label>
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
