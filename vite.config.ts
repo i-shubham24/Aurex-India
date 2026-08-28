@@ -14,4 +14,17 @@ export default defineConfig({
     port: 5174,
     host: true,
   },
+  build: {
+    target: "esnext",
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          query: ["@tanstack/react-query"],
+          icons: ["lucide-react"],
+        },
+      },
+    },
+  },
 });

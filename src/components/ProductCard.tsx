@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, Heart, Star, Minus, Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getProductBySlug } from "@/api/productApi";
 import type { Product } from "@/services/types";
 import { formatINR, discountPct } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
@@ -8,8 +10,19 @@ import { useWishlist } from "@/context/WishlistContext";
 import ProductImage from "./ProductImage";
 
 export default function ProductCard({ product }: { product: Product }) {
+  const queryClient = useQueryClient();
   const { add, lines, setQty, activeCampaign } = useCart();
   const { has, toggle } = useWishlist();
+
+  const handlePrefetch = () => {
+    if (product?.slug) {
+      queryClient.prefetchQuery({
+        queryKey: ['product', product.slug],
+        queryFn: () => getProductBySlug(product.slug),
+        staleTime: 1000 * 60 * 5,
+      });
+    }
+  };
 
   const hasCampaign = activeCampaign && activeCampaign.discountPercentage > 0;
   const qualifies = hasCampaign && (
@@ -52,7 +65,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <div className="group card relative flex flex-col overflow-hidden hover-lift cursor-fork w-full bg-white rounded-xl sm:rounded-xl2 border border-ink/[0.04] shadow-sm hover:shadow-md transition-all duration-300">
       
       {/* Product Image Section */}
-      <Link to={`/product/${product.slug}`} className="block relative aspect-square overflow-hidden bg-sand/30">
+      <Link to={`/product/${product.slug}`} onMouseEnter={handlePrefetch} className="block relative aspect-square overflow-hidden bg-sand/30">
         <ProductImage
           src={product.images[0]}
           alt={product.name}
