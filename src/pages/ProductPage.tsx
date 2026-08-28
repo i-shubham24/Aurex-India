@@ -19,9 +19,13 @@ import type { Product, ProductVariant } from "@/services/types";
 
 /** Pull a few reliable spec rows out of the (messy) source description. */
 function parseSpecs(product: Product): [string, string][] {
-  const d = product.description ?? "";
-  const rows: [string, string][] = [["Material", product.material ?? "—"]];
-  if (product.variants.length) rows.push(["Sizes", product.variants.map((v) => v.name).join(", ")]);
+  const d = typeof product.description === "string" ? product.description : "";
+  const materialStr = typeof product.material === "string" ? product.material : (product.material ? String(product.material) : "—");
+  const rows: [string, string][] = [["Material", materialStr]];
+  if (Array.isArray(product.variants) && product.variants.length) {
+    const sizeNames = product.variants.map((v) => (typeof v === 'string' ? v : v?.name || '')).filter(Boolean).join(", ");
+    if (sizeNames) rows.push(["Sizes", sizeNames]);
+  }
   const grab = (label: string, re: RegExp, cap = 120) => {
     const m = d.match(re);
     if (m && m[1]) {
@@ -366,12 +370,16 @@ export default function ProductPage() {
             <div className="mt-8">
               <h2 className="text-lg font-semibold">Specifications</h2>
               <dl className="mt-3 divide-y divide-ink/[0.06] overflow-hidden rounded-xl2 ring-1 ring-ink/[0.06]">
-                {specs.map(([k, v]) => (
-                  <div key={k} className="grid grid-cols-[110px_1fr] gap-3 px-4 py-3 text-sm odd:bg-sand/40">
-                    <dt className="font-medium text-ink/60">{k}</dt>
-                    <dd className="min-w-0 break-words text-ink/80">{v}</dd>
-                  </div>
-                ))}
+                {specs.map(([k, v], idx) => {
+                  const keyText = typeof k === 'object' ? JSON.stringify(k) : String(k ?? '');
+                  const valText = typeof v === 'object' ? JSON.stringify(v) : String(v ?? '');
+                  return (
+                    <div key={keyText || idx} className="grid grid-cols-[110px_1fr] gap-3 px-4 py-3 text-sm odd:bg-sand/40">
+                      <dt className="font-medium text-ink/60">{keyText}</dt>
+                      <dd className="min-w-0 break-words text-ink/80">{valText}</dd>
+                    </div>
+                  );
+                })}
               </dl>
             </div>
           )}
@@ -382,16 +390,22 @@ export default function ProductPage() {
       <div className="mt-14 grid gap-10 lg:grid-cols-2">
         <div>
           <h2 className="text-xl font-semibold">Description</h2>
-          <p className="mt-3 break-words leading-relaxed text-ink/75">{product.description}</p>
+          <p className="mt-3 break-words leading-relaxed text-ink/75">
+            {typeof product.description === 'string' ? product.description : String(product.description || '')}
+          </p>
         </div>
         <div>
           <h2 className="text-xl font-semibold">Features</h2>
           <ul className="mt-3 space-y-2">
-            {product.features.map((f) => (
-              <li key={f} className="flex items-start gap-2 text-ink/75">
-                <Check size={18} className="mt-0.5 flex-shrink-0 text-copper" /> {f}
-              </li>
-            ))}
+            {product.features?.map((f, idx) => {
+              const featureText = typeof f === 'object' ? ((f as any)?.title || (f as any)?.value || (f as any)?.name || '') : String(f);
+              if (!featureText) return null;
+              return (
+                <li key={idx} className="flex items-start gap-2 text-ink/75">
+                  <Check size={18} className="mt-0.5 flex-shrink-0 text-copper" /> {featureText}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
