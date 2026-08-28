@@ -1,16 +1,27 @@
-import React, { useState } from "react";
-import { X, Eye, EyeOff } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Eye, EyeOff, Smartphone, Mail, ArrowLeft, RefreshCw } from "lucide-react";
+import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import PasswordMeter from "@/components/PasswordMeter";
-import {
-  emailError,
-  passwordError,
-} from "@/lib/validation";
+import { emailError, passwordError } from "@/lib/validation";
 
 export default function AuthModal() {
-  const { authModalOpen, authModalMode, openAuthModal, closeAuthModal, signIn, signUp } = useAuth();
+  const { authModalOpen, authModalMode, openAuthModal, closeAuthModal, signIn, signUp, signInWithFirebaseToken } = useAuth();
 
-  // Login states
+  // Login Mode: "phone" | "email"
+  const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
+
+  // Phone OTP states
+  const [phone, setPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpStep, setOtpStep] = useState<"send" | "verify">("send");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [phoneError, setPhoneError] = useState("");
+  const [otpBusy, setOtpBusy] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  // Email Login states
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -30,7 +41,85 @@ export default function AuthModal() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  // Countdown timer for OTP resend
+  useEffect(() => {
+    let interval: any = null;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((t) => t - 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
   if (!authModalOpen) return null;
+
+  const getRecaptchaVerifier = () => {
+    if (!(window as any)._rcv) {
+      const el = document.getElementById('recaptcha-container');
+      if (el) el.innerHTML = '';
+      (window as any)._rcv = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {},
+        'expired-callback': () => { (window as any)._rcv = null; },
+      });
+    }
+    return (window as any)._rcv;
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError("");
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      setPhoneError("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+    setOtpBusy(true);
+    try {
+      const formattedPhone = `+91${cleanPhone}`;
+      const verifier = getRecaptchaVerifier();
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+      setConfirmationResult(confirmation);
+      setOtpStep("verify");
+      setResendTimer(60);
+    } catch (err: any) {
+      console.error("Firebase send OTP error:", err);
+      setPhoneError(err.message || "Failed to send OTP. Please try again.");
+      try { (window as any)._rcv?.clear(); } catch (_) {}
+      (window as any)._rcv = null;
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError("");
+    if (!otpCode || otpCode.length < 6) {
+      setPhoneError("Please enter the 6-digit OTP code.");
+      return;
+    }
+    if (!confirmationResult) {
+      setPhoneError("Session expired. Please request a new OTP.");
+      return;
+    }
+    setOtpBusy(true);
+    try {
+      const userCredential = await confirmationResult.confirm(otpCode);
+      const idToken = await userCredential.user.getIdToken();
+      await signInWithFirebaseToken(idToken);
+      closeAuthModal();
+    } catch (err: any) {
+      console.error("Firebase verify OTP error:", err);
+      const msg = err.response?.data?.message || err.message || "Invalid or expired OTP code. Please check and try again.";
+      setPhoneError(msg);
+    } finally {
+      setOtpBusy(false);
+    }
+  };
 
   async function handleLoginSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,13 +187,19 @@ export default function AuthModal() {
     const allTouched = { firstName: true, lastName: true, email: true, password: true };
     setSignupTouched(allTouched);
     const nextErrors: Partial<Record<string, string>> = {};
-    (Object.keys(validators) as string[]).forEach((f) => {
-      const err = validators[f](signupValues[f as keyof typeof signupValues]);
-      if (err) nextErrors[f] = err;
-    });
+    let firstErr: string | null = null;
+    for (const k of Object.keys(validators)) {
+      const err = validators[k](signupValues[k as keyof typeof signupValues]);
+      if (err) {
+        nextErrors[k] = err;
+        if (!firstErr) firstErr = err;
+      }
+    }
     setSignupErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
-
+    if (firstErr) {
+      setSignupFormError("Please fix the errors above.");
+      return;
+    }
     setSignupBusy(true);
     try {
       await signUp({
@@ -120,44 +215,45 @@ export default function AuthModal() {
     }
   }
 
-  const errCls = (f: string) =>
-    signupTouched[f] && signupErrors[f] ? "border-red-400 focus:border-red-400 focus:ring-red-200" : "";
+  const errCls = (field: string) =>
+    signupTouched[field] && signupErrors[field] ? "border-red-500 focus:ring-red-500/20" : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-ink/70 backdrop-blur-md animate-fade-in overflow-y-auto">
       <div 
-        className="absolute inset-0 bg-ink/65 backdrop-blur-sm transition-opacity" 
-      />
-
-      {/* Modal Content */}
-      <div className="relative w-full max-w-4xl transform rounded-xl2 bg-white shadow-2xl transition-all border border-ink/[0.04] z-10 animate-in fade-in-50 zoom-in-95 duration-200 overflow-hidden flex flex-col md:flex-row min-h-[550px]">
-        
-        {/* Left Column - Promotional Image (Hidden on Mobile) */}
-        <div className="hidden md:flex md:w-5/12 relative bg-ink flex-col justify-end p-10 overflow-hidden">
-          <img 
-            src="/products/tom-rumble-pN6xSeiHCr0-unsplash.jpg" 
-            alt="Aurex Cookware" 
-            className="absolute inset-0 w-full h-full object-cover opacity-85 transition-transform duration-[10s] hover:scale-110" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-90" />
+        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20 flex flex-col md:flex-row my-auto max-h-[90vh] md:max-h-[85vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Left Column - Premium Brand Promo */}
+        <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-ink via-ink-light to-copper/30 p-8 md:p-12 flex-col justify-between relative overflow-hidden text-cream">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-copper/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative z-10 text-cream">
-            <span className="inline-block bg-gold text-ink text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-sm mb-4">
-              New Member Offer
+          <div className="relative z-10">
+            <span className="chip bg-white/10 text-gold border border-white/15 text-[11px] font-black uppercase tracking-widest px-3 py-1">
+              Aurex India
             </span>
-            <h3 className="text-3xl font-serif text-white leading-tight mb-3">
+            <h3 className="mt-6 text-2xl font-black font-serif text-cream leading-tight">
               Unlock 15% Off
             </h3>
-            <p className="text-cream/70 text-sm font-light leading-relaxed">
-              Create an account today and enjoy a 15% discount on your first purchase of our premium triply and cast iron cookware.
+            <p className="text-cream/70 text-sm font-light leading-relaxed mt-3">
+              Sign in or create an account today to enjoy 15% discount on your first purchase of our premium triply and cast iron cookware.
+            </p>
+          </div>
+
+          <div className="relative z-10 pt-8 border-t border-white/10 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-copper/20 flex items-center justify-center text-copper font-bold text-sm">
+              ✨
+            </div>
+            <p className="text-xs text-cream/70 font-medium">
+              Free Shipping Across India & Lifetime Warranty
             </p>
           </div>
         </div>
 
         {/* Right Column - Auth Forms */}
-        <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-12 relative flex flex-col justify-center">
-          {/* Close Button with generous clearance */}
+        <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-10 relative flex flex-col justify-center overflow-y-auto">
+          {/* Close Button */}
           <button
             type="button"
             onClick={closeAuthModal}
@@ -169,8 +265,8 @@ export default function AuthModal() {
 
           {authModalMode === "login" ? (
             <div className="max-w-sm mx-auto w-full pt-2 sm:pt-0">
-              {/* New Member 15% OFF Banner */}
-              <div className="mb-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-sand/40 to-copper/10 border border-amber-600/20 p-3 sm:p-3.5 shadow-2xs">
+              {/* Member Offer Banner */}
+              <div className="mb-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-sand/40 to-copper/10 border border-amber-600/20 p-3 shadow-2xs">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span className="flex-shrink-0 grid h-7 w-7 place-items-center rounded-lg bg-amber-600/15 text-amber-900 text-xs font-black">
@@ -192,7 +288,7 @@ export default function AuthModal() {
                   <button
                     type="button"
                     onClick={() => openAuthModal("signup")}
-                    className="text-[11px] font-black uppercase text-copper hover:text-copper-dark hover:underline flex-shrink-0 whitespace-nowrap bg-white px-2.5 py-1.5 rounded-xl border border-copper/25 shadow-2xs active:scale-95 transition-all"
+                    className="text-[11px] font-black uppercase text-copper hover:text-copper-dark hover:underline flex-shrink-0 bg-white px-2.5 py-1.5 rounded-xl border border-copper/25 shadow-2xs"
                   >
                     Claim →
                   </button>
@@ -202,46 +298,182 @@ export default function AuthModal() {
               <h2 className="text-2xl sm:text-3xl font-black text-ink">Welcome back</h2>
               <p className="mt-1 text-xs sm:text-sm text-ink/60">Sign in to your Aurex account.</p>
 
-              <form onSubmit={handleLoginSubmit} className="mt-5 sm:mt-6 space-y-4">
-                <div>
-                  <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-email">Email Address</label>
-                  <input
-                    id="modal-email"
-                    type="email"
-                    required
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="input text-sm mt-1"
-                    placeholder="you@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-password">Password</label>
-                  <div className="relative">
-                    <input
-                      id="modal-password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className="input text-sm mt-1 w-full pr-10"
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink transition-colors mt-0.5"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-                {loginError && <p className="text-xs text-red-600 font-medium">{loginError}</p>}
-                <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-1 shadow-md">
-                  {loginBusy ? "Signing in…" : "Sign in"}
+              {/* Login Method Switcher Tabs */}
+              <div className="mt-5 grid grid-cols-2 p-1 bg-sand/60 rounded-xl text-xs font-bold border border-ink/5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginMethod("phone");
+                    setPhoneError("");
+                  }}
+                  className={`py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                    loginMethod === "phone" ? "bg-white text-ink shadow-2xs" : "text-ink/60 hover:text-ink"
+                  }`}
+                >
+                  <Smartphone size={14} /> Phone OTP
                 </button>
-              </form>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginMethod("email");
+                    setLoginError("");
+                  }}
+                  className={`py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+                    loginMethod === "email" ? "bg-white text-ink shadow-2xs" : "text-ink/60 hover:text-ink"
+                  }`}
+                >
+                  <Mail size={14} /> Email Login
+                </button>
+              </div>
+
+              {/* PHONE OTP LOGIN FLOW */}
+              {loginMethod === "phone" ? (
+                otpStep === "send" ? (
+                  <form onSubmit={handleSendOtp} className="mt-5 space-y-4">
+                    <div>
+                      <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-phone">
+                        Mobile Number
+                      </label>
+                      <div className="relative mt-1 flex rounded-xl border border-ink/15 overflow-hidden focus-within:border-copper focus-within:ring-2 focus-within:ring-copper/15">
+                        <span className="px-3.5 bg-sand/50 text-xs font-bold text-ink/70 flex items-center border-r border-ink/10">
+                          🇮🇳 +91
+                        </span>
+                        <input
+                          id="modal-phone"
+                          type="tel"
+                          required
+                          maxLength={10}
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                          className="w-full px-3.5 py-2.5 text-sm font-medium text-ink placeholder:text-ink/30 outline-none bg-white"
+                          placeholder="98765 43210"
+                        />
+                      </div>
+                      <p className="mt-1 text-[11px] text-ink/50">An instant 6-digit OTP will be sent via SMS.</p>
+                    </div>
+
+                    {/* Visible reCAPTCHA container */}
+                    <div className="my-2 flex justify-center min-h-[78px]">
+                      <div id="recaptcha-container"></div>
+                    </div>
+
+                    {phoneError && <p className="text-xs text-red-600 font-medium">{phoneError}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={otpBusy || phone.length < 10}
+                      className="btn-primary w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-50"
+                    >
+                      {otpBusy ? "Sending OTP..." : "Send OTP Verification Code"}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleVerifyOtp} className="mt-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-ink">
+                        OTP sent to <span className="text-copper">+91 {phone}</span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpStep("send");
+                          setOtpCode("");
+                          setPhoneError("");
+                        }}
+                        className="text-[11px] font-bold text-copper hover:underline flex items-center gap-1"
+                      >
+                        <ArrowLeft size={12} /> Change
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-otp">
+                        Enter 6-Digit OTP
+                      </label>
+                      <input
+                        id="modal-otp"
+                        type="text"
+                        required
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                        className="input text-center text-lg font-mono font-bold tracking-[0.4em] mt-1"
+                        placeholder="••••••"
+                        autoFocus
+                      />
+                    </div>
+
+                    {phoneError && <p className="text-xs text-red-600 font-medium">{phoneError}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={otpBusy || otpCode.length < 6}
+                      className="btn-primary w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-50"
+                    >
+                      {otpBusy ? "Verifying..." : "Verify & Sign In"}
+                    </button>
+
+                    <div className="text-center pt-2">
+                      {resendTimer > 0 ? (
+                        <p className="text-xs text-ink/50">
+                          Resend OTP in <span className="font-bold text-ink">{resendTimer}s</span>
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={otpBusy}
+                          className="text-xs font-bold text-copper hover:text-gold flex items-center gap-1 mx-auto"
+                        >
+                          <RefreshCw size={12} /> Resend OTP Code
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                )
+              ) : (
+                /* EMAIL LOGIN FLOW */
+                <form onSubmit={handleLoginSubmit} className="mt-5 space-y-4">
+                  <div>
+                    <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-email">Email Address</label>
+                    <input
+                      id="modal-email"
+                      type="email"
+                      required
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      className="input text-sm mt-1"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="label text-[11px] font-black uppercase tracking-wider text-ink/50" htmlFor="modal-password">Password</label>
+                    <div className="relative">
+                      <input
+                        id="modal-password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        className="input text-sm mt-1 w-full pr-10"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink transition-colors mt-0.5"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  {loginError && <p className="text-xs text-red-600 font-medium">{loginError}</p>}
+                  <button type="submit" disabled={loginBusy} className="btn-primary w-full py-3.5 text-sm font-bold mt-1 shadow-md">
+                    {loginBusy ? "Signing in…" : "Sign in"}
+                  </button>
+                </form>
+              )}
 
               <p className="mt-5 sm:mt-7 text-center text-xs sm:text-sm text-ink/60 font-medium border-t border-ink/[0.06] pt-4 sm:pt-5">
                 New to Aurex?{" "}
@@ -252,16 +484,10 @@ export default function AuthModal() {
                   Create an account (Get 15% OFF)
                 </button>
               </p>
-
-              {import.meta.env.DEV && (
-                <div className="mt-4 rounded-xl bg-sand/40 p-2.5 text-center text-[10px] text-ink/60 leading-relaxed border border-ink/[0.04]">
-                  <b className="text-ink/80">Dev only:</b> admin@aurexindia.com · admin123
-                </div>
-              )}
             </div>
           ) : (
             <div className="max-w-sm mx-auto w-full pt-2 sm:pt-0">
-              {/* 15% OFF Welcome Banner for Signup */}
+              {/* Signup Welcome Banner */}
               <div className="mb-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-sand/40 to-copper/10 border border-emerald-500/30 p-3 shadow-2xs">
                 <div className="flex items-center gap-2.5">
                   <span className="flex-shrink-0 grid h-7 w-7 place-items-center rounded-lg bg-emerald-600/15 text-emerald-800 text-xs font-black">

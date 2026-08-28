@@ -18,6 +18,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   signIn: (identifier: string, password: string) => Promise<User>;
   signUp: (input: SignUpInput) => Promise<User>;
+  signInWithFirebaseToken: (idToken: string) => Promise<User>;
   signOut: () => Promise<void>;
   requestOtp: (phone: string) => Promise<OtpChallenge>;
   verifyOtp: (phone: string, code: string, fullName?: string) => Promise<User>;
@@ -98,6 +99,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
+  const signInWithFirebaseToken = useCallback(async (idToken: string) => {
+    try {
+      const { token, user: u } = await authApi.firebaseLogin(idToken);
+      localStorage.setItem("aurex_token", token);
+      setUser(u);
+      toast.success("Signed in successfully with Phone OTP!");
+      return u;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "OTP Authentication failed.";
+      toast.error(msg);
+      throw err;
+    }
+  }, [toast]);
+
   const signOut = useCallback(async () => {
     localStorage.removeItem("aurex_token");
     setUser(null);
@@ -122,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: user?.role === "admin",
       signIn,
       signUp,
+      signInWithFirebaseToken,
       signOut,
       requestOtp,
       verifyOtp,
@@ -135,6 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       signIn,
       signUp,
+      signInWithFirebaseToken,
       signOut,
       requestOtp,
       verifyOtp,

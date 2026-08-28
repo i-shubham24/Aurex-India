@@ -39,5 +39,13 @@ export const authApi = {
   getMe: async (): Promise<{ user: User }> => {
     const response = await apiClient.get(API_ENDPOINTS.AUTH.ME);
     return { user: mapUser(response.data.data.user) };
+  },
+
+  firebaseLogin: async (idToken: string): Promise<{ token: string; user: User }> => {
+    const response = await apiClient.post('/auth/firebase-login', { idToken });
+    return {
+      token: response.data.data.token || response.data.data.accessToken,
+      user: mapUser(response.data.data.user)
+    };
   }
 };
