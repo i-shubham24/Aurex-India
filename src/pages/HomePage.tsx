@@ -141,8 +141,52 @@ export default function HomePage() {
 
   const categories = categoriesResponse?.data?.categories || [];
   const catScrollRef = useRef<HTMLDivElement>(null);
+  const isInteractingRef = useRef(false);
+  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Seamless auto-scrolling with instant resume after touch/hand interaction
+  useEffect(() => {
+    const el = catScrollRef.current;
+    if (!el || categories.length === 0) return;
+
+    let animationFrameId: number;
+    const speed = 0.55; // pixels per frame for smooth luxury pace
+
+    const step = () => {
+      if (!isInteractingRef.current && el) {
+        el.scrollLeft += speed;
+        // When scrolled past the first duplicate set, loop back seamlessly
+        const halfWidth = el.scrollWidth / 2;
+        if (halfWidth > 0 && el.scrollLeft >= halfWidth) {
+          el.scrollLeft -= halfWidth;
+        }
+      }
+      animationFrameId = requestAnimationFrame(step);
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, [categories]);
+
+  const handleInteractionStart = () => {
+    isInteractingRef.current = true;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+  };
+
+  const handleInteractionEnd = () => {
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    // Pause briefly (1.5s) after user touch/drag before resuming smooth auto-scroll
+    resumeTimeoutRef.current = setTimeout(() => {
+      isInteractingRef.current = false;
+    }, 1500);
+  };
 
   const scrollCategories = (dir: 'left' | 'right') => {
+    handleInteractionStart();
     if (catScrollRef.current) {
       const scrollAmount = 260;
       catScrollRef.current.scrollBy({
@@ -150,6 +194,7 @@ export default function HomePage() {
         behavior: 'smooth',
       });
     }
+    handleInteractionEnd();
   };
 
   const [heroSlides, setHeroSlides] = useState<any[]>(HERO_SLIDES);
@@ -298,12 +343,19 @@ export default function HomePage() {
         ) : (
           <div
             ref={catScrollRef}
-            className="flex gap-4 sm:gap-6 items-start overflow-x-auto no-scrollbar scroll-smooth py-2 px-1 -mx-4 px-4 sm:mx-0 sm:px-0"
+            onMouseEnter={handleInteractionStart}
+            onMouseLeave={handleInteractionEnd}
+            onTouchStart={handleInteractionStart}
+            onTouchEnd={handleInteractionEnd}
+            onPointerDown={handleInteractionStart}
+            onPointerUp={handleInteractionEnd}
+            className="flex gap-4 sm:gap-6 items-start overflow-x-auto no-scrollbar py-2 px-1 -mx-4 px-4 sm:mx-0 sm:px-0 select-none cursor-grab active:cursor-grabbing"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
-            {categories.map((t: any) => (
+            {/* Duplicated 2x for infinite seamless auto-scrolling */}
+            {[...categories, ...categories].map((t: any, idx: number) => (
               <Link
-                key={t._id}
+                key={`${t._id}-${idx}`}
                 to={`/shop/${t.slug}`}
                 className="group flex flex-col items-center text-center cursor-fork flex-shrink-0 w-[84px] sm:w-[110px]"
               >
