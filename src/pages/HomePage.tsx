@@ -307,12 +307,12 @@ export default function HomePage() {
                 to={`/shop/${t.slug}`}
                 className="group flex flex-col items-center text-center cursor-fork flex-shrink-0 w-[84px] sm:w-[110px]"
               >
-                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-sand/30 border border-ink/[0.08] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-2xs group-hover:shadow-md group-hover:border-copper group-hover:bg-white group-hover:scale-105 group-hover:ring-2 group-hover:ring-copper/20">
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-white border border-ink/10 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-2xs group-hover:shadow-md group-hover:border-copper group-hover:scale-105 group-hover:ring-2 group-hover:ring-copper/20">
                   <img
                     src={t.image?.url}
                     alt={t.name}
                     loading="lazy"
-                    className="w-[78%] h-[78%] object-contain transition-transform duration-300 group-hover:scale-110"
+                    className="w-[80%] h-[80%] object-contain transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
                 <span className="mt-2.5 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider text-center leading-tight line-clamp-2 w-full">
