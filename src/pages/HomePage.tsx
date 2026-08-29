@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Check, X, Tag } from "lucide-react";
+import { ArrowRight, Check, X, Tag, ChevronLeft, ChevronRight } from "lucide-react";
 import { discountPct } from "@/lib/format";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
@@ -140,6 +140,17 @@ export default function HomePage() {
   }, [recentReviews]);
 
   const categories = categoriesResponse?.data?.categories || [];
+  const catScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollCategories = (dir: 'left' | 'right') => {
+    if (catScrollRef.current) {
+      const scrollAmount = 260;
+      catScrollRef.current.scrollBy({
+        left: dir === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   const [heroSlides, setHeroSlides] = useState<any[]>(HERO_SLIDES);
 
@@ -242,52 +253,73 @@ export default function HomePage() {
       </section>
 
 
-      {/* Section 1: Browse by Categories (Circular slider layout) */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-        <div className="mb-4 sm:mb-8 flex items-center justify-between relative">
-          <h2 className="text-xl sm:text-3xl font-black text-ink">
-            Browse by <span className="text-copper">Categories</span>
-          </h2>
-          <Link
-            to="/shop"
-            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-copper text-copper hover:bg-copper hover:text-white transition-all text-[11px] sm:text-xs font-bold shadow-sm"
-          >
-            View all <ArrowRight size={12} />
-          </Link>
+      {/* Section 1: Browse by Categories (Horizontal touch & drag scrollable) */}
+      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <div className="mb-4 sm:mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-3xl font-black text-ink">
+              Browse by <span className="text-copper">Categories</span>
+            </h2>
+            <p className="hidden sm:block text-xs sm:text-sm text-ink/55 mt-0.5">Explore our handcrafted cookware collections</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => scrollCategories('left')}
+              className="hidden sm:grid h-8 w-8 place-items-center rounded-full border border-ink/15 text-ink/70 hover:border-copper hover:text-copper hover:bg-white transition-all shadow-2xs active:scale-95"
+              aria-label="Scroll categories left"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={() => scrollCategories('right')}
+              className="hidden sm:grid h-8 w-8 place-items-center rounded-full border border-ink/15 text-ink/70 hover:border-copper hover:text-copper hover:bg-white transition-all shadow-2xs active:scale-95"
+              aria-label="Scroll categories right"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <Link
+              to="/shop"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-copper text-copper hover:bg-copper hover:text-white transition-all text-[11px] sm:text-xs font-bold shadow-2xs"
+            >
+              View all <ArrowRight size={12} />
+            </Link>
+          </div>
         </div>
 
         {isLoadingCategories ? (
-          <div className="flex gap-8 overflow-hidden py-4 w-full">
+          <div className="flex gap-4 sm:gap-6 overflow-hidden py-3 w-full">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="flex shrink-0 flex-col items-center gap-3">
+              <div key={i} className="flex shrink-0 flex-col items-center gap-2.5">
                 <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-gray-200 animate-pulse border border-ink/[0.06]" />
                 <div className="h-3 w-16 bg-gray-200 animate-pulse rounded" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="marquee overflow-hidden py-4 w-full select-none">
-            <div className="marquee-track flex gap-8 items-center" style={{ animationDuration: "50s" }}>
-              {[0, 1].map((dup) => (
-                <div key={dup} className="flex shrink-0 gap-8 items-center" aria-hidden={dup === 1}>
-                  {categories.map((t: any) => (
-                    <Link key={t._id + (dup ? "-dup" : "")} to={`/shop/${t.slug}`} className="group flex flex-col items-center text-center cursor-fork py-2">
-                      <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-sand/30 border border-ink/[0.08] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-2xs group-hover:shadow-md group-hover:border-copper group-hover:bg-white group-hover:scale-105 group-hover:ring-2 group-hover:ring-copper/20">
-                        <img
-                          src={t.image?.url}
-                          alt={t.name}
-                          loading="lazy"
-                          className="w-[78%] h-[78%] object-contain transition-transform duration-300 group-hover:scale-110"
-                        />
-                      </div>
-                      <span className="mt-2.5 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider max-w-[85px] sm:max-w-[120px] text-center leading-tight">
-                        {t.name}
-                      </span>
-                    </Link>
-                  ))}
+          <div
+            ref={catScrollRef}
+            className="flex gap-4 sm:gap-6 items-start overflow-x-auto no-scrollbar scroll-smooth py-2 px-1 -mx-4 px-4 sm:mx-0 sm:px-0"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {categories.map((t: any) => (
+              <Link
+                key={t._id}
+                to={`/shop/${t.slug}`}
+                className="group flex flex-col items-center text-center cursor-fork flex-shrink-0 w-[84px] sm:w-[110px]"
+              >
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-sand/30 border border-ink/[0.08] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-2xs group-hover:shadow-md group-hover:border-copper group-hover:bg-white group-hover:scale-105 group-hover:ring-2 group-hover:ring-copper/20">
+                  <img
+                    src={t.image?.url}
+                    alt={t.name}
+                    loading="lazy"
+                    className="w-[78%] h-[78%] object-contain transition-transform duration-300 group-hover:scale-110"
+                  />
                 </div>
-              ))}
-            </div>
+                <span className="mt-2.5 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider text-center leading-tight line-clamp-2 w-full">
+                  {t.name}
+                </span>
+              </Link>
+            ))}
           </div>
         )}
       </section>
