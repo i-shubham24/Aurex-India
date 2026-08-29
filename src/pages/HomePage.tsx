@@ -272,21 +272,15 @@ export default function HomePage() {
                 <div key={dup} className="flex shrink-0 gap-8 items-center" aria-hidden={dup === 1}>
                   {categories.map((t: any) => (
                     <Link key={t._id + (dup ? "-dup" : "")} to={`/shop/${t.slug}`} className="group flex flex-col items-center text-center cursor-fork py-2">
-                      <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-white border border-ink/[0.06] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md hover:scale-105">
+                      <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-sand/30 border border-ink/[0.08] flex items-center justify-center overflow-hidden transition-all duration-300 shadow-2xs group-hover:shadow-md group-hover:border-copper group-hover:bg-white group-hover:scale-105 group-hover:ring-2 group-hover:ring-copper/20">
                         <img
                           src={t.image?.url}
                           alt={t.name}
                           loading="lazy"
-                          className="w-[75%] h-[75%] object-contain transition-all duration-300 group-hover:scale-50 group-hover:opacity-0"
+                          className="w-[78%] h-[78%] object-contain transition-transform duration-300 group-hover:scale-110"
                         />
-                        
-                        <div className="absolute inset-0 bg-copper/85 backdrop-blur-[2px] flex items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                          <span className="text-white text-[9px] sm:text-[11px] font-black tracking-wider uppercase text-center leading-tight">
-                            {t.name}
-                          </span>
-                        </div>
                       </div>
-                      <span className="mt-3 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider max-w-[100px] sm:max-w-[120px] truncate">
+                      <span className="mt-2.5 text-[10px] sm:text-[11px] font-extrabold text-ink group-hover:text-copper transition-colors uppercase tracking-wider max-w-[85px] sm:max-w-[120px] text-center leading-tight">
                         {t.name}
                       </span>
                     </Link>
