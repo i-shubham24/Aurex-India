@@ -4,6 +4,7 @@ export interface CreateOrderPayload {
   addressId: string;
   couponCode?: string;
   notes?: string;
+  email?: string;
   items?: Array<{
     productId: string;
     quantity: number;

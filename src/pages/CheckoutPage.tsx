@@ -86,6 +86,18 @@ export default function CheckoutPage() {
     activeCampaign,
   } = useCart();
 
+  // Contact email state (handles phone-only logged in users with placeholder emails)
+  const isPlaceholderEmail = Boolean(user?.email && user.email.endsWith('@phone.aurex.in'));
+  const [contactEmail, setContactEmail] = useState<string>(
+    user?.email && !isPlaceholderEmail ? user.email : ""
+  );
+
+  useEffect(() => {
+    if (user?.email && !user.email.endsWith('@phone.aurex.in')) {
+      setContactEmail(user.email);
+    }
+  }, [user]);
+
   // Address state
   const [addresses, setAddresses] = useState<AddressItem[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
@@ -286,6 +298,7 @@ export default function CheckoutPage() {
         addressId: targetAddressId,
         couponCode: coupon?.code,
         notes: addNote ? orderNote : undefined,
+        email: contactEmail || undefined,
         items: lines.map((l) => ({
           productId: l.productId,
           quantity: l.quantity,
@@ -307,7 +320,7 @@ export default function CheckoutPage() {
         description: `${itemCount} item(s) · Order #${order.orderNumber}`,
         prefill: {
           name: user.fullName || addressForm.fullName,
-          email: user.email,
+          email: contactEmail || (!isPlaceholderEmail ? user.email : undefined),
           contact: user.phone || addressForm.phone,
         },
         theme: { color: "#1B2A4A" },
@@ -416,14 +429,24 @@ export default function CheckoutPage() {
               {user && <span className="text-[11px] sm:text-xs font-normal text-ink/50">Logged in</span>}
             </h2>
             <div>
-              <label className="block text-xs font-semibold text-ink/70 mb-1.5">Email Address</label>
+              <label className="block text-xs font-semibold text-ink/70 mb-1.5">
+                Email Address {isPlaceholderEmail || !user?.email ? <span className="text-copper font-normal">* (For invoice & delivery tracking)</span> : null}
+              </label>
               <input
                 type="email"
-                value={user?.email || ""}
-                disabled
-                className="input bg-sand/30 text-ink/70 cursor-not-allowed text-xs sm:text-sm"
+                value={isPlaceholderEmail || !user?.email ? contactEmail : (user?.email || "")}
+                onChange={(e) => setContactEmail(e.target.value)}
+                disabled={!isPlaceholderEmail && Boolean(user?.email)}
+                placeholder="Enter email to receive order invoice"
+                className={`input text-xs sm:text-sm ${
+                  !isPlaceholderEmail && Boolean(user?.email) ? "bg-sand/30 text-ink/70 cursor-not-allowed" : "bg-white text-ink focus:border-copper"
+                }`}
               />
-              <p className="mt-1.5 text-[11px] text-ink/45">Order confirmation and invoice will be sent here.</p>
+              <p className="mt-1.5 text-[11px] text-ink/45">
+                {isPlaceholderEmail || !user?.email
+                  ? "Enter your email to receive order confirmation, GST invoice & live tracking updates."
+                  : "Order confirmation and invoice will be sent here."}
+              </p>
             </div>
           </section>
 
