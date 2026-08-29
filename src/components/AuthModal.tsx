@@ -270,11 +270,11 @@ export default function AuthModal() {
 
 
         {/* ── Right column ──────────────────────────────────────────────── */}
-        <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-10 relative flex flex-col justify-center overflow-y-auto">
+        <div className="w-full md:w-7/12 p-5 pt-12 sm:p-8 md:p-10 relative flex flex-col justify-center overflow-y-auto">
           <button
             type="button"
             onClick={closeAuthModal}
-            className="absolute right-4 top-4 sm:right-6 sm:top-6 z-30 rounded-full p-2 text-ink/40 hover:bg-sand/60 hover:text-ink transition-all"
+            className="absolute right-3.5 top-3.5 sm:right-5 sm:top-5 z-30 rounded-full p-2 bg-sand/60 sm:bg-transparent text-ink/50 hover:bg-sand hover:text-ink transition-all active:scale-95"
             aria-label="Close modal"
           >
             <X size={18} />
@@ -282,22 +282,22 @@ export default function AuthModal() {
 
           {/* ── LOGIN MODE ─────────────────────────────────────────────── */}
           {authModalMode === "login" ? (
-            <div className="max-w-sm mx-auto w-full pt-2 sm:pt-0">
-              {/* Offer Banner */}
-              <div className="mb-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-sand/40 to-copper/10 border border-amber-600/20 p-3 shadow-2xs">
+            <div className="max-w-sm mx-auto w-full">
+              {/* Offer Banner (Compact) */}
+              <div className="mb-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-sand/40 to-copper/10 border border-amber-600/20 p-2 sm:p-2.5 shadow-2xs">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="flex-shrink-0 grid h-7 w-7 place-items-center rounded-lg bg-amber-600/15 text-amber-900 text-xs font-black">%</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="flex-shrink-0 grid h-6 w-6 place-items-center rounded-md bg-amber-600/15 text-amber-900 text-[10px] font-black">%</span>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs font-bold text-ink">New Member Offer</span>
-                        <span className="font-mono text-[10px] font-black text-copper bg-white px-1.5 py-0.5 rounded border border-copper/30">NEWUSER15</span>
+                        <span className="text-[11px] font-bold text-ink">New Member Offer</span>
+                        <span className="font-mono text-[9px] font-black text-copper bg-white px-1.5 py-0.5 rounded border border-copper/30">NEWUSER15</span>
                       </div>
-                      <p className="text-[11px] text-ink/60 leading-tight mt-0.5">Get 15% off your first cookware order</p>
+                      <p className="text-[10px] text-ink/60 leading-tight mt-0.5">Get 15% off first order</p>
                     </div>
                   </div>
                   <button type="button" onClick={() => openAuthModal("signup")}
-                    className="text-[11px] font-black uppercase text-copper hover:underline flex-shrink-0 bg-white px-2.5 py-1.5 rounded-xl border border-copper/25 shadow-2xs">
+                    className="text-[10px] font-black uppercase text-copper hover:underline flex-shrink-0 bg-white px-2 py-1 rounded-lg border border-copper/25 shadow-2xs">
                     Claim →
                   </button>
                 </div>
@@ -379,17 +379,17 @@ export default function AuthModal() {
 
           ) : (
             /* ── SIGNUP MODE ─────────────────────────────────────────────── */
-            <div className="max-w-sm mx-auto w-full pt-2 sm:pt-0">
-              {/* Signup Offer Banner */}
-              <div className="mb-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-sand/40 to-copper/10 border border-emerald-500/30 p-3 shadow-2xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex-shrink-0 grid h-7 w-7 place-items-center rounded-lg bg-emerald-600/15 text-emerald-800 text-xs font-black">15%</span>
+            <div className="max-w-sm mx-auto w-full">
+              {/* Signup Offer Banner (Compact) */}
+              <div className="mb-4 rounded-xl bg-gradient-to-r from-emerald-500/10 via-sand/40 to-copper/10 border border-emerald-500/30 p-2 sm:p-2.5 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="flex-shrink-0 grid h-6 w-6 place-items-center rounded-md bg-emerald-600/15 text-emerald-800 text-[10px] font-black">15%</span>
                   <div>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-bold text-ink">15% Welcome Discount</span>
-                      <span className="font-mono text-[10px] font-black text-emerald-800 bg-white px-1.5 py-0.5 rounded border border-emerald-300">NEWUSER15</span>
+                      <span className="text-[11px] font-bold text-ink">15% Welcome Discount</span>
+                      <span className="font-mono text-[9px] font-black text-emerald-800 bg-white px-1.5 py-0.5 rounded border border-emerald-300">NEWUSER15</span>
                     </div>
-                    <p className="text-[11px] text-ink/60 leading-tight mt-0.5">Applied automatically at checkout!</p>
+                    <p className="text-[10px] text-ink/60 leading-tight mt-0.5">Applied automatically at checkout!</p>
                   </div>
                 </div>
               </div>
