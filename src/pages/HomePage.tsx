@@ -46,6 +46,7 @@ const HERO_SLIDES = [
 ];
 
 import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/api/apiClient";
 import { getCategories } from "@/api/categoryApi";
 import { getProducts } from "@/api/productApi";
 import { getRecentReviews } from "@/api/reviewApi";
@@ -200,11 +201,12 @@ export default function HomePage() {
   const [heroSlides, setHeroSlides] = useState<any[]>(HERO_SLIDES);
 
   useEffect(() => {
-    fetch("http://localhost:5002/api/v1/carousel")
-      .then((res) => res.json())
+    apiClient
+      .get("/carousel")
       .then((res) => {
-        if (res.success && res.data?.slides?.length > 0) {
-          const formatted = res.data.slides.map((s: any) => ({
+        const data = res.data;
+        if (data?.success && data?.data?.slides?.length > 0) {
+          const formatted = data.data.slides.map((s: any) => ({
             chip: s.chip,
             lead: s.lead,
             accent: s.accent,

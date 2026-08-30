@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import PasswordMeter from "@/components/PasswordMeter";
 import { emailError, passwordError } from "@/lib/validation";
 import { useQuery } from "@tanstack/react-query";
-import { getWelcomeOffer } from "@/api/welcomeOfferApi";
+import { getWelcomeOffer, getCachedWelcomeOffer } from "@/api/welcomeOfferApi";
 
 /** Converts technical Firebase / backend error messages into friendly UI copy. */
 const friendlyError = (err: any): string => {
@@ -44,13 +44,28 @@ const friendlyError = (err: any): string => {
 export default function AuthModal() {
   const { authModalOpen, authModalMode, openAuthModal, closeAuthModal, signInWithFirebaseToken } = useAuth();
 
-  const { data: welcomeOffer } = useQuery({
+  const { data: welcomeOffer, isLoading } = useQuery({
     queryKey: ["welcome-offer"],
     queryFn: getWelcomeOffer,
-    staleTime: 1000 * 60 * 5,
+    initialData: getCachedWelcomeOffer,
+    staleTime: 1000 * 60 * 10,
   });
 
-  const heroImageSrc = welcomeOffer?.image?.url || "/auth-hero.webp";
+  const heroImageSrc = welcomeOffer?.image?.url || (isLoading ? "" : "/auth-hero.webp");
+  const [displayImage, setDisplayImage] = useState<string>(() => heroImageSrc);
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (heroImageSrc) {
+      const img = new Image();
+      img.src = heroImageSrc;
+      img.onload = () => {
+        setDisplayImage(heroImageSrc);
+        setImageLoaded(true);
+      };
+    }
+  }, [heroImageSrc]);
+
   const badgeText = welcomeOffer?.badgeText || "Aurex India";
   const heading = authModalMode === "signup"
     ? (welcomeOffer?.signupHeading || "Join 10,000+ happy kitchens")
@@ -278,14 +293,18 @@ export default function AuthModal() {
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Left column ───────────────────────────────────────────────── */}
-        <div className="hidden md:flex md:w-5/12 relative flex-col justify-between p-8 md:p-12 overflow-hidden text-cream">
-          {/* Hero image */}
-          <img
-            src={heroImageSrc}
-            alt="Aurex premium cookware"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            loading="eager"
-          />
+        <div className="hidden md:flex md:w-5/12 relative flex-col justify-between p-8 md:p-12 overflow-hidden text-cream bg-ink">
+          {/* Hero image with smooth fade-in */}
+          {displayImage && (
+            <img
+              src={displayImage}
+              alt="Aurex premium cookware"
+              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ease-out ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              loading="eager"
+            />
+          )}
           {/* Dark gradient overlay so text is readable */}
           <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/60 to-ink/30" />
 

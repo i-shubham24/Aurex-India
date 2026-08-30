@@ -10,7 +10,7 @@ import RequireAuth from "@/components/RequireAuth";
 import { useAuth } from "@/context/AuthContext";
 
 import { useQuery } from "@tanstack/react-query";
-import { getWelcomeOffer } from "@/api/welcomeOfferApi";
+import { getWelcomeOffer, getCachedWelcomeOffer } from "@/api/welcomeOfferApi";
 
 // Synchronous import for main landing page (for instant LCP)
 import HomePage from "@/pages/HomePage";
@@ -54,7 +54,8 @@ export default function App() {
   const { data: welcomeOffer } = useQuery({
     queryKey: ["welcome-offer"],
     queryFn: getWelcomeOffer,
-    staleTime: 1000 * 60 * 5,
+    initialData: getCachedWelcomeOffer,
+    staleTime: 1000 * 60 * 10,
   });
 
   // Show Welcome / Discount Modal when user visits Aurex India
