@@ -11,6 +11,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { wishlistApi } from "@/api/wishlistApi";
+import { trackUserActivity } from "@/utils/activityTracker";
 
 interface WishlistContextValue {
   ids: string[];
@@ -98,9 +99,17 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         if (isWished) {
           await wishlistApi.removeFromWishlist(id);
           toast.info(productName ? `Removed ${productName} from wishlist.` : "Removed from wishlist.");
+          trackUserActivity({
+            eventType: 'REMOVE_FROM_WISHLIST',
+            item: { id, name: productName }
+          });
         } else {
           await wishlistApi.addToWishlist(id);
           toast.success(productName ? `Added ${productName} to wishlist.` : "Added to wishlist.");
+          trackUserActivity({
+            eventType: 'ADD_TO_WISHLIST',
+            item: { id, name: productName }
+          });
         }
       } catch (error) {
         // Revert on failure

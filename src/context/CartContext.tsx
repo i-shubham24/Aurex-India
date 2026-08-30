@@ -15,6 +15,7 @@ import { cartApi } from "@/api/cartApi";
 import { couponApi } from "@/api/couponApi";
 import { fireCouponConfetti } from "@/lib/confetti";
 import apiClient from "@/api/apiClient";
+import { trackUserActivity } from "@/utils/activityTracker";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -158,6 +159,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
       toast.success(`Added ${product.name} to cart.`);
       setOpen(true);
+
+      // Track user activity
+      trackUserActivity({
+        eventType: 'ADD_TO_CART',
+        item: {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: unitPrice,
+          image: variant?.images?.[0] ?? product.images[0],
+          category: product.categorySlug || (product as any).category?.name || 'Cookware'
+        },
+        metadata: {
+          quantity: qty,
+          cartTotal: unitPrice * qty
+        }
+      });
       
       if (user) {
         try {
@@ -175,9 +193,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const remove = useCallback(async (productId: string, variantId?: string) => {
     const key = lineKey(productId, variantId);
     const originalLines = linesRef.current;
+    const removedItem = originalLines.find((l) => lineKey(l.productId, l.variantId) === key);
+
     setLines((prev) =>
       prev.filter((l) => lineKey(l.productId, l.variantId) !== key)
     );
+
+    if (removedItem) {
+      trackUserActivity({
+        eventType: 'REMOVE_FROM_CART',
+        item: {
+          id: removedItem.productId,
+          name: removedItem.name,
+          price: removedItem.unitPrice,
+          image: removedItem.image
+        }
+      });
+    }
     if (user) {
       try {
         await cartApi.removeCartItem(productId);

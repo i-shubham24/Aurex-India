@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Flame, ShieldCheck, Recycle, Check, Minus, Plus, ShoppingBag, Truck, Heart, Star, Loader2, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { Product, ProductVariant } from "@/services/types";
+import { trackUserActivity } from "@/utils/activityTracker";
 
 /** Pull a few reliable spec rows out of the (messy) source description. */
 function parseSpecs(product: Product): [string, string][] {
@@ -137,6 +138,22 @@ export default function ProductPage() {
     queryFn: () => getProductReviews(product!.id),
     enabled: !!product?.id,
   });
+
+  useEffect(() => {
+    if (product) {
+      trackUserActivity({
+        eventType: 'PRODUCT_VIEW',
+        item: {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          image: product.images?.[0],
+          category: (product as any).categorySlug || (product as any).category?.name || 'Cookware'
+        }
+      });
+    }
+  }, [product?.id]);
 
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [newRating, setNewRating] = useState(5);
