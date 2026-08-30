@@ -7,6 +7,10 @@ import ChatWidget from "@/components/ChatWidget";
 import DeliveredOrderReviewPrompt from "@/components/DeliveredOrderReviewPrompt";
 import AuthModal from "@/components/AuthModal";
 import RequireAuth from "@/components/RequireAuth";
+import { useAuth } from "@/context/AuthContext";
+
+import { useQuery } from "@tanstack/react-query";
+import { getWelcomeOffer } from "@/api/welcomeOfferApi";
 
 // Synchronous import for main landing page (for instant LCP)
 import HomePage from "@/pages/HomePage";
@@ -44,6 +48,33 @@ function PageFallback() {
 }
 
 export default function App() {
+  const { user, loading, openAuthModal } = useAuth();
+  const { pathname } = useLocation();
+
+  const { data: welcomeOffer } = useQuery({
+    queryKey: ["welcome-offer"],
+    queryFn: getWelcomeOffer,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Show Welcome / Discount Modal when user visits Aurex India
+  useEffect(() => {
+    // Skip if user is authenticated, still loading auth state, on admin routes, or modal is disabled from admin
+    if (loading || user || pathname.startsWith("/admin")) return;
+    if (welcomeOffer && welcomeOffer.isEnabled === false) return;
+
+    const hasShown = sessionStorage.getItem("aurex_welcome_modal_shown");
+    if (!hasShown) {
+      // 800ms gentle delay to allow initial page layout to paint seamlessly
+      const timer = setTimeout(() => {
+        openAuthModal("login");
+        sessionStorage.setItem("aurex_welcome_modal_shown", "true");
+      }, 800);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, user, pathname, openAuthModal, welcomeOffer]);
+
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop />

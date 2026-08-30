@@ -5,6 +5,8 @@ import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import PasswordMeter from "@/components/PasswordMeter";
 import { emailError, passwordError } from "@/lib/validation";
+import { useQuery } from "@tanstack/react-query";
+import { getWelcomeOffer } from "@/api/welcomeOfferApi";
 
 /** Converts technical Firebase / backend error messages into friendly UI copy. */
 const friendlyError = (err: any): string => {
@@ -42,6 +44,29 @@ const friendlyError = (err: any): string => {
 export default function AuthModal() {
   const { authModalOpen, authModalMode, openAuthModal, closeAuthModal, signInWithFirebaseToken } = useAuth();
 
+  const { data: welcomeOffer } = useQuery({
+    queryKey: ["welcome-offer"],
+    queryFn: getWelcomeOffer,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const heroImageSrc = welcomeOffer?.image?.url || "/auth-hero.webp";
+  const badgeText = welcomeOffer?.badgeText || "Aurex India";
+  const heading = authModalMode === "signup"
+    ? (welcomeOffer?.signupHeading || "Join 10,000+ happy kitchens")
+    : (welcomeOffer?.heading || "Unlock 15% Off");
+  const description = authModalMode === "signup"
+    ? (welcomeOffer?.signupDescription || "Create your Aurex account and get 15% off your first order of premium triply and cast iron cookware.")
+    : (welcomeOffer?.description || "Sign in to your Aurex account and enjoy exclusive offers on premium triply and cast iron cookware.");
+  const footerPerk = welcomeOffer?.footerPerk || "Free Shipping Across India & Lifetime Warranty";
+
+  const showOfferBanner = welcomeOffer?.showOfferBanner ?? true;
+  const offerTag = welcomeOffer?.offerTag || "%";
+  const offerTitle = welcomeOffer?.offerTitle || "New Member Offer";
+  const offerCouponCode = welcomeOffer?.offerCouponCode || "NEWUSER15";
+  const offerDescription = welcomeOffer?.offerDescription || "Get 15% off first order";
+  const offerCtaText = welcomeOffer?.offerCtaText || "Claim →";
+
   // ── Login state (Phone OTP only) ──────────────────────────────────────────
   const [loginPhone, setLoginPhone] = useState("");
   const [loginOtpCode, setLoginOtpCode] = useState("");
@@ -76,6 +101,18 @@ export default function AuthModal() {
     if (signupResendTimer > 0) t = setInterval(() => setSignupResendTimer((n) => n - 1), 1000);
     return () => clearInterval(t);
   }, [signupResendTimer]);
+
+  // ── Close on Escape key ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!authModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeAuthModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [authModalOpen, closeAuthModal]);
 
   if (!authModalOpen) return null;
 
@@ -232,17 +269,19 @@ export default function AuthModal() {
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-ink/70 backdrop-blur-md animate-fade-in overflow-y-auto">
-
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-ink/70 backdrop-blur-md animate-fade-in overflow-y-auto cursor-pointer"
+      onClick={closeAuthModal}
+    >
       <div
-        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20 flex flex-col md:flex-row my-auto max-h-[90vh] md:max-h-[85vh]"
+        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20 flex flex-col md:flex-row my-auto max-h-[90vh] md:max-h-[85vh] cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Left column ───────────────────────────────────────────────── */}
         <div className="hidden md:flex md:w-5/12 relative flex-col justify-between p-8 md:p-12 overflow-hidden text-cream">
           {/* Hero image */}
           <img
-            src="/auth-hero.webp"
+            src={heroImageSrc}
             alt="Aurex premium cookware"
             className="absolute inset-0 w-full h-full object-cover object-center"
             loading="eager"
@@ -252,20 +291,22 @@ export default function AuthModal() {
 
           {/* Content on top of image */}
           <div className="relative z-10">
-            <span className="chip bg-white/10 text-gold border border-white/20 text-[11px] font-black uppercase tracking-widest px-3 py-1 backdrop-blur-sm">Aurex India</span>
+            <span className="chip bg-white/10 text-gold border border-white/20 text-[11px] font-black uppercase tracking-widest px-3 py-1 backdrop-blur-sm">
+              {badgeText}
+            </span>
             <h3 className="mt-6 text-2xl font-black font-serif text-cream leading-tight drop-shadow-lg">
-              {authModalMode === "signup" ? "Join 10,000+ happy kitchens" : "Unlock 15% Off"}
+              {heading}
             </h3>
             <p className="text-cream/80 text-sm font-light leading-relaxed mt-3 drop-shadow">
-              {authModalMode === "signup"
-                ? "Create your Aurex account and get 15% off your first order of premium triply and cast iron cookware."
-                : "Sign in to your Aurex account and enjoy exclusive offers on premium triply and cast iron cookware."}
+              {description}
             </p>
           </div>
-          <div className="relative z-10 pt-8 border-t border-white/15 flex items-center gap-3 backdrop-blur-sm">
-            <div className="w-9 h-9 rounded-full bg-copper/30 border border-copper/40 flex items-center justify-center text-gold font-bold text-sm">✨</div>
-            <p className="text-xs text-cream/80 font-medium">Free Shipping Across India & Lifetime Warranty</p>
-          </div>
+
+          {footerPerk && (
+            <div className="relative z-10 pt-6 border-t border-white/15 backdrop-blur-sm">
+              <p className="text-xs text-cream/90 font-medium leading-relaxed">{footerPerk}</p>
+            </div>
+          )}
         </div>
 
 
@@ -283,25 +324,33 @@ export default function AuthModal() {
           {/* ── LOGIN MODE ─────────────────────────────────────────────── */}
           {authModalMode === "login" ? (
             <div className="max-w-sm mx-auto w-full">
-              {/* Offer Banner (Compact) */}
-              <div className="mb-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-sand/40 to-copper/10 border border-amber-600/20 p-2 sm:p-2.5 shadow-2xs">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="flex-shrink-0 grid h-6 w-6 place-items-center rounded-md bg-amber-600/15 text-amber-900 text-[10px] font-black">%</span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[11px] font-bold text-ink">New Member Offer</span>
-                        <span className="font-mono text-[9px] font-black text-copper bg-white px-1.5 py-0.5 rounded border border-copper/30">NEWUSER15</span>
+              {/* Offer Banner (Refined Dimensions & Balanced Spacing) */}
+              {showOfferBanner && (
+                <div className="mb-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-50/60 to-copper/10 border border-amber-600/25 p-2.5 sm:p-3 shadow-xs">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <span className="flex-shrink-0 w-8 h-8 rounded-xl bg-amber-600/15 text-amber-950 text-xs font-black flex items-center justify-center border border-amber-600/20">
+                        {offerTag}
+                      </span>
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <span className="text-xs sm:text-[13px] font-bold text-ink leading-tight">
+                          {offerTitle}
+                        </span>
+                        <span className="font-mono text-[10px] font-black text-copper bg-white px-2 py-0.5 rounded-md border border-copper/30 shadow-2xs tracking-wider">
+                          {offerCouponCode}
+                        </span>
                       </div>
-                      <p className="text-[10px] text-ink/60 leading-tight mt-0.5">Get 15% off first order</p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => openAuthModal("signup")}
+                      className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-copper hover:text-white hover:bg-copper bg-white flex-shrink-0 rounded-xl border border-copper/30 shadow-2xs transition-all active:scale-95"
+                    >
+                      {offerCtaText}
+                    </button>
                   </div>
-                  <button type="button" onClick={() => openAuthModal("signup")}
-                    className="text-[10px] font-black uppercase text-copper hover:underline flex-shrink-0 bg-white px-2 py-1 rounded-lg border border-copper/25 shadow-2xs">
-                    Claim →
-                  </button>
                 </div>
-              </div>
+              )}
 
               <h2 className="text-2xl sm:text-3xl font-black text-ink">Welcome back</h2>
               <p className="mt-1 text-xs sm:text-sm text-ink/60">Sign in instantly via mobile OTP.</p>
