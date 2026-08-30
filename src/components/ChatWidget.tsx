@@ -15,9 +15,7 @@ interface Msg {
 
 const SUGGESTIONS = [
   "Which pan is best for dosas?",
-  "What's your return policy?",
   "How do I season cast iron?",
-  "Do you ship across India?",
 ];
 
 export default function ChatWidget() {
@@ -43,8 +41,16 @@ export default function ChatWidget() {
     setInput("");
     setMsgs((m) => [...m, { from: "user", text: q }]);
     setBusy(true);
+    const history = msgs.map((m) => ({
+      role: m.from === "user" ? ("user" as const) : ("assistant" as const),
+      content: m.text,
+    }));
+
     try {
-      const reply: BotReply = await askBot(q, { isLoggedIn: !!user });
+      const reply: BotReply = await askBot(q, {
+        isLoggedIn: !!user,
+        history,
+      });
       setMsgs((m) => [
         ...m,
         { from: "bot", text: reply.text, products: reply.products, handoff: reply.handoff },
@@ -71,9 +77,8 @@ export default function ChatWidget() {
 
       {/* Panel */}
       <div
-        className={`fixed bottom-40 lg:bottom-24 right-4 lg:right-6 z-40 flex w-[calc(100vw-2rem)] sm:w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-lift ring-1 ring-ink/10 transition-all duration-300 ${
-          open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
-        }`}
+        className={`fixed bottom-40 lg:bottom-24 right-4 lg:right-6 z-40 flex w-[calc(100vw-2rem)] sm:w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl bg-white shadow-lift ring-1 ring-ink/10 transition-all duration-300 ${open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
+          }`}
         style={{ height: "min(70vh, 560px)" }}
         role="dialog"
         aria-label="Aurex assistant"
@@ -95,11 +100,10 @@ export default function ChatWidget() {
             <div key={i} className={m.from === "user" ? "flex justify-end" : "flex justify-start"}>
               <div className="max-w-[85%] space-y-2">
                 <div
-                  className={`whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                    m.from === "user"
+                  className={`whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${m.from === "user"
                       ? "rounded-br-sm bg-ink text-cream"
                       : "rounded-bl-sm bg-white text-ink ring-1 ring-ink/[0.06]"
-                  }`}
+                    }`}
                 >
                   {m.text}
                 </div>

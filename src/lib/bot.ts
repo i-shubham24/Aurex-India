@@ -1,6 +1,7 @@
 import { data } from "@/services";
 import type { Product } from "@/services/types";
 import { formatINR } from "@/lib/format";
+import apiClient from "@/api/apiClient";
 
 /**
  * Aurea — Aurex's support assistant.
@@ -23,6 +24,7 @@ export interface BotReply {
 
 export interface BotContext {
   isLoggedIn: boolean;
+  history?: { role: 'user' | 'assistant'; content: string }[];
 }
 
 const whatsapp = import.meta.env.VITE_WHATSAPP_NUMBER ?? "917814477667";
@@ -106,23 +108,27 @@ async function recommend(text: string): Promise<Product[]> {
 }
 
 /**
- * The single entry point the ChatWidget calls. If VITE_BOT_API_URL is set, we
- * hand off to the server LLM; otherwise we answer locally.
+ * The single entry point the ChatWidget calls.
+ * First queries the Groq AI backend API grounded on Aurex Store & Blog content.
+ * Falls back to local grounded heuristic engine if backend is offline.
  */
 export async function askBot(message: string, ctx: BotContext): Promise<BotReply> {
-  const apiUrl = import.meta.env.VITE_BOT_API_URL;
-  if (apiUrl) {
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, context: ctx }),
-      });
-      if (res.ok) return (await res.json()) as BotReply;
-    } catch {
-      /* fall through to local */
+  try {
+    const res = await apiClient.post('/chat', {
+      message,
+      history: ctx.history || []
+    });
+
+    if (res.data?.success && res.data?.data) {
+      return {
+        text: res.data.data.text,
+        products: res.data.data.products || []
+      };
     }
+  } catch (err) {
+    console.warn("AI Chat Backend fallback to local engine:", err);
   }
+
   return localAnswer(message, ctx);
 }
 
