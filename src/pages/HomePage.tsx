@@ -493,36 +493,34 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="mt-6 sm:mt-10 grid gap-6 sm:gap-8 lg:grid-cols-2 items-center max-w-5xl mx-auto">
-              {/* Left Column: Contained Diagram Image */}
-              <div className="flex items-center justify-center bg-white p-4 sm:p-6 rounded-xl2 border border-ink/[0.04] shadow-sm">
-                <img
-                  src="/brand/construction.webp"
-                  alt="Aurex triply construction"
-                  loading="lazy"
-                  className="w-full max-h-[360px] sm:max-h-[480px] object-contain"
-                />
-              </div>
+            {/* Full-width diagram image */}
+            <div className="mt-6 sm:mt-10 flex items-center justify-center bg-white p-4 sm:p-8 rounded-xl2 border border-ink/[0.04] shadow-sm max-w-5xl mx-auto">
+              <img
+                src="/brand/construction.webp"
+                alt="Aurex triply construction"
+                loading="lazy"
+                className="w-full max-h-[420px] sm:max-h-[600px] object-contain"
+              />
+            </div>
 
-              {/* Right Column: Layer specifications */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {[
-                  { badge: "304", title: "Inner Layer", desc: "Food-grade steel — corrosion-resistant & non-reactive." },
-                  { badge: "Al", title: "Aluminium Core", desc: "Superior heat distribution for even cooking." },
-                  { badge: "430", title: "Outer Layer", desc: "Food-grade & magnetic — fully induction ready." },
-                  { badge: "★", title: "No Hotspots", desc: "Uniform heating across the whole surface." },
-                ].map((l) => (
-                  <div key={l.title} className="card p-4 sm:p-5 bg-white shadow-sm border border-ink/[0.04] flex gap-3.5 sm:gap-4 items-start text-left">
-                    <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl bg-copper/10 text-xs font-black text-copper flex-shrink-0">
-                      {l.badge}
-                    </div>
-                    <div>
-                      <p className="font-bold text-ink text-xs sm:text-sm leading-tight">{l.title}</p>
-                      <p className="text-[11px] sm:text-xs leading-normal text-ink/65 mt-1">{l.desc}</p>
-                    </div>
+            {/* 4 layer cards — single row beneath the image */}
+            <div className="mt-5 sm:mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto">
+              {[
+                { badge: "304", title: "Inner Layer", desc: "Food-grade steel — corrosion-resistant & non-reactive." },
+                { badge: "Al",  title: "Aluminium Core", desc: "Superior heat distribution for even cooking." },
+                { badge: "430", title: "Outer Layer", desc: "Food-grade & magnetic — fully induction ready." },
+                { badge: "★",  title: "No Hotspots", desc: "Uniform heating across the whole surface." },
+              ].map((l) => (
+                <div key={l.title} className="card p-4 sm:p-5 bg-white shadow-sm border border-ink/[0.04] flex flex-col gap-2.5 items-start text-left">
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-copper/10 text-xs font-black text-copper flex-shrink-0">
+                    {l.badge}
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <p className="font-bold text-ink text-xs sm:text-sm leading-tight">{l.title}</p>
+                    <p className="text-[11px] sm:text-xs leading-normal text-ink/65 mt-1">{l.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
