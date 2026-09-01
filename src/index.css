@@ -216,17 +216,26 @@
 
 /* Top announcement marquee */
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee {
+  /* Prevent any sub-pixel overflow leak on the sides */
+  overflow: hidden;
 }
 .marquee-track {
-  display: inline-flex;
+  display: flex;
+  width: max-content;
   white-space: nowrap;
+  /* GPU compositing — keeps text sharp during animation */
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   animation: marquee 30s linear infinite;
 }
 .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
+  .marquee-track { animation: none !important; }
 }
