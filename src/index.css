@@ -239,3 +239,39 @@
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none !important; }
 }
+
+/* ─── Chat bot markdown rendering ─── */
+.chat-prose strong { font-weight: 700; }
+.chat-prose em { font-style: italic; }
+
+.chat-prose .chat-ol,
+.chat-prose .chat-ul {
+  margin: 0.4em 0 0.4em 1.1em;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+.chat-prose .chat-ol { list-style-type: decimal; }
+.chat-prose .chat-ul { list-style-type: disc; }
+.chat-prose .chat-ol li,
+.chat-prose .chat-ul li {
+  padding-left: 0.15em;
+  line-height: 1.5;
+}
+
+.chat-prose .chat-link {
+  color: #B06E3F;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.chat-prose .chat-link:hover { opacity: 0.75; }
+
+.chat-prose .inline-code {
+  background: rgba(0,0,0,0.06);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+  font-family: monospace;
+}

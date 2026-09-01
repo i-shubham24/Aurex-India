@@ -6,6 +6,55 @@ import { useAuth } from "@/context/AuthContext";
 import type { Product } from "@/services/types";
 import { formatINR } from "@/lib/format";
 
+/** Converts common bot markdown to safe HTML. */
+function renderMarkdown(text: string): string {
+  return (
+    text
+      // Escape any existing HTML to prevent XSS
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      // Bold: **text**
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      // Italic: *text* or _text_
+      .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>")
+      .replace(/\_(.+?)\_/g, "<em>$1</em>")
+      // Inline code: `code`
+      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+      // Links: [text](url)  — only allow relative or http(s) URLs
+      .replace(
+        /\[([^\]]+)\]\(((https?:\/\/|\/)[^)]+)\)/g,
+        '<a href="$2" class="chat-link" target="_blank" rel="noreferrer">$1</a>'
+      )
+      // Numbered list items: "1. " at start of line
+      .replace(
+        /((?:^|\n)(?:\d+\..+(?:\n|$))+)/g,
+        (block) =>
+          "<ol class='chat-ol'>" +
+          block
+            .trim()
+            .split("\n")
+            .filter(Boolean)
+            .map((line) => `<li>${line.replace(/^\d+\.\s*/, "")}</li>`)
+            .join("") +
+          "</ol>"
+      )
+      // Bullet list items: "- " or "• " at start of line
+      .replace(
+        /((?:^|\n)(?:[\-•]\s.+(?:\n|$))+)/g,
+        (block) =>
+          "<ul class='chat-ul'>" +
+          block
+            .trim()
+            .split("\n")
+            .filter(Boolean)
+            .map((line) => `<li>${line.replace(/^[\-•]\s*/, "")}</li>`)
+            .join("") +
+          "</ul>"
+      )
+      // Line breaks
+      .replace(/\n/g, "<br />")
+  );
+}
+
 interface Msg {
   from: "bot" | "user";
   text: string;
@@ -100,13 +149,16 @@ export default function ChatWidget() {
             <div key={i} className={m.from === "user" ? "flex justify-end" : "flex justify-start"}>
               <div className="max-w-[85%] space-y-2">
                 <div
-                  className={`whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${m.from === "user"
-                      ? "rounded-br-sm bg-ink text-cream"
-                      : "rounded-bl-sm bg-white text-ink ring-1 ring-ink/[0.06]"
-                    }`}
-                >
-                  {m.text}
-                </div>
+                  className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                    m.from === "user"
+                      ? "rounded-br-sm bg-ink text-cream whitespace-pre-line"
+                      : "rounded-bl-sm bg-white text-ink ring-1 ring-ink/[0.06] chat-prose"
+                  }`}
+                  {...(m.from === "bot"
+                    ? { dangerouslySetInnerHTML: { __html: renderMarkdown(m.text) } }
+                    : { children: m.text }
+                  )}
+                />
 
                 {m.products && m.products.length > 0 && (
                   <div className="space-y-2">
