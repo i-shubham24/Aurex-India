@@ -19,11 +19,8 @@ function renderMarkdown(text: string): string {
       .replace(/\_(.+?)\_/g, "<em>$1</em>")
       // Inline code: `code`
       .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-      // Links: [text](url)  — only allow relative or http(s) URLs
-      .replace(
-        /\[([^\]]+)\]\(((https?:\/\/|\/)[^)]+)\)/g,
-        '<a href="$2" class="chat-link" target="_blank" rel="noreferrer">$1</a>'
-      )
+      // Links: [text](url) — strip link syntax, keep only the label text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
       // Numbered list items: "1. " at start of line
       .replace(
         /((?:^|\n)(?:\d+\..+(?:\n|$))+)/g,
