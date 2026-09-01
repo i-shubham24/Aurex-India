@@ -11,9 +11,9 @@ import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
 const HERO_SLIDES = [
   {
-    chip: "5 decades of craftsmanship",
-    lead: "Cookware built to",
-    typewriter: ["last a lifetime", "cook evenly", "be passed down"],
+    chip: "Built for Modern Indian Kitchens",
+    lead: "Cookware that",
+    typewriter: ["feels like Home", "is crafted for everyday comfort"],
     subtitle:
       "Premium triply stainless steel and toxin-free cast iron, engineered for even heat and everyday Indian cooking.",
     cta: "Shop all cookware",
@@ -24,9 +24,9 @@ const HERO_SLIDES = [
   {
     chip: "Triply Collection",
     lead: "Triply steel,",
-    accent: "engineered to last",
+    accent: "Where Durability Meets Design",
     subtitle:
-      "Three bonded layers — food-grade steel and an aluminium core — for fast, even, induction-ready heat.",
+      "Upgrade your kitchen with thoughtfully crafted triply stainless steel cookware.",
     cta: "Shop Triply",
     to: "/shop/triply",
     image: "/brand/tri-ply-range.webp",
@@ -35,9 +35,9 @@ const HERO_SLIDES = [
   {
     chip: "Cast Iron",
     lead: "Cast iron,",
-    accent: "reimagined",
+    accent: "Engineered for Everyday Excellence",
     subtitle:
-      "Pre-seasoned, naturally non-stick and toxin-free — built to be passed down for generations.",
+      "Upgrade your kitchen with cast iron cookware, built to last for generations.",
     cta: "Shop Cast Iron",
     to: "/shop/cast-iron",
     image: "/brand/cast-iron-range.webp",
@@ -452,10 +452,10 @@ export default function HomePage() {
       <section className="border-y border-ink/[0.06] bg-gradient-to-r from-copper/[0.06] via-white to-gold/[0.1] my-4 sm:my-10">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-14">
           <div className="mb-4 sm:mb-8 max-w-xl">
-            <span className="chip bg-gold text-ink text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"><Tag size={12} className="mr-1 inline" /> Best Deals</span>
-            <h2 className="mt-2 text-xl sm:text-3xl font-black text-ink">Weekly Special Offers</h2>
+            <span className="chip bg-gold text-ink text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"><Tag size={12} className="mr-1 inline" /> Unlock 15% Off</span>
+            <h2 className="mt-2 text-xl sm:text-3xl font-black text-ink">Join the Aurex Family</h2>
             <p className="mt-1 text-xs sm:text-sm text-ink/65">
-              Use coupon code <b className="text-copper">WELCOME15</b> for an extra 15% discount on your first purchase.
+              Join the aurex family for premium recipes, care tips, exclusive deals and offers. Use coupon code <b className="text-copper">WELCOME15</b> for an extra 15% discount on your first purchase.
             </p>
           </div>
           
