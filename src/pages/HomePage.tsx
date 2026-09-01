@@ -495,12 +495,12 @@ export default function HomePage() {
 
             <div className="mt-6 sm:mt-10 grid gap-6 sm:gap-8 lg:grid-cols-2 items-center max-w-5xl mx-auto">
               {/* Left Column: Contained Diagram Image */}
-              <div className="flex items-center justify-center bg-white p-4 sm:p-6 rounded-xl2 border border-ink/[0.04] shadow-sm max-h-[380px] overflow-hidden">
+              <div className="flex items-center justify-center bg-white p-4 sm:p-6 rounded-xl2 border border-ink/[0.04] shadow-sm">
                 <img
                   src="/brand/construction.webp"
                   alt="Aurex triply construction"
                   loading="lazy"
-                  className="max-h-[240px] sm:max-h-[320px] object-contain"
+                  className="w-full max-h-[360px] sm:max-h-[480px] object-contain"
                 />
               </div>
 
