@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Flame, ShieldCheck, Recycle, Check, Minus, Plus, ShoppingBag, Truck, Heart, Star, Loader2, X } from "lucide-react";
+import { Flame, ShieldCheck, Recycle, Check, Minus, Plus, ShoppingBag, Truck, Heart, Star, Loader2, X, Camera } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProductBySlug, getProducts } from "@/api/productApi";
 import { orderApi } from "@/api/orderApi";
-import { getProductReviews, createReview, type ReviewItem } from "@/api/reviewApi";
+import { getProductReviews, createReview, uploadReviewImage, type ReviewItem, type ReviewImage } from "@/api/reviewApi";
 import { formatINR, discountPct } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -162,6 +162,51 @@ export default function ProductPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewImages, setReviewImages] = useState<ReviewImage[]>([]);
+  const [isUploadingReviewImage, setIsUploadingReviewImage] = useState(false);
+  const [previewReviewPhoto, setPreviewReviewPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleReviewFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (reviewImages.length + files.length > 4) {
+      toast.error("You can upload up to 4 photos per review.");
+      return;
+    }
+
+    setIsUploadingReviewImage(true);
+    try {
+      const uploaded: ReviewImage[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} is too large (max 5MB).`);
+          continue;
+        }
+        const res = await uploadReviewImage(file);
+        if (res?.url) {
+          uploaded.push(res);
+        }
+      }
+      setReviewImages((prev) => [...prev, ...uploaded]);
+      if (uploaded.length > 0) {
+        toast.success(`${uploaded.length} photo(s) added!`);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to upload photo. Please try again.");
+    } finally {
+      setIsUploadingReviewImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveReviewPhoto = (index: number) => {
+    setReviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // Query user orders to verify delivery
   const { data: userOrders = [] } = useQuery({
@@ -208,12 +253,14 @@ export default function ProductPage() {
         rating: newRating,
         title: newTitle.trim(),
         comment: newComment.trim(),
+        images: reviewImages,
       });
       toast.success("⭐ Rating submitted successfully! Thank you for your feedback.");
       setShowReviewModal(false);
       setNewTitle("");
       setNewComment("");
       setNewRating(5);
+      setReviewImages([]);
       refetchReviews();
 
       const currentUid = user?.id || (user as any)?._id;
@@ -585,6 +632,32 @@ export default function ProductPage() {
                   </div>
                   {r.title && <p className="font-bold text-sm text-ink">{r.title}</p>}
                   <p className="text-xs leading-relaxed text-ink/75">{r.comment}</p>
+
+                  {/* Customer Review Photos */}
+                  {r.images && r.images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {r.images.map((img: any, i: number) => {
+                        const imgUrl = typeof img === 'string' ? img : img?.url;
+                        if (!imgUrl) return null;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setPreviewReviewPhoto(imgUrl)}
+                            className="relative group rounded-xl overflow-hidden border border-ink/10 aspect-square w-16 h-16 bg-sand/20 focus:outline-none hover:ring-2 hover:ring-copper/40 transition-all cursor-zoom-in"
+                            title="Click to view photo"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Customer review photo ${i + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   <p className="text-[11px] text-ink/40 pt-2 border-t border-ink/5">
                     — {authorName} {dateStr && `· ${dateStr}`}
                   </p>
@@ -696,6 +769,65 @@ export default function ProductPage() {
                 />
               </div>
 
+              {/* Photo Upload for Review */}
+              <div>
+                <label className="block text-xs font-bold text-ink mb-1.5">
+                  Add Photos <span className="text-ink/40 font-normal">(Optional, up to 4)</span>
+                </label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleReviewFileChange}
+                  accept="image/jpeg,image/png,image/webp,image/jpg"
+                  multiple
+                  className="hidden"
+                />
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {reviewImages.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="relative group w-16 h-16 rounded-xl overflow-hidden border border-ink/15 bg-sand/30 shadow-2xs"
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Preview ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReviewPhoto(idx)}
+                        className="absolute top-1 right-1 bg-ink/80 hover:bg-red-600 text-white p-0.5 rounded-full shadow-sm transition-colors"
+                        title="Remove photo"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+
+                  {isUploadingReviewImage && (
+                    <div className="w-16 h-16 rounded-xl border border-dashed border-copper/50 bg-copper/5 flex flex-col items-center justify-center text-copper">
+                      <Loader2 size={16} className="animate-spin" />
+                      <span className="text-[9px] font-bold mt-1">Uploading...</span>
+                    </div>
+                  )}
+
+                  {reviewImages.length < 4 && !isUploadingReviewImage && (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-16 h-16 rounded-xl border-2 border-dashed border-ink/20 hover:border-copper hover:bg-copper/5 text-ink/60 hover:text-copper flex flex-col items-center justify-center transition-all active:scale-95 group"
+                    >
+                      <Camera size={18} className="group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold mt-0.5">+ Photo</span>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-ink/40 mt-1.5">
+                  Share photos of your cookware in use, seasoning, or packaging to help other cooks.
+                </p>
+              </div>
+
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -714,6 +846,32 @@ export default function ProductPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Lightbox */}
+      {previewReviewPhoto && (
+        <div
+          onClick={() => setPreviewReviewPhoto(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in cursor-zoom-out"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-2xl max-h-[85vh] bg-transparent rounded-2xl overflow-hidden"
+          >
+            <button
+              onClick={() => setPreviewReviewPhoto(null)}
+              className="absolute top-3 right-3 z-10 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors"
+              aria-label="Close photo preview"
+            >
+              <X size={18} />
+            </button>
+            <img
+              src={previewReviewPhoto}
+              alt="Customer review photo"
+              className="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl mx-auto"
+            />
           </div>
         </div>
       )}

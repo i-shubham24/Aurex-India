@@ -1,5 +1,10 @@
 import apiClient from './apiClient';
 
+export interface ReviewImage {
+  url: string;
+  publicId?: string;
+}
+
 export interface ReviewItem {
   _id: string;
   user: {
@@ -16,6 +21,7 @@ export interface ReviewItem {
   rating: number;
   title: string;
   comment: string;
+  images?: ReviewImage[];
   isApproved: boolean;
   createdAt: string;
 }
@@ -26,6 +32,7 @@ export interface CreateReviewPayload {
   rating: number;
   title: string;
   comment: string;
+  images?: ReviewImage[];
 }
 
 export const getProductReviews = async (productId: string): Promise<ReviewItem[]> => {
@@ -47,13 +54,23 @@ export const getMyReviews = async (): Promise<{
   return res.data.data || { reviews: [], reviewedProductIds: [], reviewedOrderProductKeys: [] };
 };
 
+export const uploadReviewImage = async (file: File): Promise<ReviewImage> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await apiClient.post('/reviews/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data.data;
+};
+
 export const createReview = async (payload: CreateReviewPayload): Promise<ReviewItem> => {
-  const { productId, orderId, rating, title, comment } = payload;
+  const { productId, orderId, rating, title, comment, images } = payload;
   const res = await apiClient.post(`/products/${productId}/reviews`, {
     rating,
     title,
     comment,
     orderId,
+    images,
   });
   return res.data.data?.review;
 };

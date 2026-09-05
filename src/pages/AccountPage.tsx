@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   LogOut,
@@ -22,6 +22,7 @@ import {
   Printer,
   Tag,
   Star,
+  Camera,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ import { addressApi, AddressItem, AddressInput } from "@/api/addressApi";
 import { orderApi, BackendOrder } from "@/api/orderApi";
 import { paymentApi } from "@/api/paymentApi";
 import { shippingApi } from "@/api/shippingApi";
-import { createReview, getMyReviews } from "@/api/reviewApi";
+import { createReview, getMyReviews, uploadReviewImage, type ReviewImage } from "@/api/reviewApi";
 import { openRazorpay } from "@/lib/razorpay";
 import { useAsync } from "@/lib/useAsync";
 import { formatINR } from "@/lib/format";
@@ -223,6 +224,50 @@ export default function AccountPage() {
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [accountReviewImages, setAccountReviewImages] = useState<ReviewImage[]>([]);
+  const [isUploadingAccountPhoto, setIsUploadingAccountPhoto] = useState(false);
+  const accountFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleAccountFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (accountReviewImages.length + files.length > 4) {
+      toast.error("You can upload up to 4 photos per review.");
+      return;
+    }
+
+    setIsUploadingAccountPhoto(true);
+    try {
+      const uploaded: ReviewImage[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} is too large (max 5MB).`);
+          continue;
+        }
+        const res = await uploadReviewImage(file);
+        if (res?.url) {
+          uploaded.push(res);
+        }
+      }
+      setAccountReviewImages((prev) => [...prev, ...uploaded]);
+      if (uploaded.length > 0) {
+        toast.success(`${uploaded.length} photo(s) added!`);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to upload photo.");
+    } finally {
+      setIsUploadingAccountPhoto(false);
+      if (accountFileInputRef.current) {
+        accountFileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveAccountPhoto = (index: number) => {
+    setAccountReviewImages((prev) => prev.filter((_, i) => i !== index));
+  };
   const [localReviewedIds, setLocalReviewedIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -266,6 +311,7 @@ export default function AccountPage() {
         rating: reviewRating,
         title: reviewTitle.trim() || `${reviewRating} Star Review`,
         comment: reviewComment.trim() || "Excellent cookware! Heats evenly and very durable.",
+        images: accountReviewImages,
       });
       toast.success("⭐ Thank you! Your product review and rating are now live.");
       const updated = Array.from(new Set([...localReviewedIds, reviewingItem.productId]));
@@ -287,6 +333,7 @@ export default function AccountPage() {
       setReviewTitle("");
       setReviewComment("");
       setReviewRating(5);
+      setAccountReviewImages([]);
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to submit review");
     } finally {
@@ -1640,6 +1687,65 @@ export default function AccountPage() {
                   placeholder="Tell other home cooks about the quality, heat retention, weight, and cleaning ease..."
                   className="w-full text-xs p-3.5 rounded-xl border border-ink/15 focus:border-copper focus:ring-2 focus:ring-copper/10 outline-none resize-none"
                 />
+              </div>
+
+              {/* Photos upload */}
+              <div>
+                <label className="block text-xs font-bold text-ink mb-1.5">
+                  Add Photos <span className="text-ink/40 font-normal">(Optional, up to 4)</span>
+                </label>
+                <input
+                  type="file"
+                  ref={accountFileInputRef}
+                  onChange={handleAccountFileChange}
+                  accept="image/jpeg,image/png,image/webp,image/jpg"
+                  multiple
+                  className="hidden"
+                />
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {accountReviewImages.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="relative group w-16 h-16 rounded-xl overflow-hidden border border-ink/15 bg-sand/30 shadow-2xs"
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Preview ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveAccountPhoto(idx)}
+                        className="absolute top-1 right-1 bg-ink/80 hover:bg-red-600 text-white p-0.5 rounded-full shadow-sm transition-colors"
+                        title="Remove photo"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+
+                  {isUploadingAccountPhoto && (
+                    <div className="w-16 h-16 rounded-xl border border-dashed border-copper/50 bg-copper/5 flex flex-col items-center justify-center text-copper">
+                      <Loader2 size={16} className="animate-spin" />
+                      <span className="text-[9px] font-bold mt-1">Uploading...</span>
+                    </div>
+                  )}
+
+                  {accountReviewImages.length < 4 && !isUploadingAccountPhoto && (
+                    <button
+                      type="button"
+                      onClick={() => accountFileInputRef.current?.click()}
+                      className="w-16 h-16 rounded-xl border-2 border-dashed border-ink/20 hover:border-copper hover:bg-copper/5 text-ink/60 hover:text-copper flex flex-col items-center justify-center transition-all active:scale-95 group"
+                    >
+                      <Camera size={18} className="group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold mt-0.5">+ Photo</span>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-ink/40 mt-1.5">
+                  Share photos of your cookware to help other home cooks!
+                </p>
               </div>
 
               {/* Actions */}
