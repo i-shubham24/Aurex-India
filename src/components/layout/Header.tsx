@@ -83,7 +83,7 @@ export default function Header() {
   }
 
   return (
-    <header className="fixed top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80 w-full shadow-sm">
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80 w-full shadow-sm">
       {/* Announcement marquee */}
       <div className="marquee bg-ink py-2 text-cream">
         <div className="marquee-track text-xs font-medium">
