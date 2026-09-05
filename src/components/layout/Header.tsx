@@ -85,13 +85,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/95 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80 w-full shadow-sm">
       {/* Announcement marquee */}
-      <div className="marquee bg-ink py-2 text-cream">
-        <div className="marquee-track text-xs font-medium">
+      <div className="marquee bg-ink text-cream pt-[max(0.5rem,env(safe-area-inset-top))] pb-2">
+        <div className="marquee-track text-xs font-medium min-h-[1.5rem] items-center">
           {[0, 1].map((dup) => (
             <span key={dup} className="flex shrink-0 items-center" aria-hidden={dup === 1 ? "true" : undefined}>
               {marqueeItems.map((m, i) => (
-                <span key={i} className="mx-6 inline-flex items-center gap-1.5">
-                  <Truck size={13} className="text-gold" /> {m}
+                <span key={i} className="mx-6 inline-flex items-center gap-1.5 leading-normal">
+                  <Truck size={13} className="text-gold shrink-0" /> {m}
                 </span>
               ))}
             </span>

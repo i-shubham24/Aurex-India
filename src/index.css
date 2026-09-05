@@ -220,11 +220,15 @@
   100% { transform: translateX(-50%); }
 }
 .marquee {
+  position: relative;
+  width: 100%;
   /* Prevent any sub-pixel overflow leak on the sides */
   overflow: hidden;
+  contain: paint;
 }
 .marquee-track {
   display: flex;
+  align-items: center;
   width: max-content;
   white-space: nowrap;
   /* GPU compositing — keeps text sharp during animation */
