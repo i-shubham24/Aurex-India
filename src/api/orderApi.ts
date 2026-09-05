@@ -5,6 +5,7 @@ export interface CreateOrderPayload {
   couponCode?: string;
   notes?: string;
   email?: string;
+  paymentMethod?: 'ONLINE' | 'PARTIAL_COD';
   items?: Array<{
     productId: string;
     quantity: number;
@@ -42,11 +43,18 @@ export interface BackendOrder {
     shippingFee: number;
     tax: number;
     total: number;
+    advanceAmount?: number;
+    codAmount?: number;
   };
   coupon?: string;
   payment?: {
     status: string;
     method?: string;
+    paidAmount?: number;
+    remainingCodAmount?: number;
+    isCodSettled?: boolean;
+    codSettledAt?: string;
+    razorpayPaymentId?: string;
   };
   shipping?: {
     awbCode?: string;

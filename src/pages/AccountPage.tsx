@@ -35,6 +35,7 @@ import { useAsync } from "@/lib/useAsync";
 import { formatINR } from "@/lib/format";
 import { useToast } from "@/context/ToastContext";
 import Seo from "@/components/Seo";
+import PaymentProcessingOverlay, { PaymentStage } from "@/components/PaymentProcessingOverlay";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
@@ -300,7 +301,9 @@ export default function AccountPage() {
 
   // Orders state
   const [backendOrders, setBackendOrders] = useState<BackendOrder[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [payingOrder, setPayingOrder] = useState<BackendOrder | null>(null);
+  const [payingStage, setPayingStage] = useState<PaymentStage>("initiating");
 
   // Load user data
   const loadAddresses = async () => {
@@ -328,10 +331,13 @@ export default function AccountPage() {
   };
 
   const handlePayPendingOrder = async (order: BackendOrder) => {
+    setPayingOrder(order);
+    setPayingStage("initiating");
     try {
       const rzpKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TULLOSxhCME7H3";
       const rzpOrder = await paymentApi.createRazorpayOrder(order._id);
 
+      setPayingStage("waiting");
       await openRazorpay({
         key: rzpKey,
         amount: rzpOrder.amount,
@@ -346,6 +352,7 @@ export default function AccountPage() {
         },
         theme: { color: "#1B2A4A" },
         handler: async (resp) => {
+          setPayingStage("verifying");
           try {
             const verifyRes = await paymentApi.verifyPayment({
               razorpay_order_id: resp.razorpay_order_id || rzpOrder.orderId,
@@ -361,11 +368,20 @@ export default function AccountPage() {
             }
           } catch (vErr: any) {
             toast.error(vErr.message || "Payment verification failed.");
+          } finally {
+            setPayingOrder(null);
           }
+        },
+        modal: {
+          ondismiss: () => {
+            setPayingOrder(null);
+            toast.info("Payment cancelled.");
+          },
         },
       });
     } catch (err: any) {
       toast.error(err.message || "Failed to initiate payment.");
+      setPayingOrder(null);
     }
   };
 
@@ -588,9 +604,18 @@ export default function AccountPage() {
                             })}
                           </p>
                         </div>
-                        <span className={`chip text-xs font-bold uppercase tracking-wider ${statusStyle[o.orderStatus] || "bg-sand text-ink"}`}>
-                          {o.orderStatus.replace(/_/g, " ")}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {o.payment?.method === "PARTIAL_COD" && (
+                            <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                              {o.payment?.isCodSettled
+                                ? "COD Settled"
+                                : `Advance Paid · Due ${formatINR(o.payment?.remainingCodAmount || o.pricing?.codAmount || 0)} COD`}
+                            </span>
+                          )}
+                          <span className={`chip text-xs font-bold uppercase tracking-wider ${statusStyle[o.orderStatus] || "bg-sand text-ink"}`}>
+                            {o.orderStatus.replace(/_/g, " ")}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Items */}
@@ -1276,7 +1301,11 @@ export default function AccountPage() {
               <div>
                 <span className="text-ink/40 block text-[10px] uppercase font-bold">Payment Mode</span>
                 <strong className="text-ink font-semibold">
-                  {selectedInvoiceOrder.payment?.method === "COD" ? "Cash on Delivery" : "Prepaid (Razorpay)"}
+                  {selectedInvoiceOrder.payment?.method === "PARTIAL_COD"
+                    ? "Partial Payment + COD"
+                    : selectedInvoiceOrder.payment?.method === "COD"
+                    ? "Cash on Delivery"
+                    : "Prepaid (Razorpay)"}
                 </strong>
               </div>
               <div>
@@ -1285,10 +1314,18 @@ export default function AccountPage() {
                   className={`inline-block font-bold px-2 py-0.5 rounded text-[10px] mt-0.5 ${
                     selectedInvoiceOrder.payment?.status === "SUCCESS"
                       ? "bg-emerald-100 text-emerald-800"
+                      : selectedInvoiceOrder.payment?.method === "PARTIAL_COD"
+                      ? selectedInvoiceOrder.payment?.isCodSettled
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
                       : "bg-amber-100 text-amber-800"
                   }`}
                 >
-                  {selectedInvoiceOrder.payment?.status || "PENDING"}
+                  {selectedInvoiceOrder.payment?.method === "PARTIAL_COD"
+                    ? selectedInvoiceOrder.payment?.isCodSettled
+                      ? "COD SETTLED"
+                      : "PARTIALLY PAID"
+                    : selectedInvoiceOrder.payment?.status || "PENDING"}
                 </span>
               </div>
             </div>
@@ -1414,6 +1451,18 @@ export default function AccountPage() {
                   <span>Grand Total</span>
                   <span className="text-copper">{formatINR(selectedInvoiceOrder.pricing?.total || 0)}</span>
                 </div>
+                {selectedInvoiceOrder.payment?.method === "PARTIAL_COD" && (
+                  <div className="mt-2.5 pt-2 border-t border-dashed border-ink/15 space-y-1 text-xs">
+                    <div className="flex justify-between text-forest font-semibold">
+                      <span>Advance Paid Online:</span>
+                      <span>{formatINR(selectedInvoiceOrder.payment?.paidAmount || selectedInvoiceOrder.pricing?.advanceAmount || 0)}</span>
+                    </div>
+                    <div className="flex justify-between text-amber-800 font-bold">
+                      <span>{selectedInvoiceOrder.payment?.isCodSettled ? "COD Amount (Collected):" : "COD Balance Due on Delivery:"}</span>
+                      <span>{formatINR(selectedInvoiceOrder.payment?.remainingCodAmount || selectedInvoiceOrder.pricing?.codAmount || 0)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1543,6 +1592,13 @@ export default function AccountPage() {
           </div>
         </div>
       )}
+
+      {/* Full Screen Payment Processing Overlay */}
+      <PaymentProcessingOverlay
+        isOpen={Boolean(payingOrder)}
+        stage={payingStage}
+        amount={payingOrder?.pricing?.total}
+      />
     </div>
   );
 }

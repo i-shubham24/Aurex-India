@@ -21,14 +21,15 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { addressApi, AddressItem, AddressInput } from "@/api/addressApi";
-import { orderApi } from "@/api/orderApi";
-import { paymentApi } from "@/api/paymentApi";
+import { orderApi, BackendOrder } from "@/api/orderApi";
+import { paymentApi, PaymentConfig } from "@/api/paymentApi";
 import { couponApi, PublicCoupon } from "@/api/couponApi";
 import { payments, isPaymentConfigured } from "@/services/payments";
 import { openRazorpay } from "@/lib/razorpay";
 import { formatINR } from "@/lib/format";
 import Seo from "@/components/Seo";
 import CouponsModal from "@/components/CouponsModal";
+import PaymentProcessingOverlay, { PaymentStage } from "@/components/PaymentProcessingOverlay";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
@@ -135,7 +136,8 @@ export default function CheckoutPage() {
   // Additional order options
   const [addNote, setAddNote] = useState(false);
   const [orderNote, setOrderNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "partial_cod">("razorpay");
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
 
   // Coupon state
   const [couponCodeInput, setCouponCodeInput] = useState("");
@@ -145,8 +147,41 @@ export default function CheckoutPage() {
 
   // Order placing state
   const [placing, setPlacing] = useState(false);
+  const [placingStage, setPlacingStage] = useState<PaymentStage>("initiating");
   const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
+  const [placedOrderDetails, setPlacedOrderDetails] = useState<BackendOrder | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Load payment config
+  useEffect(() => {
+    paymentApi.getPaymentConfig().then((cfg) => {
+      if (cfg) setPaymentConfig(cfg);
+    });
+  }, []);
+
+  // Compute partial payment advance and COD balance
+  const { advanceAmount, codAmount, isPartialEligible } = useMemo(() => {
+    const isEligible = Boolean(
+      paymentConfig?.partialPaymentEnabled !== false &&
+      (!paymentConfig?.minOrderAmount || total >= paymentConfig.minOrderAmount)
+    );
+
+    if (!isEligible) {
+      const adv = Math.min(total, 149);
+      return { advanceAmount: adv, codAmount: Math.max(0, total - adv), isPartialEligible: false };
+    }
+
+    let adv = 149;
+    if (paymentConfig?.partialPaymentType === 'PERCENTAGE') {
+      const percent = paymentConfig.partialPaymentValue || 25;
+      adv = Math.min(total, Math.max(1, Math.round((total * percent) / 100)));
+    } else {
+      adv = Math.min(total, paymentConfig?.partialPaymentValue || 149);
+    }
+
+    const cod = Math.max(0, total - adv);
+    return { advanceAmount: adv, codAmount: cod, isPartialEligible: true };
+  }, [total, paymentConfig]);
 
   // Load user addresses
   const loadAddresses = async () => {
@@ -277,6 +312,7 @@ export default function CheckoutPage() {
 
       try {
         setPlacing(true);
+        setPlacingStage("initiating");
         const created = await addressApi.createAddress({
           ...addressForm,
           isDefault: addresses.length === 0 ? true : addressForm.isDefault,
@@ -291,14 +327,18 @@ export default function CheckoutPage() {
     }
 
     setPlacing(true);
+    setPlacingStage("initiating");
 
     try {
+      const isPartial = paymentMethod === "partial_cod";
+
       // 1. Create order on backend (in PENDING_PAYMENT status)
       const order = await orderApi.createOrder({
         addressId: targetAddressId,
         couponCode: coupon?.code,
         notes: addNote ? orderNote : undefined,
         email: contactEmail || undefined,
+        paymentMethod: isPartial ? "PARTIAL_COD" : "ONLINE",
         items: lines.map((l) => ({
           productId: l.productId,
           quantity: l.quantity,
@@ -306,18 +346,21 @@ export default function CheckoutPage() {
         })),
       });
 
-      // 2. Call backend to create real Razorpay Order
+      // 2. Call backend to create real Razorpay Order (charges advanceAmount if partial)
       const rzpKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_TULLOSxhCME7H3";
       const rzpOrder = await paymentApi.createRazorpayOrder(order._id);
 
       // 3. Open official Razorpay Checkout Modal
+      setPlacingStage("waiting");
       await openRazorpay({
         key: rzpKey,
         amount: rzpOrder.amount,
         currency: rzpOrder.currency || "INR",
         order_id: rzpOrder.orderId,
         name: "Aurex India",
-        description: `${itemCount} item(s) · Order #${order.orderNumber}`,
+        description: isPartial
+          ? `Advance Deposit (Order #${order.orderNumber}) · ₹${advanceAmount} Now, ₹${codAmount} COD`
+          : `${itemCount} item(s) · Order #${order.orderNumber}`,
         prefill: {
           name: user.fullName || addressForm.fullName,
           email: contactEmail || (!isPlaceholderEmail ? user.email : undefined),
@@ -325,6 +368,7 @@ export default function CheckoutPage() {
         },
         theme: { color: "#1B2A4A" },
         handler: async (resp) => {
+          setPlacingStage("verifying");
           try {
             // 4. Verify payment signature on backend
             const verifyRes = await paymentApi.verifyPayment({
@@ -335,6 +379,21 @@ export default function CheckoutPage() {
 
             if (verifyRes.success) {
               setPlacedOrderId(order.orderNumber);
+              setPlacedOrderDetails({
+                ...order,
+                pricing: {
+                  ...order.pricing,
+                  advanceAmount: order.pricing?.advanceAmount || advanceAmount,
+                  codAmount: order.pricing?.codAmount || codAmount,
+                },
+                payment: {
+                  ...order.payment,
+                  method: isPartial ? "PARTIAL_COD" : "ONLINE",
+                  status: isPartial ? "PARTIALLY_PAID" : "SUCCESS",
+                  paidAmount: isPartial ? advanceAmount : total,
+                  remainingCodAmount: isPartial ? codAmount : 0,
+                },
+              });
               clear();
             } else {
               setErrorMsg("Payment verification could not be completed. Please contact support.");
@@ -371,8 +430,31 @@ export default function CheckoutPage() {
           <h1 className="mt-1 text-2xl sm:text-3xl font-bold text-ink">Thank you for your order!</h1>
           <p className="mt-3 text-sm text-ink/60 leading-relaxed">
             Your order <strong className="font-semibold text-ink">{placedOrderId}</strong> has been received and is being prepared.
-            A confirmation has been sent to <span className="font-medium text-ink">{user?.email}</span>.
+            A confirmation has been sent to <span className="font-medium text-ink">{user?.email || contactEmail}</span>.
           </p>
+
+          {placedOrderDetails?.payment?.method === "PARTIAL_COD" && (
+            <div className="mt-5 rounded-2xl bg-amber-500/[0.08] border border-amber-500/25 p-4 text-left space-y-2 animate-fade-up">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold uppercase tracking-wider text-amber-950">Payment Breakdown</span>
+                <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Partial COD</span>
+              </div>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between text-ink/75">
+                  <span>Advance Paid Online (Razorpay):</span>
+                  <strong className="text-forest font-bold">{formatINR(placedOrderDetails.payment?.paidAmount || advanceAmount)}</strong>
+                </div>
+                <div className="flex justify-between border-t border-ink/5 pt-1.5 text-ink font-bold">
+                  <span>Pay on Delivery (Cash / UPI):</span>
+                  <strong className="text-copper">{formatINR(placedOrderDetails.payment?.remainingCodAmount || codAmount)}</strong>
+                </div>
+              </div>
+              <p className="text-[11px] text-ink/55 pt-1">
+                🚚 Please keep <strong className="text-ink">{formatINR(placedOrderDetails.payment?.remainingCodAmount || codAmount)}</strong> ready in Cash or UPI when your delivery agent arrives.
+              </p>
+            </div>
+          )}
+
           <div className="mt-6 rounded-xl bg-sand/40 p-4 text-xs text-ink/70">
             💬 Our customer support team will share real-time delivery updates directly on WhatsApp.
           </div>
@@ -784,28 +866,76 @@ export default function CheckoutPage() {
               <CreditCard size={17} className="text-copper flex-shrink-0" /> Payment Options
             </h2>
             <div className="space-y-3">
+              {/* Option 1: 100% Online Razorpay */}
               <label
                 onClick={() => setPaymentMethod("razorpay")}
-                className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 sm:p-4 transition-all ${paymentMethod === "razorpay"
-                  ? "border-copper bg-copper/[0.03] ring-1 ring-copper"
-                  : "border-ink/10 hover:border-ink/20"
-                  }`}
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 sm:p-4 transition-all ${
+                  paymentMethod === "razorpay"
+                    ? "border-copper bg-copper/[0.03] ring-1 ring-copper"
+                    : "border-ink/10 hover:border-ink/20"
+                }`}
               >
                 <input
                   type="radio"
                   name="payment"
                   checked={paymentMethod === "razorpay"}
                   onChange={() => setPaymentMethod("razorpay")}
-                  className="h-4 w-4 mt-0.5 text-copper focus:ring-copper flex-shrink-0"
+                  className="h-4 w-4 mt-0.5 text-copper focus:ring-copper flex-shrink-0 cursor-pointer"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <span className="font-bold text-xs sm:text-sm text-ink">Online Payment (Razorpay)</span>
-                    <span className="text-[10px] sm:text-[11px] font-bold text-forest bg-forest/10 px-2 py-0.5 rounded">Fast & Secure</span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-forest bg-forest/10 px-2 py-0.5 rounded">
+                      Fast & Secure · 100% Prepaid
+                    </span>
                   </div>
                   <p className="mt-1 text-xs text-ink/55 leading-relaxed">
                     Pay securely via UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, or Netbanking.
                   </p>
+                </div>
+              </label>
+
+              {/* Option 2: Partial Payment + Cash on Delivery */}
+              <label
+                onClick={() => setPaymentMethod("partial_cod")}
+                className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 sm:p-4 transition-all ${
+                  paymentMethod === "partial_cod"
+                    ? "border-copper bg-copper/[0.03] ring-1 ring-copper shadow-2xs"
+                    : "border-ink/10 hover:border-ink/20"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === "partial_cod"}
+                  onChange={() => setPaymentMethod("partial_cod")}
+                  className="h-4 w-4 mt-0.5 text-copper focus:ring-copper flex-shrink-0 cursor-pointer"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="font-bold text-xs sm:text-sm text-ink">
+                      Partial Payment + Cash on Delivery (COD)
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                      Advance + COD
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-ink/60 leading-relaxed">
+                    Pay <strong className="text-ink font-semibold">{formatINR(advanceAmount)}</strong> advance deposit online to confirm and reserve your order. Pay the remaining <strong className="text-copper font-bold">{formatINR(codAmount)}</strong> via Cash or UPI at your doorstep.
+                  </p>
+
+                  {paymentMethod === "partial_cod" && (
+                    <div className="mt-3 p-3 rounded-xl bg-white border border-copper/30 grid grid-cols-2 gap-3 text-xs animate-fade-up">
+                      <div className="border-r border-ink/5 pr-2">
+                        <span className="text-ink/45 text-[10px] uppercase font-bold block">Pay Now Online</span>
+                        <span className="font-bold text-forest text-sm">{formatINR(advanceAmount)}</span>
+                      </div>
+                      <div className="pl-1">
+                        <span className="text-ink/45 text-[10px] uppercase font-bold block">Pay on Delivery (COD)</span>
+                        <span className="font-bold text-copper text-sm">{formatINR(codAmount)}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </label>
             </div>
@@ -851,7 +981,11 @@ export default function CheckoutPage() {
               disabled={placing}
               className="btn-primary w-full py-4 text-base shadow-lift font-bold rounded-2xl"
             >
-              {placing ? "Processing Order..." : `Place Order · ${formatINR(total)}`}
+              {placing
+                ? "Processing Payment..."
+                : paymentMethod === "partial_cod"
+                ? `Pay Advance · ${formatINR(advanceAmount)}`
+                : `Pay · ${formatINR(total)}`}
             </button>
           </div>
         </div>
@@ -1036,6 +1170,19 @@ export default function CheckoutPage() {
                 <dd className="text-base text-copper">{formatINR(total)}</dd>
               </div>
 
+              {paymentMethod === "partial_cod" && (
+                <div className="mt-3 rounded-xl bg-gradient-to-br from-amber-500/[0.08] to-copper/[0.08] border border-copper/20 p-3 space-y-1.5 animate-fade-up">
+                  <div className="flex justify-between text-xs font-bold text-ink">
+                    <span>Pay Advance Online</span>
+                    <span className="text-forest">{formatINR(advanceAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-bold text-ink border-t border-ink/5 pt-1.5">
+                    <span>Pay on Delivery (COD)</span>
+                    <span className="text-copper">{formatINR(codAmount)}</span>
+                  </div>
+                </div>
+              )}
+
               {totalSavings > 0 && (
                 <div className="mt-3 flex items-center justify-between rounded-xl bg-forest/[0.06] border border-forest/15 px-3 py-2 text-xs text-forest">
                   <div className="flex items-center gap-1.5 font-medium">
@@ -1056,10 +1203,16 @@ export default function CheckoutPage() {
                 disabled={placing}
                 className="btn-primary w-full py-3.5 text-sm shadow-lift font-bold cursor-fork active:scale-[0.98]"
               >
-                {placing ? "Processing Order..." : `Place Order · ${formatINR(total)}`}
+                {placing
+                  ? "Processing Payment..."
+                  : paymentMethod === "partial_cod"
+                  ? `Pay Advance · ${formatINR(advanceAmount)}`
+                  : `Pay · ${formatINR(total)}`}
               </button>
               <p className="mt-3 text-center text-[11px] text-ink/45">
-                By placing your order, you agree to our Terms & Privacy Policy.
+                {paymentMethod === "partial_cod"
+                  ? `Pay ${formatINR(advanceAmount)} now to place order. ${formatINR(codAmount)} due on delivery.`
+                  : "By placing your order, you agree to our Terms & Privacy Policy."}
               </p>
             </div>
           </div>
@@ -1077,6 +1230,14 @@ export default function CheckoutPage() {
           return await applyCoupon(code);
         }}
         onRemoveCoupon={removeCoupon}
+      />
+
+      {/* Full Screen Payment Processing Overlay */}
+      <PaymentProcessingOverlay
+        isOpen={placing}
+        stage={placingStage}
+        amount={paymentMethod === "partial_cod" ? advanceAmount : total}
+        isAdvance={paymentMethod === "partial_cod"}
       />
     </div>
   );
