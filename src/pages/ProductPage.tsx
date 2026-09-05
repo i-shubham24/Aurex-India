@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Flame, ShieldCheck, Recycle, Check, Minus, Plus, ShoppingBag, Truck, Heart, Star, Loader2, X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProductBySlug, getProducts } from "@/api/productApi";
 import { orderApi } from "@/api/orderApi";
 import { getProductReviews, createReview, type ReviewItem } from "@/api/reviewApi";
@@ -126,6 +126,7 @@ export default function ProductPage() {
   const { has, toggle } = useWishlist();
   const { user, openAuthModal } = useAuth();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const { data: product, isLoading: loading } = useQuery({
     queryKey: ['product', slug],
@@ -169,9 +170,9 @@ export default function ProductPage() {
     enabled: !!user,
   });
 
-  const hasPurchasedAndDelivered = useMemo(() => {
-    if (!user || !product || !userOrders.length) return false;
-    return userOrders.some(
+  const deliveredOrderForThisProduct = useMemo(() => {
+    if (!user || !product || !userOrders.length) return undefined;
+    return userOrders.find(
       (o: any) =>
         o.orderStatus === 'DELIVERED' &&
         o.items.some(
@@ -180,6 +181,8 @@ export default function ProductPage() {
         )
     );
   }, [user, product, userOrders]);
+
+  const hasPurchasedAndDelivered = !!deliveredOrderForThisProduct;
 
   const hasAlreadyReviewed = useMemo(() => {
     if (!user || !liveReviews || !liveReviews.length) return false;
@@ -201,6 +204,7 @@ export default function ProductPage() {
     try {
       await createReview({
         productId: product.id,
+        orderId: deliveredOrderForThisProduct?._id,
         rating: newRating,
         title: newTitle.trim(),
         comment: newComment.trim(),
@@ -211,6 +215,26 @@ export default function ProductPage() {
       setNewComment("");
       setNewRating(5);
       refetchReviews();
+
+      const currentUid = user?.id || (user as any)?._id;
+      if (currentUid) {
+        queryClient.setQueryData(['my-reviews', currentUid], (old: any) => {
+          if (!old) return { reviews: [], reviewedProductIds: [product.id] };
+          return {
+            ...old,
+            reviewedProductIds: Array.from(new Set([...(old.reviewedProductIds || []), product.id])),
+          };
+        });
+        const key = `aurex_reviewed_products_${currentUid}`;
+        try {
+          const arr = JSON.parse(localStorage.getItem(key) || "[]");
+          if (!arr.includes(product.id)) {
+            arr.push(product.id);
+            localStorage.setItem(key, JSON.stringify(arr));
+          }
+        } catch {}
+      }
+      queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to submit rating");
     } finally {

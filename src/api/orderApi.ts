@@ -87,4 +87,9 @@ export const orderApi = {
     const res = await apiClient.get(`/orders/${id}`);
     return res.data?.data?.order;
   },
+
+  cancelOrder: async (id: string, reason?: string): Promise<BackendOrder> => {
+    const res = await apiClient.post(`/orders/${id}/cancel`, { reason });
+    return res.data?.data?.order;
+  },
 };

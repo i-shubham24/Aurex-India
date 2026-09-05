@@ -22,6 +22,7 @@ export interface ReviewItem {
 
 export interface CreateReviewPayload {
   productId: string;
+  orderId?: string;
   rating: number;
   title: string;
   comment: string;
@@ -37,17 +38,22 @@ export const getRecentReviews = async (): Promise<ReviewItem[]> => {
   return res.data.data?.reviews || [];
 };
 
-export const getMyReviews = async (): Promise<{ reviews: ReviewItem[]; reviewedProductIds: string[] }> => {
+export const getMyReviews = async (): Promise<{
+  reviews: ReviewItem[];
+  reviewedProductIds: string[];
+  reviewedOrderProductKeys?: string[];
+}> => {
   const res = await apiClient.get('/reviews/my-reviews');
-  return res.data.data || { reviews: [], reviewedProductIds: [] };
+  return res.data.data || { reviews: [], reviewedProductIds: [], reviewedOrderProductKeys: [] };
 };
 
 export const createReview = async (payload: CreateReviewPayload): Promise<ReviewItem> => {
-  const { productId, rating, title, comment } = payload;
+  const { productId, orderId, rating, title, comment } = payload;
   const res = await apiClient.post(`/products/${productId}/reviews`, {
     rating,
     title,
     comment,
+    orderId,
   });
   return res.data.data?.review;
 };

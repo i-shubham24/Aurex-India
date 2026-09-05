@@ -34,28 +34,37 @@ export default function DeliveredOrderReviewPrompt() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showInput, setShowInput] = useState(false);
 
+  const uid = user?.id || (user as any)?._id;
+  const userReviewedKey = uid ? `aurex_reviewed_products_${uid}` : null;
+  const dismissedOrderKey = uid ? `aurex_dismissed_review_prompts_${uid}` : null;
+
   useEffect(() => {
     if (!user) {
       setPromptItem(null);
       return;
     }
 
+    // Clean up legacy global key if present to prevent cross-user contamination
+    try {
+      localStorage.removeItem("aurex_reviewed_products");
+    } catch {}
+
     let isMounted = true;
 
     // Small delay so it feels natural and smooth
     const timer = setTimeout(async () => {
       try {
-        const reviewedIds: string[] = JSON.parse(
-          localStorage.getItem("aurex_reviewed_products") || "[]"
-        );
-        const dismissedOrderIds: string[] = JSON.parse(
-          sessionStorage.getItem("aurex_dismissed_review_prompts") || "[]"
-        );
+        const userReviewedIds: string[] = userReviewedKey
+          ? JSON.parse(localStorage.getItem(userReviewedKey) || "[]")
+          : [];
+        const dismissedOrderIds: string[] = dismissedOrderKey
+          ? JSON.parse(sessionStorage.getItem(dismissedOrderKey) || "[]")
+          : [];
 
         const orders: BackendOrder[] = await orderApi.getOrders();
         if (!isMounted || !orders || !orders.length) return;
 
-        // Find first delivered order with an unreviewed product
+        // Find first delivered order with an unreviewed product for THIS user
         const deliveredOrders = orders.filter((o) => o.orderStatus === "DELIVERED");
 
         for (const order of deliveredOrders) {
@@ -69,8 +78,7 @@ export default function DeliveredOrderReviewPrompt() {
 
             const isAlreadyReviewed =
               prodId &&
-              (reviewedIds.includes(prodId) ||
-                backendReviewedIds.includes(prodId) ||
+              (userReviewedIds.some((id) => id?.toString() === prodId?.toString()) ||
                 backendReviewedIds.some((id) => id?.toString() === prodId?.toString()));
 
             if (prodId && !isAlreadyReviewed) {
@@ -94,15 +102,17 @@ export default function DeliveredOrderReviewPrompt() {
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [user, backendReviewedIds]);
+  }, [user, backendReviewedIds, userReviewedKey, dismissedOrderKey]);
 
   const handleDismiss = () => {
-    if (promptItem) {
+    if (promptItem && dismissedOrderKey) {
       const dismissed: string[] = JSON.parse(
-        sessionStorage.getItem("aurex_dismissed_review_prompts") || "[]"
+        sessionStorage.getItem(dismissedOrderKey) || "[]"
       );
-      dismissed.push(promptItem.orderId);
-      sessionStorage.setItem("aurex_dismissed_review_prompts", JSON.stringify(dismissed));
+      if (!dismissed.includes(promptItem.orderId)) {
+        dismissed.push(promptItem.orderId);
+        sessionStorage.setItem(dismissedOrderKey, JSON.stringify(dismissed));
+      }
     }
     setPromptItem(null);
   };
@@ -115,6 +125,7 @@ export default function DeliveredOrderReviewPrompt() {
     try {
       await createReview({
         productId: promptItem.productId,
+        orderId: promptItem.orderId,
         rating,
         title: `${rating} Star Rating`,
         comment: comment.trim() || "Excellent cookware quality, heats evenly and looks beautiful.",
@@ -123,11 +134,26 @@ export default function DeliveredOrderReviewPrompt() {
       setIsSubmitted(true);
       toast.success("⭐ Thank you! Your review is now live.");
 
-      const reviewed: string[] = JSON.parse(
-        localStorage.getItem("aurex_reviewed_products") || "[]"
-      );
-      reviewed.push(promptItem.productId);
-      localStorage.setItem("aurex_reviewed_products", JSON.stringify(reviewed));
+      if (userReviewedKey) {
+        const reviewed: string[] = JSON.parse(
+          localStorage.getItem(userReviewedKey) || "[]"
+        );
+        if (!reviewed.includes(promptItem.productId)) {
+          reviewed.push(promptItem.productId);
+          localStorage.setItem(userReviewedKey, JSON.stringify(reviewed));
+        }
+      }
+
+      const currentUid = user?.id || (user as any)?._id;
+      if (currentUid) {
+        queryClient.setQueryData(['my-reviews', currentUid], (old: any) => {
+          if (!old) return { reviews: [], reviewedProductIds: [promptItem.productId] };
+          return {
+            ...old,
+            reviewedProductIds: Array.from(new Set([...(old.reviewedProductIds || []), promptItem.productId])),
+          };
+        });
+      }
 
       queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['reviews'] });

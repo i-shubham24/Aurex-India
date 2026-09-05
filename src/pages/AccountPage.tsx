@@ -223,17 +223,31 @@ export default function AccountPage() {
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [localReviewedIds, setLocalReviewedIds] = useState<string[]>(() => {
+  const [localReviewedIds, setLocalReviewedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Purge legacy un-scoped global key to prevent cross-user contamination
     try {
-      return JSON.parse(localStorage.getItem("aurex_reviewed_products") || "[]");
-    } catch {
-      return [];
+      localStorage.removeItem("aurex_reviewed_products");
+    } catch {}
+
+    const uid = user?.id || (user as any)?._id;
+    if (uid) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(`aurex_reviewed_products_${uid}`) || "[]");
+        setLocalReviewedIds(Array.isArray(stored) ? stored : []);
+      } catch {
+        setLocalReviewedIds([]);
+      }
+    } else {
+      setLocalReviewedIds([]);
     }
-  });
+  }, [user?.id, (user as any)?._id]);
 
   const queryClient = useQueryClient();
+  const activeUserId = user?.id || (user as any)?._id;
   const { data: myReviewsData } = useQuery({
-    queryKey: ['my-reviews', user?.id],
+    queryKey: ['my-reviews', activeUserId],
     queryFn: getMyReviews,
     enabled: !!user,
   });
@@ -248,14 +262,25 @@ export default function AccountPage() {
     try {
       await createReview({
         productId: reviewingItem.productId,
+        orderId: reviewingItem.orderId,
         rating: reviewRating,
         title: reviewTitle.trim() || `${reviewRating} Star Review`,
         comment: reviewComment.trim() || "Excellent cookware! Heats evenly and very durable.",
       });
       toast.success("⭐ Thank you! Your product review and rating are now live.");
-      const updated = [...localReviewedIds, reviewingItem.productId];
+      const updated = Array.from(new Set([...localReviewedIds, reviewingItem.productId]));
       setLocalReviewedIds(updated);
-      localStorage.setItem("aurex_reviewed_products", JSON.stringify(updated));
+      const currentUid = user?.id || (user as any)?._id;
+      if (currentUid) {
+        localStorage.setItem(`aurex_reviewed_products_${currentUid}`, JSON.stringify(updated));
+      }
+      queryClient.setQueryData(['my-reviews', currentUid], (old: any) => {
+        if (!old) return { reviews: [], reviewedProductIds: [reviewingItem.productId] };
+        return {
+          ...old,
+          reviewedProductIds: Array.from(new Set([...(old.reviewedProductIds || []), reviewingItem.productId])),
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
       setReviewingItem(null);
@@ -304,6 +329,8 @@ export default function AccountPage() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [payingOrder, setPayingOrder] = useState<BackendOrder | null>(null);
   const [payingStage, setPayingStage] = useState<PaymentStage>("initiating");
+  const [cancellingOrder, setCancellingOrder] = useState<BackendOrder | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Load user data
   const loadAddresses = async () => {
@@ -382,6 +409,21 @@ export default function AccountPage() {
     } catch (err: any) {
       toast.error(err.message || "Failed to initiate payment.");
       setPayingOrder(null);
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancellingOrder) return;
+    try {
+      setIsCancelling(true);
+      await orderApi.cancelOrder(cancellingOrder._id);
+      toast.success(`Order #${cancellingOrder.orderNumber} has been cancelled.`);
+      setCancellingOrder(null);
+      await loadOrders();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err.message || "Failed to cancel order.");
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -607,7 +649,9 @@ export default function AccountPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           {o.payment?.method === "PARTIAL_COD" && (
                             <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                              {o.payment?.isCodSettled
+                              {o.orderStatus === "PENDING_PAYMENT" || (o.payment?.paidAmount || 0) === 0
+                                ? `Advance Due · ${formatINR(o.pricing?.advanceAmount || 149)}`
+                                : o.payment?.isCodSettled
                                 ? "COD Settled"
                                 : `Advance Paid · Due ${formatINR(o.payment?.remainingCodAmount || o.pricing?.codAmount || 0)} COD`}
                             </span>
@@ -785,12 +829,22 @@ export default function AccountPage() {
                           )}
 
                           {o.orderStatus === "PENDING_PAYMENT" && (
-                            <button
-                              onClick={() => handlePayPendingOrder(o)}
-                              className="btn-primary text-xs py-1.5 px-3 font-bold"
-                            >
-                              Pay with Razorpay
-                            </button>
+                            <>
+                              <button
+                                onClick={() => setCancellingOrder(o)}
+                                className="btn-outline text-xs py-1.5 px-3 font-semibold text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
+                              >
+                                Cancel Order
+                              </button>
+                              <button
+                                onClick={() => handlePayPendingOrder(o)}
+                                className="btn-primary text-xs py-1.5 px-3 font-bold"
+                              >
+                                {o.payment?.method === "PARTIAL_COD"
+                                  ? `Pay Advance · ${formatINR(o.pricing?.advanceAmount || 149)}`
+                                  : "Pay with Razorpay"}
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -1315,16 +1369,20 @@ export default function AccountPage() {
                     selectedInvoiceOrder.payment?.status === "SUCCESS"
                       ? "bg-emerald-100 text-emerald-800"
                       : selectedInvoiceOrder.payment?.method === "PARTIAL_COD"
-                      ? selectedInvoiceOrder.payment?.isCodSettled
-                        ? "bg-emerald-100 text-emerald-800"
+                      ? (selectedInvoiceOrder.payment?.paidAmount || 0) > 0
+                        ? selectedInvoiceOrder.payment?.isCodSettled
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-amber-100 text-amber-800"
                         : "bg-amber-100 text-amber-800"
                       : "bg-amber-100 text-amber-800"
                   }`}
                 >
                   {selectedInvoiceOrder.payment?.method === "PARTIAL_COD"
-                    ? selectedInvoiceOrder.payment?.isCodSettled
-                      ? "COD SETTLED"
-                      : "PARTIALLY PAID"
+                    ? (selectedInvoiceOrder.payment?.paidAmount || 0) > 0
+                      ? selectedInvoiceOrder.payment?.isCodSettled
+                        ? "COD SETTLED"
+                        : "PARTIALLY PAID"
+                      : "ADVANCE PENDING"
                     : selectedInvoiceOrder.payment?.status || "PENDING"}
                 </span>
               </div>
@@ -1453,9 +1511,9 @@ export default function AccountPage() {
                 </div>
                 {selectedInvoiceOrder.payment?.method === "PARTIAL_COD" && (
                   <div className="mt-2.5 pt-2 border-t border-dashed border-ink/15 space-y-1 text-xs">
-                    <div className="flex justify-between text-forest font-semibold">
-                      <span>Advance Paid Online:</span>
-                      <span>{formatINR(selectedInvoiceOrder.payment?.paidAmount || selectedInvoiceOrder.pricing?.advanceAmount || 0)}</span>
+                    <div className={`flex justify-between ${(selectedInvoiceOrder.payment?.paidAmount || 0) > 0 ? "text-forest" : "text-amber-800"} font-semibold`}>
+                      <span>{(selectedInvoiceOrder.payment?.paidAmount || 0) > 0 ? "Advance Paid Online:" : "Advance Payable Online (Due):"}</span>
+                      <span>{formatINR((selectedInvoiceOrder.payment?.paidAmount || 0) > 0 ? (selectedInvoiceOrder.payment?.paidAmount || 0) : (selectedInvoiceOrder.pricing?.advanceAmount || 0))}</span>
                     </div>
                     <div className="flex justify-between text-amber-800 font-bold">
                       <span>{selectedInvoiceOrder.payment?.isCodSettled ? "COD Amount (Collected):" : "COD Balance Due on Delivery:"}</span>
@@ -1469,12 +1527,26 @@ export default function AccountPage() {
             {/* Footer Notice */}
             <div className="mt-6 border-t border-ink/5 pt-4 text-[10px] text-ink/40 text-center flex flex-col sm:flex-row items-center justify-between gap-2">
               <span>Aurex India Private Limited · Luxury Certified Cookware</span>
-              <button
-                onClick={() => setSelectedInvoiceOrder(null)}
-                className="btn-outline text-xs py-1.5 px-4 print:hidden"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2 print:hidden">
+                {selectedInvoiceOrder.orderStatus === "PENDING_PAYMENT" && (
+                  <button
+                    onClick={() => {
+                      const ord = selectedInvoiceOrder;
+                      setSelectedInvoiceOrder(null);
+                      setCancellingOrder(ord);
+                    }}
+                    className="btn-outline text-xs py-1.5 px-3 font-semibold text-red-600 border-red-200 hover:bg-red-50"
+                  >
+                    Cancel Order
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedInvoiceOrder(null)}
+                  className="btn-outline text-xs py-1.5 px-4"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1589,6 +1661,48 @@ export default function AccountPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Order Confirmation Modal */}
+      {cancellingOrder && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm animate-fade-in"
+          onClick={() => !isCancelling && setCancellingOrder(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center animate-scale-up border border-ink/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 mx-auto flex items-center justify-center mb-3.5">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-ink">Cancel This Order?</h3>
+            <p className="text-xs text-ink/60 mt-1.5 leading-relaxed">
+              Are you sure you want to cancel order{" "}
+              <strong className="text-ink font-semibold">{cancellingOrder.orderNumber}</strong>? This action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={() => setCancellingOrder(null)}
+                className="btn-outline text-xs py-2 px-4 font-semibold disabled:opacity-50"
+              >
+                Keep Order
+              </button>
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={handleConfirmCancel}
+                className="btn text-xs py-2 px-4 font-bold bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1.5 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                {isCancelling && <Loader2 size={13} className="animate-spin" />}
+                <span>{isCancelling ? "Cancelling..." : "Yes, Cancel Order"}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
